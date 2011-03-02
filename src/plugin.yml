@@ -1,0 +1,8 @@
+name: iConomy
+main: com.nijiko.coelho.iConomy.iConomy
+version: 4.2
+authors: [Nijikokun, Coelho]
+commands:
+    money:
+        description:
+        usage:

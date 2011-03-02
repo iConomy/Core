@@ -1,0 +1,2 @@
+Manifest-Version: 1.0
+Class-Path: ../lib/mysql.jar ../lib/mysql-connector-java-bin.jar ../lib/mysql-connector-java-5.1.14-bin.jar ../lib/mysql-connector-java-5.1.15-bin.jar ../lib/sqlite.jar ../lib/sqlite-jdbc.jar ../lib/sqlite-v056.jar ../lib/sqlitejdbc-v056.jar ../mysql.jar ../mysql-connector-java-bin.jar ../mysql-connector-java-5.1.14-bin.jar ../mysql-connector-java-5.1.15-bin.jar ../sqlite.jar ../sqlite-jdbc.jar ../sqlite-v056.jar ../sqlitejdbc-v056.jar
