@@ -5,7 +5,6 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.Statement;
 
 import com.nijiko.coelho.iConomy.util.Constants;
 
@@ -17,23 +16,23 @@ public class iDatabase {
 	public iDatabase() throws Exception {
 		if(Constants.Database_Type.equalsIgnoreCase("sqlite")) {
 			Class.forName("org.sqlite.JDBC");
-            Connection = DriverManager.getConnection("jdbc:sqlite:" + Constants.Plugin_Directory + File.separator + Constants.SQL_Database + ".sqlite");
+			Connection = DriverManager.getConnection("jdbc:sqlite:" + Constants.Plugin_Directory + File.separator + Constants.SQL_Database + ".sqlite");
 		} else if(Constants.Database_Type.equalsIgnoreCase("mysql")){
 			Class.forName("com.mysql.jdbc.Driver");
 			Connection = DriverManager.getConnection("jdbc:mysql://" + Constants.SQL_Hostname + ":" + Constants.SQL_Port + "/" + Constants.SQL_Database, Constants.SQL_Username, Constants.SQL_Password);
 		}
 	}
 
-    public ResultSet resultQuery(String sql) {
+	public ResultSet resultQuery(String sql) {
 		try {
 			PreparedStatement ps = this.Connection.prepareStatement(sql);
 			return ps.executeQuery();
 		} catch(Exception e) {
-            e.printStackTrace();
+			e.printStackTrace();
 			return null;
 		}
-    }
-	
+	}
+
 	public ResultSet resultQuery(String sql, Object[] parameters) {
 		try {
 			PreparedStatement ps = this.Connection.prepareStatement(sql);
@@ -46,17 +45,17 @@ public class iDatabase {
 		}
 	}
 
-    public boolean executeQuery(String sql) {
+	public boolean executeQuery(String sql) {
 		try {
 			PreparedStatement ps = this.Connection.prepareStatement(sql);
-			ps.executeUpdate(sql);
+			ps.executeUpdate();
 			return true;
 		} catch(Exception e) {
-            e.printStackTrace();
+			e.printStackTrace();
 			return false;
 		}
-    }
-	
+	}
+
 	public boolean executeQuery(String sql, Object[] parameters) {
 		try {
 			PreparedStatement ps = this.Connection.prepareStatement(sql);
@@ -65,11 +64,11 @@ public class iDatabase {
 			ps.executeUpdate();
 			return true;
 		} catch(Exception e) {
-            e.printStackTrace();
+			e.printStackTrace();
 			return false;
 		}
 	}
-	
+
 	public Connection getConnection() {
 		return Connection;
 	}

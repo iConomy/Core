@@ -357,7 +357,7 @@ public class iPlayerListener extends PlayerListener {
 			case 2:
 
 				if (Misc.isAny(split[1], new String[] { "rank", "-r" })) {
-					if (!iConomy.getPermissions().permission(player, "iConomy.rank"))
+					if (!iConomy.hasPermissions(player, "iConomy.rank"))
 						return;
 
 					showRank(player, player.getName());
@@ -366,7 +366,7 @@ public class iPlayerListener extends PlayerListener {
 				}
                 
                 if (Misc.isAny(split[1], new String[] { "top", "-t" })) {
-					if (!iConomy.getPermissions().has(player, "iConomy.list"))
+					if (!iConomy.hasPermissions(player, "iConomy.list"))
 						return;
 
 					showTop(player, 5);
@@ -375,7 +375,7 @@ public class iPlayerListener extends PlayerListener {
 				}
                 
                 if (Misc.isAny(split[1], new String[] { "stats", "-s" })) {
-					if (!iConomy.getPermissions().has(player, "iConomy.admin.stats"))
+					if (!iConomy.hasPermissions(player, "iConomy.admin.stats"))
 						return;
 
 					Collection<Account> money = iConomy.getBank().getAccounts().values();
@@ -412,7 +412,7 @@ public class iPlayerListener extends PlayerListener {
 
 					return;
 				} else {
-					if (!iConomy.getPermissions().has(player, "iConomy.access"))
+					if (!iConomy.hasPermissions(player, "iConomy.access"))
 						return;
 
 					if (iConomy.getBank().hasAccount(split[1])) {
@@ -427,7 +427,7 @@ public class iPlayerListener extends PlayerListener {
 			case 3:
 
 				if (Misc.isAny(split[1], new String[] { "rank", "-r" })) {
-					if (!iConomy.getPermissions().has(player, "iConomy.rank"))
+					if (!iConomy.hasPermissions(player, "iConomy.rank"))
 						return;
 
 					if (iConomy.getBank().hasAccount(split[2])) {
@@ -440,7 +440,7 @@ public class iPlayerListener extends PlayerListener {
 				}
                 
                 if (Misc.isAny(split[1], new String[] { "top", "-t" })) {
-					if (!iConomy.getPermissions().has(player, "iConomy.list"))
+					if (!iConomy.hasPermissions(player, "iConomy.list"))
 						return;
 
 					try {
@@ -453,7 +453,7 @@ public class iPlayerListener extends PlayerListener {
 				}
                 
                 if(Misc.isAny(split[1], new String[] { "reset", "-x" })) {
-					if (!iConomy.getPermissions().has(player, "iConomy.admin.reset"))
+					if (!iConomy.hasPermissions(player, "iConomy.admin.reset"))
 						return;
 
 					if (iConomy.getBank().hasAccount(split[2])) {
@@ -470,7 +470,7 @@ public class iPlayerListener extends PlayerListener {
 			case 4:
 
 				if (Misc.isAny(split[1], new String[] { "pay", "-p" })) {
-					if (!iConomy.getPermissions().has(player, "iConomy.payment"))
+					if (!iConomy.hasPermissions(player, "iConomy.payment"))
 						return;
 
 					String name = "";
@@ -500,7 +500,7 @@ public class iPlayerListener extends PlayerListener {
 				}
                 
                 if (Misc.isAny(split[1], new String[] { "grant", "-g" })) {
-					if (!iConomy.getPermissions().has(player, "iConomy.admin.grant"))
+					if (!iConomy.hasPermissions(player, "iConomy.admin.grant"))
 						return;
 
 					String name = "";
@@ -525,7 +525,7 @@ public class iPlayerListener extends PlayerListener {
 				}
                 
                 if (Misc.isAny(split[1], new String[] { "set", "-s" })) {
-					if (!iConomy.getPermissions().has(player, "iConomy.admin.set"))
+					if (!iConomy.hasPermissions(player, "iConomy.admin.set"))
 						return;
 
 					String name = "";

@@ -17,7 +17,7 @@ public class iPluginListener extends ServerListener {
     public void onPluginEnabled(PluginEvent event) {
     	
         if(event.getPlugin().getDescription().getName().equals("Permissions")) {
-            iConomy.setPermissions((Permissions)event.getPlugin());
+            iConomy.setPermissions(((Permissions) event.getPlugin()).getHandler());
             
             System.out.println("[iConomy] Successfully linked with Permissions.");
         }

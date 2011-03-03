@@ -7,7 +7,7 @@ import org.bukkit.util.config.Configuration;
 public class Constants {
 	
 	// Code name
-	public static final String Codename = "Kristen";
+	public static final String Codename = "Beatrix";
 
 	// Files and Directories
 	public static File Configuration;

@@ -29,16 +29,15 @@ import com.nijiko.coelho.iConomy.system.Interest;
 import com.nijiko.coelho.iConomy.util.Constants;
 import com.nijiko.coelho.iConomy.system.Transactions;
 import com.nijiko.coelho.iConomy.util.FileManager;
-
-import com.nijikokun.bukkit.Permissions.Permissions;
+import com.nijiko.permissions.PermissionHandler;
 
 public class iConomy extends JavaPlugin {
 	
 	private static Server Server = null;
 	private static Bank Bank = null;
 	private static iDatabase iDatabase = null;
-	private static Permissions Permissions = null;
 	private static Transactions Transactions = null;
+	private static PermissionHandler Permissions = null;
 	private static iPlayerListener playerListener = null;
 	private static iPluginListener pluginListener = null;
 
@@ -281,17 +280,16 @@ public class iConomy extends JavaPlugin {
 		return Transactions;
 	}
 
-	@SuppressWarnings("static-access")
 	public static boolean hasPermissions(Player p, String s) {
 		if(Permissions != null)
-			return Permissions.Security.has(p, s);
+			return Permissions.has(p, s);
 		else
 			return p.isOp();
 	}
-
-	public static boolean setPermissions(Permissions permissions) {
+	
+	public static boolean setPermissions(PermissionHandler ph) {
 		if(Permissions == null)
-			Permissions = permissions;
+			Permissions = ph;
 		else
 			return false;
 		return true;
