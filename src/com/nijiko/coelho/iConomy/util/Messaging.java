@@ -6,7 +6,6 @@ import org.bukkit.entity.Player;
 import com.nijiko.coelho.iConomy.iConomy;
 
 /**
- * General 1.1 & Code from iConomy 2.x
  * Copyright (C) 2011  Nijikokun <nijikokun@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -22,16 +21,18 @@ import com.nijiko.coelho.iConomy.iConomy;
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 /**
  * Messaging.java
  * <br /><br />
- * Lets us do fancy pantsy things with colors, messages, and broadcasting :D!
+ * Let's us create an easier messaging format for any type of
+ * user that bukkit will allow us to send messages to as well as
+ * easily add colors or other effects that we might need without
+ * extra coding in main classes.
  *
  * @author Nijikokun <nijikokun@gmail.com>
  */
-
 public class Messaging {
+
     private static CommandSender sender = null;
 
     /**
@@ -43,7 +44,6 @@ public class Messaging {
      *
      * @return <code>String</code> - The parsed string after converting arguments to variables (points)
      */
-    
     public static String argument(String original, Object[] arguments, Object[] points) {
         for (int i = 0; i < arguments.length; i++) {
             if (String.valueOf(arguments[i]).contains(",")) {
@@ -70,7 +70,6 @@ public class Messaging {
      *
      * @return <code>String</code> - The parsed string after conversion.
      */
-    
     public static String parse(String original) {
         original = colorize(original);
         return original.replaceAll("(&([a-z0-9]))", "\u00A7$2").replace("&&", "&");
@@ -89,25 +88,8 @@ public class Messaging {
      *
      * @return <code>String</code> - The parsed string after conversion.
      */
-    
     public static String colorize(String original) {
-        return original
-                 .replace("<black>", "\u00A70")
-                  .replace("<navy>", "\u00A71")
-                 .replace("<green>", "\u00A72")
-                  .replace("<teal>", "\u00A73")
-                   .replace("<red>", "\u00A74")
-                .replace("<purple>", "\u00A75")
-                  .replace("<gold>", "\u00A76")
-                .replace("<silver>", "\u00A77")
-                  .replace("<gray>", "\u00A78")
-                  .replace("<blue>", "\u00A79")
-                  .replace("<lime>", "\u00A7a")
-                  .replace("<aqua>", "\u00A7b")
-                  .replace("<rose>", "\u00A7c")
-                  .replace("<pink>", "\u00A7d")
-                .replace("<yellow>", "\u00A7e")
-                 .replace("<white>", "\u00A7f");
+        return original.replace("<black>", "\u00A70").replace("<navy>", "\u00A71").replace("<green>", "\u00A72").replace("<teal>", "\u00A73").replace("<red>", "\u00A74").replace("<purple>", "\u00A75").replace("<gold>", "\u00A76").replace("<silver>", "\u00A77").replace("<gray>", "\u00A78").replace("<blue>", "\u00A79").replace("<lime>", "\u00A7a").replace("<aqua>", "\u00A7b").replace("<rose>", "\u00A7c").replace("<pink>", "\u00A7d").replace("<yellow>", "\u00A7e").replace("<white>", "\u00A7f");
     }
 
     /**
@@ -117,7 +99,6 @@ public class Messaging {
      *
      * @return <code>String</code> - The message inside [brackets]
      */
-    
     public static String bracketize(String message) {
         return "[" + message + "]";
     }
@@ -133,7 +114,6 @@ public class Messaging {
      *
      * @param player The player we wish to save for later.
      */
-    
     public static void save(Player player) {
         Messaging.sender = player;
     }
@@ -149,7 +129,6 @@ public class Messaging {
      *
      * @param player The player we wish to save for later.
      */
-    
     public static void save(CommandSender sender) {
         Messaging.sender = sender;
     }
@@ -165,7 +144,6 @@ public class Messaging {
      * @param player Player we are sending the message to.
      * @param message The message to be sent.
      */
-    
     public static void send(Player player, String message) {
         player.sendMessage(parse(message));
     }
@@ -181,7 +159,6 @@ public class Messaging {
      * @param sender Entity we are sending the message to.
      * @param message The message to be sent.
      */
-    
     public static void send(CommandSender sender, String message) {
         sender.sendMessage(parse(message));
     }
@@ -192,7 +169,6 @@ public class Messaging {
      * @param message The message to be sent.
      * @see Messaging#save(CommandSender)
      */
-    
     public static void send(String message) {
         if (Messaging.sender != null) {
             sender.sendMessage(parse(message));
@@ -200,15 +176,13 @@ public class Messaging {
     }
 
     /**
-     * Brodcast a message to every player online.
+     * Broadcast a message to every player online.
      *
      * @param message - The message to be sent.
      */
-    
     public static void broadcast(String message) {
         for (Player p : iConomy.getBukkitServer().getOnlinePlayers()) {
             p.sendMessage(parse(message));
         }
     }
 }
-

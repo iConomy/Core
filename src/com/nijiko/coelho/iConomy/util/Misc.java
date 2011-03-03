@@ -16,17 +16,17 @@ public class Misc {
      * @return <code>Boolean</code> - True or false based on text.
      */
     public static boolean isAny(String text, String[] is) {
-    	for(String s : is) {
-    		if(text.equalsIgnoreCase(s))
-    			return true;
-    	}
-    	return false;
+        for (String s : is) {
+            if (text.equalsIgnoreCase(s)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
      * Get the player from the server (matched)
      */
-    
     public static Player playerMatch(String name) {
         Player[] online = iConomy.getBukkitServer().getOnlinePlayers();
         Player lastPlayer = null;

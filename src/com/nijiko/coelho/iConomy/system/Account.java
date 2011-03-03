@@ -7,109 +7,140 @@ import com.nijiko.coelho.iConomy.iConomy;
 import com.nijiko.coelho.iConomy.util.Constants;
 
 public class Account {
-	
-	private String name;
-	private double balance;
 
-	public Account(String name, double balance) {
-		this.name = name;
-		this.balance = balance;
-	}
+    private String name;
+    private double balance;
+    private boolean altered = false;
+    private boolean exists = false;
 
-	public String getName() {
-		return name;
-	}
+    public Account(String name, double balance) {
+        this.name = name;
+        this.balance = balance;
+        this.exists = true;
+    }
 
-	public double getBalance() {
-		return this.balance;
-	}
+    public boolean exists() {
+        return exists;
+    }
 
-	public void setBalance(double balance) {
-		this.balance = balance;
-	}
+    public boolean isAltered() {
+        return altered;
+    }
 
-	public void resetBalance() {
-		this.setBalance(Constants.Initial_Balance);
-		this.save();
-	}
+    private void setExists(boolean exists) {
+        this.exists = exists;
+    }
 
-	public boolean hasEnough(double amount) {
-		return amount <= this.balance;
-	}
+    private void setAltered(boolean altered) {
+        this.altered = altered;
+    }
 
-	public boolean hasOver(double amount) {
-		return amount < this.balance;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public boolean isNegative() {
-		return this.balance < 0.0;
-	}
+    public double getBalance() {
+        return this.balance;
+    }
 
-	public void add(double amount) {
-		this.balance = this.balance + amount;
-	} 
+    public void setBalance(double balance) {
+        this.balance = balance;
+        this.setAltered(true);
+    }
 
-	public void multiply(double amount) {
-		this.balance = this.balance * amount;
-	} 
+    public void resetBalance() {
+        this.setBalance(Constants.Initial_Balance);
+        this.setAltered(true);
+        this.save();
+    }
 
-	public void divide(double amount) {
-		this.balance = this.balance / amount;
-	}
+    public boolean hasEnough(double amount) {
+        return amount <= this.balance;
+    }
 
-	public void subtract(double amount) {
-		this.balance = this.balance - amount;
-	}
+    public boolean hasOver(double amount) {
+        return amount < this.balance;
+    }
 
-	public void remove() {
-		try {
-			ResultSet rs = iConomy.getDatabase().resultQuery(
-					"SELECT * FROM `" + Constants.SQL_Table + "` WHERE username = ?",
-					new Object[]{ this.name }
-			);
-			if(rs.next()) {
-				iConomy.getDatabase().executeQuery(
-					"DELETE FROM `" + Constants.SQL_Table + "` WHERE username = ?",
-					new Object[]{ this.name }
-				);
-			}
-		} catch(Exception e) {
-			e.printStackTrace();
-		}
-	}
+    public boolean isNegative() {
+        return this.balance < 0.0;
+    }
 
-	public void save() {
-		try {
-			ResultSet rs = iConomy.getDatabase().resultQuery(
-					"SELECT * FROM `" + Constants.SQL_Table + "` WHERE username = ?",
-					new Object[]{ this.name }
-			);
+    public void add(double amount) {
+        this.balance = this.balance + amount;
+        this.setAltered(true);
+    }
 
-			if(!rs.next()) {
-				iConomy.getDatabase().executeQuery(
-						"INSERT INTO `" + Constants.SQL_Table + "`(username, balance) VALUES (?, ?)",
-						new Object[] { this.name, this.balance }
-				);
-			} else {
-				iConomy.getDatabase().executeQuery(
-						"UPDATE `" + Constants.SQL_Table + "` SET balance = ? WHERE username = ?",
-						new Object[] { this.balance, this.name }
-				);
-			}
-		} catch(Exception e) {
-			e.printStackTrace();
-		}
-	}
+    public void multiply(double amount) {
+        this.balance = this.balance * amount;
+        this.setAltered(true);
+    }
 
-	@Override
-	public String toString() {
-		DecimalFormat formatter = new DecimalFormat("#,##0.##");
-		String formatted = formatter.format(this.balance);
+    public void divide(double amount) {
+        this.balance = this.balance / amount;
+        this.setAltered(true);
+    }
 
-		if(formatted.endsWith("."))
-			formatted = formatted.substring(0, formatted.length()-1);
+    public void subtract(double amount) {
+        this.balance = this.balance - amount;
+        this.setAltered(true);
+    }
 
-		return formatted;
-	}
+    public void remove() {
+        try {
+            ResultSet rs = iConomy.getDatabase().resultQuery(
+                    "SELECT * FROM `" + Constants.SQL_Table + "` WHERE username = ?",
+                    new Object[]{ this.name }
+            );
+            if (rs.next()) {
+                iConomy.getDatabase().executeQuery(
+                        "DELETE FROM `" + Constants.SQL_Table + "` WHERE username = ?",
+                        new Object[]{ this.name }
+                );
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        this.setExists(false);
+    }
+
+    public void save() {
+        try {
+            ResultSet rs = iConomy.getDatabase().resultQuery(
+                    "SELECT * FROM `" + Constants.SQL_Table + "` WHERE username = ?",
+                    new Object[]{ this.name }
+            );
+
+            if (!rs.next()) {
+                iConomy.getDatabase().executeQuery(
+                        "INSERT INTO `" + Constants.SQL_Table + "`(username, balance) VALUES (?, ?)",
+                        new Object[]{ this.name, this.balance }
+                );
+
+                this.setExists(true);
+            } else {
+                iConomy.getDatabase().executeQuery(
+                        "UPDATE `" + Constants.SQL_Table + "` SET balance = ? WHERE username = ?",
+                        new Object[]{ this.balance, this.name }
+                );
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        this.setAltered(false);
+    }
+
+    @Override
+    public String toString() {
+        DecimalFormat formatter = new DecimalFormat("#,##0.##");
+        String formatted = formatter.format(this.balance);
+
+        if (formatted.endsWith(".")) {
+            formatted = formatted.substring(0, formatted.length() - 1);
+        }
+
+        return formatted;
+    }
 }
-

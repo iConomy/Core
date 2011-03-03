@@ -14,162 +14,172 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerEvent;
 import org.bukkit.event.player.PlayerListener;
 
+/**
+ * Handles the command usage and account creation upon a
+ * player joining the server.
+ *
+ * @author Nijikokun
+ */
 public class iPlayerListener extends PlayerListener {
-	private Template Template = null;
 
-	public iPlayerListener(String directory) {
-		Template = new Template(directory, "Messages.yml");
-	}
+    private Template Template = null;
 
-	/**
-	 * Sends simple condensed help lines to the current player
-	 */
-	private void showSimpleHelp() {
-		Messaging.send("&e----------------------------------------------------");
-		Messaging.send("&f iConomy (&c" + Constants.Codename + "&f)           ");
-		Messaging.send("&e----------------------------------------------------");
-		Messaging.send("&f [] Required, () Optional                            ");
-		Messaging.send("&e----------------------------------------------------");
-		Messaging.send("&f/money &6-&e Check your balance                     ");
-		Messaging.send("&f/money ? &6-&e For help & Information               ");
-		Messaging.send("&f/money rank (player) &6-&e Rank on the topcharts.   ");
-		Messaging.send("&f/money top (amount) &6-&e Richest players listing.  ");
-		Messaging.send("&f/money pay [player] [amount] &6-&e Send money to a player.");
-		Messaging.send("&e----------------------------------------------------");
-		Messaging.send("&f Admin Commands:                                     ");
-		Messaging.send("&e----------------------------------------------------");
-		Messaging.send("&f/money grant [player] [amount] &6-&e Give money to a player.");
-		Messaging.send("&f/money grant [player] -[amount] &6-&e Take money from a player.");
-		Messaging.send("&f/money set [player] [amount] &6-&e Sets a players account at input.");
-		Messaging.send("&f/money reset [player] &6-&e Sets a players account at initial.");
-		Messaging.send("&f/money stats  &6-&e Check all economic stats.");
-		Messaging.send("&e----------------------------------------------------");
-	}
+    /**
+     * Initialize the class as well as the template for various
+     * messages throughout the commands.
+     *
+     * @param directory
+     */
+    public iPlayerListener(String directory) {
+        Template = new Template(directory, "Messages.yml");
+    }
 
-	/**
-	 * Shows the balance to the requesting player.
-	 *
-	 * @param name The name of the player we are viewing
-	 * @param viewing The player who is viewing the account
-	 * @param mine Is it the player who is trying to view?
-	 */
+    /**
+     * Help documentation for iConomy all in one method.
+     *
+     * Allows us to easily utilize all throughout the class without having multiple
+     * instances of the same help lines.
+     */
+    private void showHelp() {
+        Messaging.send("&e----------------------------------------------------");
+        Messaging.send("&f iConomy (&c" + Constants.Codename + "&f)           ");
+        Messaging.send("&e----------------------------------------------------");
+        Messaging.send("&f [] Required, () Optional                            ");
+        Messaging.send("&e----------------------------------------------------");
+        Messaging.send("&f/money &6-&e Check your balance                     ");
+        Messaging.send("&f/money ? &6-&e For help & Information               ");
+        Messaging.send("&f/money rank (player) &6-&e Rank on the topcharts.   ");
+        Messaging.send("&f/money top (amount) &6-&e Richest players listing.  ");
+        Messaging.send("&f/money pay [player] [amount] &6-&e Send money to a player.");
+        Messaging.send("&e----------------------------------------------------");
+        Messaging.send("&f Admin Commands:                                     ");
+        Messaging.send("&e----------------------------------------------------");
+        Messaging.send("&f/money grant [player] [amount] &6-&e Give money to a player.");
+        Messaging.send("&f/money grant [player] -[amount] &6-&e Take money from a player.");
+        Messaging.send("&f/money set [player] [amount] &6-&e Sets a players account at input.");
+        Messaging.send("&f/money reset [player] &6-&e Sets a players account at initial.");
+        Messaging.send("&f/money stats  &6-&e Check all economic stats.");
+        Messaging.send("&e----------------------------------------------------");
+    }
 
-	public void showBalance(String name, Player viewing, boolean mine) {
-		if (mine) {
-			Messaging.send(viewing, Template.color("tag") + Template.parse("personal.balance", new String[]{"+balance,+b"}, new String[]{iConomy.getBank().format(viewing.getName())}));
-		} else {
-			Messaging.send(viewing, Template.color("tag") + Template.parse("player.balance", new String[]{"+balance,+b", "+name,+n"}, new String[]{iConomy.getBank().format(name), name}));
-		}
-	}
+    /**
+     * Shows the balance to the requesting player.
+     *
+     * @param name The name of the player we are viewing
+     * @param viewing The player who is viewing the account
+     * @param mine Is it the player who is trying to view?
+     */
+    public void showBalance(String name, Player viewing, boolean mine) {
+        if (mine) {
+            Messaging.send(viewing, Template.color("tag") + Template.parse("personal.balance", new String[]{"+balance,+b"}, new String[]{iConomy.getBank().format(viewing.getName())}));
+        } else {
+            Messaging.send(viewing, Template.color("tag") + Template.parse("player.balance", new String[]{"+balance,+b", "+name,+n"}, new String[]{iConomy.getBank().format(name), name}));
+        }
+    }
 
-	/**
-	 * Reset a players account easily.
-	 *
-	 * @param resetting The player being reset. Cannot be null.
-	 * @param by The player resetting the account. Cannot be null.
-	 * @param notify Do we want to show the updates to each player?
-	 */
+    /**
+     * Reset a players account easily.
+     *
+     * @param resetting The player being reset. Cannot be null.
+     * @param by The player resetting the account. Cannot be null.
+     * @param notify Do we want to show the updates to each player?
+     */
+    public void showPayment(String from, String to, double amount) {
+        Player paymentFrom = iConomy.getBukkitServer().getPlayer(from);
+        Player paymentTo = iConomy.getBukkitServer().getPlayer(to);
+        Account balanceFrom = iConomy.getBank().getAccount(from);
+        Account balanceTo = iConomy.getBank().getAccount(to);
 
-	public void showPayment(String from, String to, double amount) {
-		Player paymentFrom = iConomy.getBukkitServer().getPlayer(from);
-		Player paymentTo = iConomy.getBukkitServer().getPlayer(to);
-		Account balanceFrom = iConomy.getBank().getAccount(from);
-		Account balanceTo = iConomy.getBank().getAccount(to);
+        if (from.equals(to)) {
+            if (paymentFrom != null) {
+                Messaging.send(paymentFrom, Template.color("payment.self"));
+            }
+        } else if (amount < 0.0 || !balanceFrom.hasEnough(amount)) {
+            if (paymentFrom != null) {
+                Messaging.send(paymentFrom, Template.color("error.funds"));
+            }
+        } else {
+            balanceFrom.subtract(amount);
+            balanceFrom.save();
+            balanceTo.add(amount);
+            balanceTo.save();
 
-		if (from.equals(to)) {
-			if (paymentFrom != null) {
-				Messaging.send(paymentFrom, Template.color("payment.self"));
-			}
-		} else if (amount < 0.0 || !balanceFrom.hasEnough(amount)) {
-			if (paymentFrom != null) {
-				Messaging.send(paymentFrom, Template.color("error.funds"));
-			}
-		} else {
-			balanceFrom.subtract(amount); balanceFrom.save();
-			balanceTo.add(amount); balanceTo.save();
-
-			iConomy.getTransactions().insert(from, to, balanceFrom.getBalance(), balanceTo.getBalance(), 0.0, 0.0, amount);
+            iConomy.getTransactions().insert(from, to, balanceFrom.getBalance(), balanceTo.getBalance(), 0.0, 0.0, amount);
             iConomy.getTransactions().insert(to, from, balanceTo.getBalance(), balanceFrom.getBalance(), 0.0, amount, 0.0);
-			
-			if (paymentFrom != null) {
-				Messaging.send(
-						paymentFrom,
-						Template.color("tag")
-						+ Template.parse(
-								"payment.to",
-								new String[]{"+name,+n", "+amount,+a"},
-								new String[]{to, iConomy.getBank().format(amount) }
-						)
-				);
-				showBalance(from, paymentFrom, true);
-			}
 
-			if (paymentTo != null) {
-				Messaging.send(
-						paymentTo,
-						Template.color("tag")
-						+ Template.parse(
-								"payment.from",
-								new String[]{"+name,+n", "+amount,+a"},
-								new String[]{from, iConomy.getBank().format(amount) }
-						)
-				);
-				showBalance(to, paymentTo, true);
-			}
-		}
-	}
+            if (paymentFrom != null) {
+                Messaging.send(
+                        paymentFrom,
+                        Template.color("tag") + Template.parse(
+                        "payment.to",
+                        new String[]{"+name,+n", "+amount,+a"},
+                        new String[]{to, iConomy.getBank().format(amount)}));
 
-	/**
-	 * Reset a players account, accessable via Console & In-Game
-	 *
-	 * @param account The account we are resetting.
-	 * @param controller If set to null, won't display messages.
-	 * @param console Is it sent via console?
-	 */
+                showBalance(from, paymentFrom, true);
+            }
 
-	public void showReset(String account, Player controller, boolean console) {
-		Player player = iConomy.getBukkitServer().getPlayer(account);
+            if (paymentTo != null) {
+                Messaging.send(
+                        paymentTo,
+                        Template.color("tag") + Template.parse(
+                        "payment.from",
+                        new String[]{"+name,+n", "+amount,+a"},
+                        new String[]{from, iConomy.getBank().format(amount)}));
+
+                showBalance(to, paymentTo, true);
+            }
+        }
+    }
+
+    /**
+     * Reset a players account, accessable via Console & In-Game
+     *
+     * @param account The account we are resetting.
+     * @param controller If set to null, won't display messages.
+     * @param console Is it sent via console?
+     */
+    public void showReset(String account, Player controller, boolean console) {
+        Player player = iConomy.getBukkitServer().getPlayer(account);
 
         // Log Transaction
         iConomy.getTransactions().insert(account, "[System]", 0.0, 0.0, 0.0, 0.0, iConomy.getBank().getAccount(account).getBalance());
 
         // Reset
-		iConomy.getBank().resetAccount(account);
+        iConomy.getBank().resetAccount(account);
 
-		if (player != null) {
-			Messaging.send(player, Template.color("personal.reset"));
-		}
+        if (player != null) {
+            Messaging.send(player, Template.color("personal.reset"));
+        }
 
-		if (controller != null) {
-			Messaging.send(
-					Template.parse(
-							"player.reset",
-							new String[]{ "+name,+n" },
-							new String[]{ account }
-					)
-			);
-		}
+        if (controller != null) {
+            Messaging.send(
+                Template.parse(
+                    "player.reset",
+                    new String[]{"+name,+n"},
+                    new String[]{account}
+                )
+            );
+        }
 
-		if (console) {
-			System.out.println("Player " + account + "'s account has been reset.");
-		} else {
-			System.out.println(Messaging.bracketize("iConomy") + "Player " + account + "'s account has been reset by " + controller.getName() + ".");
-		}
-	}
+        if (console) {
+            System.out.println("Player " + account + "'s account has been reset.");
+        } else {
+            System.out.println(Messaging.bracketize("iConomy") + "Player " + account + "'s account has been reset by " + controller.getName() + ".");
+        }
+    }
 
-	/**
-	 *
-	 * @param account
-	 * @param controller If set to null, won't display messages.
-	 * @param amount
-	 * @param console Is it sent via console?
-	 */
-
-	public void showGrant(String name, Player controller, double amount, boolean console) {
-		Player online = iConomy.getBukkitServer().getPlayer(name);
-		Account account = iConomy.getBank().getAccount(name);
-		account.add(amount);
-		account.save();
+    /**
+     *
+     * @param account
+     * @param controller If set to null, won't display messages.
+     * @param amount
+     * @param console Is it sent via console?
+     */
+    public void showGrant(String name, Player controller, double amount, boolean console) {
+        Player online = iConomy.getBukkitServer().getPlayer(name);
+        Account account = iConomy.getBank().getAccount(name);
+        account.add(amount);
+        account.save();
 
         // Log Transaction
         if (amount < 0.0) {
@@ -178,384 +188,394 @@ public class iPlayerListener extends PlayerListener {
             iConomy.getTransactions().insert("[System]", name, 0.0, account.getBalance(), 0.0, amount, 0.0);
         }
 
-		if (online != null) {
-			Messaging.send(online,
-					Template.color("tag")
-					+ Template.parse(
-							(amount < 0.0) ? "personal.debit" : "personal.credit",
-							new String[]{"+by", "+amount,+a"},
-							new String[]{(console) ? "console" : controller.getName(), iConomy.getBank().format(((amount < 0.0) ? amount * -1 : amount)) }
-					)
-			);
+        if (online != null) {
+            Messaging.send(online,
+                Template.color("tag") + Template.parse(
+                    (amount < 0.0) ? "personal.debit" : "personal.credit",
+                    new String[]{"+by", "+amount,+a"},
+                    new String[]{(console) ? "console" : controller.getName(), iConomy.getBank().format(((amount < 0.0) ? amount * -1 : amount))}
+                )
+            );
 
-			showBalance(name, online, true);
-		}
+            showBalance(name, online, true);
+        }
 
-		if (controller != null) {
-			Messaging.send(
-					Template.color("tag")
-					+ Template.parse(
-							(amount < 0.0) ? "player.debit" : "player.credit",
-							new String[]{"+name,+n", "+amount,+a"},
-							new String[]{ name, iConomy.getBank().format(amount) }
-					)
-			);
-		}
+        if (controller != null) {
+            Messaging.send(
+                Template.color("tag") + Template.parse(
+                    (amount < 0.0) ? "player.debit" : "player.credit",
+                    new String[]{"+name,+n", "+amount,+a"},
+                    new String[]{name, iConomy.getBank().format(amount)}
+                )
+            );
+        }
 
-		if (console) {
-			System.out.println("Player " + account + "'s account had " + amount + " grant to it.");
-		} else {
-			System.out.println(Messaging.bracketize("iConomy") + "Player " + account + "'s account had " + amount + " grant to it by " + controller.getName() + ".");
-		}
-	}
+        if (console) {
+            System.out.println("Player " + account + "'s account had " + amount + " grant to it.");
+        } else {
+            System.out.println(Messaging.bracketize("iConomy") + "Player " + account + "'s account had " + amount + " grant to it by " + controller.getName() + ".");
+        }
+    }
 
-	/**
-	 *
-	 * @param account
-	 * @param controller If set to null, won't display messages.
-	 * @param amount
-	 * @param console Is it sent via console?
-	 */
-
-	public void showSet(String name, Player controller, double amount, boolean console) {
-		Player online = iConomy.getBukkitServer().getPlayer(name);
-		Account account = iConomy.getBank().getAccount(name);
-		account.setBalance(amount);
-		account.save();
+    /**
+     *
+     * @param account
+     * @param controller If set to null, won't display messages.
+     * @param amount
+     * @param console Is it sent via console?
+     */
+    public void showSet(String name, Player controller, double amount, boolean console) {
+        Player online = iConomy.getBukkitServer().getPlayer(name);
+        Account account = iConomy.getBank().getAccount(name);
+        account.setBalance(amount);
+        account.save();
 
         // Log Transaction
         iConomy.getTransactions().insert("[System]", name, 0.0, account.getBalance(), amount, 0.0, 0.0);
 
-		if (online != null) {
-			Messaging.send(online,
-					Template.color("tag")
-					+ Template.parse(
-							"personal.set",
-							new String[]{"+by", "+amount,+a"},
-							new String[]{(console) ? "console" : controller.getName(), iConomy.getBank().format(amount) }
-					)
-			);
+        if (online != null) {
+            Messaging.send(online,
+                Template.color("tag") + Template.parse(
+                    "personal.set",
+                    new String[]{"+by", "+amount,+a"},
+                    new String[]{(console) ? "console" : controller.getName(), iConomy.getBank().format(amount)}
+                )
+            );
 
-			showBalance(name, online, true);
-		}
+            showBalance(name, online, true);
+        }
 
-		if (controller != null) {
-			Messaging.send(
-					Template.color("tag")
-					+ Template.parse(
-							"player.set",
-							new String[]{"+name,+n", "+amount,+a"},
-							new String[]{ name, iConomy.getBank().format(amount) }
-					)
-			);
-		}
+        if (controller != null) {
+            Messaging.send(
+                Template.color("tag") + Template.parse(
+                    "player.set",
+                    new String[]{"+name,+n", "+amount,+a"},
+                    new String[]{name, iConomy.getBank().format(amount)}
+                )
+            );
+        }
 
-		if (console) {
-			System.out.println("Player " + account + "'s account had " + amount + " set to it.");
-		} else {
-			System.out.println(Messaging.bracketize("iConomy") + "Player " + account + "'s account had " + amount + " set to it by " + controller.getName() + ".");
-		}
-	}
+        if (console) {
+            System.out.println("Player " + account + "'s account had " + amount + " set to it.");
+        } else {
+            System.out.println(Messaging.bracketize("iConomy") + "Player " + account + "'s account had " + amount + " set to it by " + controller.getName() + ".");
+        }
+    }
 
     /**
-     * Shows the ranking through templates
+     * Parses and outputs personal rank.
+     *
+     * Grabs rankings via the bank system and outputs the data,
+     * using the template variables, to the given player stated
+     * in the method.
      *
      * @param viewing
      * @param player
      */
-	public void showRank(Player viewing, String player) {
-		if (iConomy.getBank().hasAccount(player)) {
-			int rank = iConomy.getBank().getAccountRank(player);
+    public void showRank(Player viewing, String player) {
+        if (iConomy.getBank().hasAccount(player)) {
+            int rank = iConomy.getBank().getAccountRank(player);
 
-			Messaging.send(
-					viewing,
-					Template.color("tag")
-					+ Template.parse(
-							((viewing.getName().equalsIgnoreCase(player)) ? "personal.rank" : "player.rank"),
-							new Object[]{"+name,+n", "+rank,+r"},
-							new Object[]{ player, rank }
-					)
-			);
-		} else {
-			Messaging.send(
-					viewing,
-					Template.parse(
-							"error.account",
-							new Object[]{ "+name,+n" }, 
-							new Object[]{ player }
-					)
-			);
-		}
-	}
+            Messaging.send(
+                viewing,
+                Template.color("tag") + Template.parse(
+                    ((viewing.getName().equalsIgnoreCase(player)) ? "personal.rank" : "player.rank"),
+                    new Object[]{"+name,+n", "+rank,+r"},
+                    new Object[]{player, rank}
+                )
+            );
+        } else {
+            Messaging.send(
+                viewing,
+                Template.parse(
+                    "error.account",
+                    new Object[]{"+name,+n"},
+                    new Object[]{player}
+                )
+            );
+        }
+    }
 
     /**
-     * Grabs the top amount of players and shows them through the templating system.
+     * Top ranking users by cash flow.
+     *
+     * Grabs the top amount of players and outputs the data, using the template
+     * system, to the given viewing player.
      *
      * @param viewing
      * @param amount
      */
-	public void showTop(Player viewing, int amount) {
-		ArrayList<String> als = iConomy.getBank().getAccountRanks(amount);
+    public void showTop(Player viewing, int amount) {
+        ArrayList<String> als = iConomy.getBank().getAccountRanks(amount);
 
-		Messaging.send(
-				viewing,
-				Template.parse(
-						"top.opening",
-						new Object[]{ "+amount,+a" },
-						new Object[]{ als.size() }
-				)
-		);
+        Messaging.send(
+                viewing,
+                Template.parse(
+                "top.opening",
+                new Object[]{"+amount,+a"},
+                new Object[]{als.size()}
+            )
+        );
 
-		for(int i = 0; i < als.size(); i++) {
-			int current = i+1;
+        for (int i = 0; i < als.size(); i++) {
+            int current = i + 1;
 
             Account account = iConomy.getBank().getAccount(als.get(i));
 
-			Messaging.send(
-					viewing,
-					Template.parse(
-							"top.line",
-							new String[]{ "+i,+number", "+player,+name,+n", "+balance,+b" },
-							new Object[]{ current, account.getName(),  iConomy.getBank().format(account.getBalance()) }
-					)
-			);
-		}
-	}
-
-	/**
-	 * Commands sent from in game to us.
-	 *
-	 * @param player The player who sent the command.
-	 * @param split The input line split by spaces.
-	 * @return <code>boolean</code> - True denotes that the command existed, false the command doesn't.
-	 */
-
-	@Override
-	public void onPlayerJoin(PlayerEvent event) {
-		Player player = event.getPlayer();
-
-		if(!iConomy.getBank().hasAccount(player.getName()))
-			iConomy.getBank().addAccount(player.getName());
-	}
+            Messaging.send(
+                    viewing,
+                    Template.parse(
+                    "top.line",
+                    new String[]{"+i,+number", "+player,+name,+n", "+balance,+b"},
+                    new Object[]{current, account.getName(), iConomy.getBank().format(account.getBalance())}));
+        }
+    }
 
     /**
-     * Player commands.
+     * Commands sent from in game to us.
      *
-     * @param event
+     * @param player The player who sent the command.
+     * @param split The input line split by spaces.
+     * @return <code>boolean</code> - True denotes that the command existed, false the command doesn't.
      */
-	
-	public void onPlayerCommand(Player player, String[] split) {
-		Messaging.save(player);
+    @Override
+    public void onPlayerJoin(PlayerEvent event) {
+        Player player = event.getPlayer();
 
-		if (split[0].equalsIgnoreCase("money")) {
-			switch(split.length) {
-			case 1:
+        if (!iConomy.getBank().hasAccount(player.getName())) {
+            iConomy.getBank().addAccount(player.getName());
+        }
+    }
 
-				showBalance("", player, true);
-				return;
+    /**
+     * Commands sent from in-game are parsed and evaluated here.
+     *
+     * @param player
+     * @param split
+     */
+    public void onPlayerCommand(Player player, String[] split) {
+        Messaging.save(player);
 
-			case 2:
+        if (split[0].equalsIgnoreCase("money")) {
+            switch (split.length) {
+                case 1:
 
-				if (Misc.isAny(split[1], new String[] { "rank", "-r" })) {
-					if (!iConomy.hasPermissions(player, "iConomy.rank"))
-						return;
+                    showBalance("", player, true);
+                    return;
 
-					showRank(player, player.getName());
+                case 2:
 
-					return;
-				}
-                
-                if (Misc.isAny(split[1], new String[] { "top", "-t" })) {
-					if (!iConomy.hasPermissions(player, "iConomy.list"))
-						return;
+                    if (Misc.isAny(split[1], new String[]{"rank", "-r"})) {
+                        if (!iConomy.hasPermissions(player, "iConomy.rank")) {
+                            return;
+                        }
 
-					showTop(player, 5);
+                        showRank(player, player.getName());
 
-					return;
-				}
-                
-                if (Misc.isAny(split[1], new String[] { "stats", "-s" })) {
-					if (!iConomy.hasPermissions(player, "iConomy.admin.stats"))
-						return;
+                        return;
+                    }
 
-					Collection<Account> money = iConomy.getBank().getAccounts().values();
-					double totalMoney = 0;
-					int totalPlayers = money.size();
-					
-					for(Object o : money.toArray())
-						totalMoney += ((Account) o).getBalance();
+                    if (Misc.isAny(split[1], new String[]{"top", "-t"})) {
+                        if (!iConomy.hasPermissions(player, "iConomy.list")) {
+                            return;
+                        }
 
-                    Messaging.send(Template.color("statistics.opening"));
+                        showTop(player, 5);
 
-                    Messaging.send(Template.parse("statistics.total",
-                            new String[]{ "+currency,+c", "+amount,+money,+a,+m" },
-                            new Object[]{ iConomy.getBank().getCurrency(), iConomy.getBank().format(totalMoney) }
-                    ));
+                        return;
+                    }
 
-                    Messaging.send(Template.parse("statistics.average",
-                            new String[]{ "+currency,+c", "+amount,+money,+a,+m" },
-                            new Object[]{ iConomy.getBank().getCurrency(), iConomy.getBank().format(totalMoney / totalPlayers) }
-                    ));
+                    if (Misc.isAny(split[1], new String[]{"stats", "-s"})) {
+                        if (!iConomy.hasPermissions(player, "iConomy.admin.stats")) {
+                            return;
+                        }
 
-                    Messaging.send(Template.parse("statistics.accounts",
-                            new String[]{ "+currency,+c", "+amount,+accounts,+a" },
-                            new Object[]{ iConomy.getBank().getCurrency(), totalPlayers }
-                    ));
-					
-					return;
-				}
+                        Collection<Account> money = iConomy.getBank().getAccounts().values();
+                        double totalMoney = 0;
+                        int totalPlayers = money.size();
 
-                if (Misc.isAny(split[1],
-                        new String[] { "help", "?", "grant", "-g", "reset", "-x", "set", "-s", "pay", "-p" })) {
+                        for (Object o : money.toArray()) {
+                            totalMoney += ((Account) o).getBalance();
+                        }
 
-					showSimpleHelp();
+                        Messaging.send(Template.color("statistics.opening"));
 
-					return;
-				} else {
-					if (!iConomy.hasPermissions(player, "iConomy.access"))
-						return;
+                        Messaging.send(Template.parse("statistics.total",
+                                new String[]{"+currency,+c", "+amount,+money,+a,+m"},
+                                new Object[]{iConomy.getBank().getCurrency(), iConomy.getBank().format(totalMoney)}
+                        ));
 
-					if (iConomy.getBank().hasAccount(split[1])) {
-						showBalance(split[1], player, false);
-					} else {
-						Messaging.send(Template.parse("error.account", new String[]{"+name,+n"}, new String[]{split[1]}));
-					}
+                        Messaging.send(Template.parse("statistics.average",
+                                new String[]{"+currency,+c", "+amount,+money,+a,+m"},
+                                new Object[]{iConomy.getBank().getCurrency(), iConomy.getBank().format(totalMoney / totalPlayers)}
+                        ));
 
-					return;
-				}
+                        Messaging.send(Template.parse("statistics.accounts",
+                                new String[]{"+currency,+c", "+amount,+accounts,+a"},
+                                new Object[]{iConomy.getBank().getCurrency(), totalPlayers}
+                        ));
 
-			case 3:
+                        return;
+                    }
 
-				if (Misc.isAny(split[1], new String[] { "rank", "-r" })) {
-					if (!iConomy.hasPermissions(player, "iConomy.rank"))
-						return;
+                    if (Misc.isAny(split[1],
+                            new String[]{"help", "?", "grant", "-g", "reset", "-x", "set", "-s", "pay", "-p"})) {
 
-					if (iConomy.getBank().hasAccount(split[2])) {
-						showRank(player, split[2]);
-					} else {
-						Messaging.send(Template.parse("error.account", new String[]{"+name,+n"}, new String[]{split[2]}));
-					}
+                        showHelp();
 
-					return;
-				}
-                
-                if (Misc.isAny(split[1], new String[] { "top", "-t" })) {
-					if (!iConomy.hasPermissions(player, "iConomy.list"))
-						return;
+                        return;
+                    } else {
+                        if (!iConomy.hasPermissions(player, "iConomy.access")) {
+                            return;
+                        }
 
-					try {
-						showTop(player, Integer.parseInt(split[2]) < 0 ? 5 : Integer.parseInt(split[2]));
-					} catch(Exception e) {
-						showTop(player, 5);
-					}
+                        if (iConomy.getBank().hasAccount(split[1])) {
+                            showBalance(split[1], player, false);
+                        } else {
+                            Messaging.send(Template.parse("error.account", new String[]{"+name,+n"}, new String[]{split[1]}));
+                        }
 
-					return;
-				}
-                
-                if(Misc.isAny(split[1], new String[] { "reset", "-x" })) {
-					if (!iConomy.hasPermissions(player, "iConomy.admin.reset"))
-						return;
+                        return;
+                    }
 
-					if (iConomy.getBank().hasAccount(split[2])) {
-						showReset(split[2], player, false);
-					} else {
-						Messaging.send(Template.parse("error.account", new String[]{"+name,+n"}, new String[]{split[2]}));
-					}
+                case 3:
 
-					return;
-				}
+                    if (Misc.isAny(split[1], new String[]{"rank", "-r"})) {
+                        if (!iConomy.hasPermissions(player, "iConomy.rank")) {
+                            return;
+                        }
 
-				break;
+                        if (iConomy.getBank().hasAccount(split[2])) {
+                            showRank(player, split[2]);
+                        } else {
+                            Messaging.send(Template.parse("error.account", new String[]{"+name,+n"}, new String[]{split[2]}));
+                        }
 
-			case 4:
+                        return;
+                    }
 
-				if (Misc.isAny(split[1], new String[] { "pay", "-p" })) {
-					if (!iConomy.hasPermissions(player, "iConomy.payment"))
-						return;
+                    if (Misc.isAny(split[1], new String[]{"top", "-t"})) {
+                        if (!iConomy.hasPermissions(player, "iConomy.list")) {
+                            return;
+                        }
 
-					String name = "";
-					double amount = 0.0;
+                        try {
+                            showTop(player, Integer.parseInt(split[2]) < 0 ? 5 : Integer.parseInt(split[2]));
+                        } catch (Exception e) {
+                            showTop(player, 5);
+                        }
 
-					if (iConomy.getBank().hasAccount(split[2])) {
-						name = split[2];
-					} else {
-						Messaging.send(Template.parse("error.account", new String[]{"+name,+n"}, new String[]{split[2]}));
-						return;
-					}
+                        return;
+                    }
 
-					try {
-						amount = Double.parseDouble(split[3]);
+                    if (Misc.isAny(split[1], new String[]{"reset", "-x"})) {
+                        if (!iConomy.hasPermissions(player, "iConomy.admin.reset")) {
+                            return;
+                        }
 
-						if (amount < 0.01)
-							throw new NumberFormatException();
-					} catch (NumberFormatException ex) {
-						Messaging.send("&cInvalid amount: &f" + amount);
-						Messaging.send("&cUsage: &f/money &c[&f-p&c|&fpay&c] <&fplayer&c> &c<&famount&c>");
-						return;
-					}
+                        if (iConomy.getBank().hasAccount(split[2])) {
+                            showReset(split[2], player, false);
+                        } else {
+                            Messaging.send(Template.parse("error.account", new String[]{"+name,+n"}, new String[]{split[2]}));
+                        }
 
-					showPayment(player.getName(), name, amount);
+                        return;
+                    }
 
-					return;
-				}
-                
-                if (Misc.isAny(split[1], new String[] { "grant", "-g" })) {
-					if (!iConomy.hasPermissions(player, "iConomy.admin.grant"))
-						return;
+                    break;
 
-					String name = "";
-					double amount = 0.0;
+                case 4:
 
-					if (iConomy.getBank().hasAccount(split[2])) {
-						name = split[2];
-					} else {
-						Messaging.send(Template.parse("error.account", new String[]{"+name,+n"}, new String[]{split[2]}));
-					}
+                    if (Misc.isAny(split[1], new String[]{"pay", "-p"})) {
+                        if (!iConomy.hasPermissions(player, "iConomy.payment")) {
+                            return;
+                        }
 
-					try {
-						amount = Double.parseDouble(split[3]);
-					} catch (NumberFormatException e) {
-						Messaging.send("&cInvalid amount: &f" + split[3]);
-						Messaging.send("&cUsage: &f/money &c[&f-g&c|&fgrant&c] <&fplayer&c> (&f-&c)&c<&famount&c>");
-					}
+                        String name = "";
+                        double amount = 0.0;
 
-					showGrant(name, player, amount, true);
+                        if (iConomy.getBank().hasAccount(split[2])) {
+                            name = split[2];
+                        } else {
+                            Messaging.send(Template.parse("error.account", new String[]{"+name,+n"}, new String[]{split[2]}));
+                            return;
+                        }
 
-					return;
-				}
-                
-                if (Misc.isAny(split[1], new String[] { "set", "-s" })) {
-					if (!iConomy.hasPermissions(player, "iConomy.admin.set"))
-						return;
+                        try {
+                            amount = Double.parseDouble(split[3]);
 
-					String name = "";
-					double amount = 0.0;
+                            if (amount < 0.01) {
+                                throw new NumberFormatException();
+                            }
+                        } catch (NumberFormatException ex) {
+                            Messaging.send("&cInvalid amount: &f" + amount);
+                            Messaging.send("&cUsage: &f/money &c[&f-p&c|&fpay&c] <&fplayer&c> &c<&famount&c>");
+                            return;
+                        }
 
-					if (iConomy.getBank().hasAccount(split[2])) {
-						name = split[2];
-					} else {
-						Messaging.send(Template.parse("error.account", new String[]{"+name,+n"}, new String[]{split[2]}));
-					}
+                        showPayment(player.getName(), name, amount);
 
-					try {
-						amount = Double.parseDouble(split[3]);
-					} catch (NumberFormatException e) {
-						Messaging.send("&cInvalid amount: &f" + split[3]);
-						Messaging.send("&cUsage: &f/money &c[&f-g&c|&fgrant&c] <&fplayer&c> (&f-&c)&c<&famount&c>");
-					}
+                        return;
+                    }
 
-					showSet(name, player, amount, true);
+                    if (Misc.isAny(split[1], new String[]{"grant", "-g"})) {
+                        if (!iConomy.hasPermissions(player, "iConomy.admin.grant")) {
+                            return;
+                        }
 
-					return;
-				}
+                        String name = "";
+                        double amount = 0.0;
 
-				break;
-			}
+                        if (iConomy.getBank().hasAccount(split[2])) {
+                            name = split[2];
+                        } else {
+                            Messaging.send(Template.parse("error.account", new String[]{"+name,+n"}, new String[]{split[2]}));
+                        }
 
-			showSimpleHelp();
-		}
+                        try {
+                            amount = Double.parseDouble(split[3]);
+                        } catch (NumberFormatException e) {
+                            Messaging.send("&cInvalid amount: &f" + split[3]);
+                            Messaging.send("&cUsage: &f/money &c[&f-g&c|&fgrant&c] <&fplayer&c> (&f-&c)&c<&famount&c>");
+                        }
 
-		return;
-	}
+                        showGrant(name, player, amount, true);
 
+                        return;
+                    }
+
+                    if (Misc.isAny(split[1], new String[]{"set", "-s"})) {
+                        if (!iConomy.hasPermissions(player, "iConomy.admin.set")) {
+                            return;
+                        }
+
+                        String name = "";
+                        double amount = 0.0;
+
+                        if (iConomy.getBank().hasAccount(split[2])) {
+                            name = split[2];
+                        } else {
+                            Messaging.send(Template.parse("error.account", new String[]{"+name,+n"}, new String[]{split[2]}));
+                        }
+
+                        try {
+                            amount = Double.parseDouble(split[3]);
+                        } catch (NumberFormatException e) {
+                            Messaging.send("&cInvalid amount: &f" + split[3]);
+                            Messaging.send("&cUsage: &f/money &c[&f-g&c|&fgrant&c] <&fplayer&c> (&f-&c)&c<&famount&c>");
+                        }
+
+                        showSet(name, player, amount, true);
+
+                        return;
+                    }
+
+                    break;
+            }
+
+            showHelp();
+        }
+
+        return;
+    }
 }
