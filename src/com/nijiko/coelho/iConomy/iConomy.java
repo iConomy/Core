@@ -16,6 +16,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.Server;
 import org.bukkit.event.Event.Priority;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -30,7 +31,9 @@ import com.nijiko.coelho.iConomy.system.Interest;
 import com.nijiko.coelho.iConomy.util.Constants;
 import com.nijiko.coelho.iConomy.system.Transactions;
 import com.nijiko.coelho.iConomy.util.FileManager;
+
 import com.nijiko.permissions.PermissionHandler;
+import com.nijikokun.bukkit.Permissions.Permissions;
 
 /**
  * iConomy by Team iCo
@@ -53,7 +56,9 @@ import com.nijiko.permissions.PermissionHandler;
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 public class iConomy extends JavaPlugin {
+	
     private static Server Server = null;
     private static Bank Bank = null;
     private static iDatabase iDatabase = null;
@@ -137,6 +142,19 @@ public class iConomy extends JavaPlugin {
             System.out.println("[iConomy] Failed to start interest system: " + e.getMessage());
             return;
         }
+        
+        try {
+			Plugin PermissionsPlugin = this.getServer().getPluginManager().getPlugin("Permissions");
+
+			if(PermissionsPlugin == null)
+				pm.registerEvent(Event.Type.PLUGIN_ENABLE, pluginListener, Priority.Monitor, this);
+			else
+				setPermissions(((Permissions) PermissionsPlugin).getHandler());
+		} catch(Exception e) {
+			Server.getPluginManager().disablePlugin(this);
+			System.out.println("[iConomy] Failed to link with permissions: " + e.getMessage());
+			return; 
+		}
 
         // Initializing Listeners
         pluginListener = new iPluginListener();
@@ -157,7 +175,6 @@ public class iConomy extends JavaPlugin {
             for (String account_name : Bank.getAccounts().keySet()) {
                 Account account = Bank.getAccount(account_name);
 
-                // Only save unsaved data.
                 if(account.isAltered()) {
                     account.save();
                 }
@@ -301,6 +318,7 @@ public class iConomy extends JavaPlugin {
      *
      * @return Bank
      */
+    
     public static Bank getBank() {
         return Bank;
     }
@@ -310,6 +328,7 @@ public class iConomy extends JavaPlugin {
      *
      * @return iDatabase
      */
+    
     public static iDatabase getDatabase() {
         return iDatabase;
     }
@@ -322,6 +341,7 @@ public class iConomy extends JavaPlugin {
      *
      * @return T
      */
+    
     public static Transactions getTransactions() {
         return Transactions;
     }

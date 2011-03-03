@@ -18,8 +18,11 @@ import com.nijikokun.bukkit.Permissions.Permissions;
  *
  * @author Nijikokun
  */
+
 public class iPluginListener extends ServerListener {
-    public iPluginListener() { }
+    public iPluginListener() { 
+    	
+    }
 
     @Override
     public void onPluginEnabled(PluginEvent event) {
