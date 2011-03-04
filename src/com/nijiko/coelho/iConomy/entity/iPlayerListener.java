@@ -40,7 +40,7 @@ public class iPlayerListener extends PlayerListener {
      * Allows us to easily utilize all throughout the class without having multiple
      * instances of the same help lines.
      */
-    private void showHelp() {
+    private void showHelp(Player player) {
         Messaging.send("&e----------------------------------------------------");
         Messaging.send("&f iConomy (&c" + Constants.Codename + "&f)           ");
         Messaging.send("&e----------------------------------------------------");
@@ -50,15 +50,28 @@ public class iPlayerListener extends PlayerListener {
         Messaging.send("&f/money ? &6-&e For help & Information               ");
         Messaging.send("&f/money rank (player) &6-&e Rank on the topcharts.   ");
         Messaging.send("&f/money top (amount) &6-&e Richest players listing.  ");
-        Messaging.send("&f/money pay [player] [amount] &6-&e Send money to a player.");
-        Messaging.send("&e----------------------------------------------------");
-        Messaging.send("&f Admin Commands:                                     ");
-        Messaging.send("&e----------------------------------------------------");
-        Messaging.send("&f/money grant [player] [amount] &6-&e Give money to a player.");
-        Messaging.send("&f/money grant [player] -[amount] &6-&e Take money from a player.");
-        Messaging.send("&f/money set [player] [amount] &6-&e Sets a players account at input.");
-        Messaging.send("&f/money reset [player] &6-&e Sets a players account at initial.");
-        Messaging.send("&f/money stats  &6-&e Check all economic stats.");
+
+        if (!iConomy.hasPermissions(player, "iConomy.payment")) {
+            Messaging.send("&f/money pay [player] [amount] &6-&e Send money to a player.");
+        }
+
+        if (!iConomy.hasPermissions(player, "iConomy.admin.grant")) {
+            Messaging.send("&f/money grant [player] [amount] &6-&e Give money.");
+            Messaging.send("&f/money grant [player] -[amount] &6-&e Take money.");
+        }
+
+        if (!iConomy.hasPermissions(player, "iConomy.admin.set")) {
+            Messaging.send("&f/money set [player] [amount] &6-&e Sets a players balance.");
+        }
+
+        if (!iConomy.hasPermissions(player, "iConomy.admin.reset")) {
+            Messaging.send("&f/money reset [player] &6-&e Reset player account.");
+        }
+
+        if (!iConomy.hasPermissions(player, "iConomy.admin.stats")) {
+            Messaging.send("&f/money stats  &6-&e Check all economic stats.");
+        }
+
         Messaging.send("&e----------------------------------------------------");
     }
 
@@ -323,11 +336,13 @@ public class iPlayerListener extends PlayerListener {
             Account account = iConomy.getBank().getAccount(als.get(i));
 
             Messaging.send(
-                    viewing,
-                    Template.parse(
+                viewing,
+                Template.parse(
                     "top.line",
                     new String[]{"+i,+number", "+player,+name,+n", "+balance,+b"},
-                    new Object[]{current, account.getName(), iConomy.getBank().format(account.getBalance())}));
+                    new Object[]{current, account.getName(), iConomy.getBank().format(account.getBalance())}
+                )
+            );
         }
     }
 
@@ -371,7 +386,6 @@ public class iPlayerListener extends PlayerListener {
                         }
 
                         showRank(player, player.getName());
-
                         return;
                     }
 
@@ -381,7 +395,6 @@ public class iPlayerListener extends PlayerListener {
                         }
 
                         showTop(player, 5);
-
                         return;
                     }
 
@@ -418,12 +431,8 @@ public class iPlayerListener extends PlayerListener {
                         return;
                     }
 
-                    if (Misc.isAny(split[1],
-                            new String[]{"help", "?", "grant", "-g", "reset", "-x", "set", "-s", "pay", "-p"})) {
-
-                        showHelp();
-
-                        return;
+                    if (Misc.isAny(split[1], new String[]{"help", "?", "grant", "-g", "reset", "-x", "set", "-s", "pay", "-p"})) {
+                        showHelp(player); return;
                     } else {
                         if (!iConomy.hasPermissions(player, "iConomy.access")) {
                             return;
@@ -514,7 +523,6 @@ public class iPlayerListener extends PlayerListener {
                         }
 
                         showPayment(player.getName(), name, amount);
-
                         return;
                     }
 
@@ -540,7 +548,6 @@ public class iPlayerListener extends PlayerListener {
                         }
 
                         showGrant(name, player, amount, true);
-
                         return;
                     }
 
@@ -566,14 +573,13 @@ public class iPlayerListener extends PlayerListener {
                         }
 
                         showSet(name, player, amount, true);
-
                         return;
                     }
 
                     break;
             }
 
-            showHelp();
+            showHelp(player);
         }
 
         return;
