@@ -6,6 +6,7 @@ import org.bukkit.event.server.ServerListener;
 import com.nijiko.coelho.iConomy.iConomy;
 
 import com.nijikokun.bukkit.Permissions.Permissions;
+import org.bukkit.plugin.Plugin;
 
 /**
  * iPluginListener
@@ -23,9 +24,13 @@ public class iPluginListener extends ServerListener {
 
     @Override
     public void onPluginEnabled(PluginEvent event) {
-        if (event.getPlugin().getDescription().getName().equals("Permissions")) {
-            iConomy.setPermissions(((Permissions) event.getPlugin()).getHandler());
-            System.out.println("[iConomy] Successfully linked with Permissions.");
+        if(iConomy.getPermissions() == null) {
+            Plugin permissions = iConomy.getBukkitServer().getPluginManager().getPlugin("Permissions");
+
+            if (permissions != null) {
+                iConomy.setPermissions(((Permissions)permissions).getHandler());
+                System.out.println("[iConomy] Successfully linked with Permissions.");
+            }
         }
     }
 }
