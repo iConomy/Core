@@ -28,8 +28,10 @@ public class iPluginListener extends ServerListener {
             Plugin permissions = iConomy.getBukkitServer().getPluginManager().getPlugin("Permissions");
 
             if (permissions != null) {
-                iConomy.setPermissions(((Permissions)permissions).getHandler());
-                System.out.println("[iConomy] Successfully linked with Permissions.");
+                if(permissions.isEnabled()) {
+                    iConomy.setPermissions(((Permissions)permissions).getHandler());
+                    System.out.println("[iConomy] Successfully linked with Permissions.");
+                }
             }
         }
     }
