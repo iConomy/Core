@@ -8,6 +8,24 @@ public class Constants {
     // Code name
     public static final String Codename = "Lind";
 
+    // Nodes
+    private static String[] nodes = new String[] {
+        "System.Logging.Enabled:false",
+        "System.Currency:Coin",
+        "System.Initial_Balance:45.0",
+        "System.Interest.Enabled:false",
+        "System.Interest.IntervalSeconds:60",
+        "System.Interest.MinimumPerInterval:1",
+        "System.Interest.MaximumPerInterval:2",
+        "System.Database.Type:SQLite",
+        "System.Database.MySQL.Hostname:localhost",
+        "System.Database.MySQL.Port:3306",
+        "System.Database.MySQL.Username:root",
+        "System.Database.MySQL.Password:none",
+        "System.Database.Name:minecraft",
+        "System.Database.Table:iConomy",
+    };
+
     // Files and Directories
     public static File Configuration;
     public static String Plugin_Directory;
@@ -26,7 +44,7 @@ public class Constants {
     public static double Interest_Max_Interval = 2;
 
     // Database Type
-    public static String Database_Type = "MySQL";
+    public static String Database_Type = "SQLite";
 
     // Relational SQL Generics
     public static String SQL_Hostname = "localhost";
@@ -67,22 +85,24 @@ public class Constants {
         SQL_Database = config.getString("System.Database.Name", SQL_Database);
         SQL_Table = config.getString("System.Database.Table", SQL_Table);
 
-        if (config.getProperty("System.Logging.Enabled") == null
-                || config.getProperty("System.Currency") == null
-                || config.getProperty("System.Initial_Balance") == null
-                || config.getProperty("System.Interest.Enabled") == null
-                || config.getProperty("System.Interest.IntervalSeconds") == null
-                || config.getProperty("System.Interest.MinimumPerInterval") == null
-                || config.getProperty("System.Interest.MaximumPerInterval") == null
-                || config.getProperty("System.Database.Type") == null
-                || config.getProperty("System.Database.MySQL.Hostname") == null
-                || config.getProperty("System.Database.MySQL.Port") == null
-                || config.getProperty("System.Database.MySQL.Username") == null
-                || config.getProperty("System.Database.MySQL.Password") == null
-                || config.getProperty("System.Database.Name") == null
-                || config.getProperty("System.Database.Table") == null) {
-            System.out.println("[iConomy] Certain nodes in the properties are missing.");
-            System.out.println("[iConomy] Please backup your current iConomy.yml and let us recreate it.");
+        int i = 0;
+
+        for(String node : nodes) {
+            if(config.getProperty(node.split(":")[0]) == null) {
+                i++;
+            }
+        }
+
+        if(i != 0) {
+            System.out.println("[iConomy] Configuration Integrity Start:");
+
+            for(String node : nodes) {
+                if(config.getProperty(node.split(":")[0]) == null) {
+                    System.out.println("    - "+ node.split(":")[0] +" is null, Defaulting to: " + node.split(":")[1]);
+                }
+            }
+
+            System.out.println("[iConomy] Configuration Integrity End.");
         }
     }
 }
