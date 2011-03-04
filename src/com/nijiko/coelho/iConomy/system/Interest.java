@@ -14,7 +14,7 @@ public class Interest extends TimerTask {
     public void run() {
         DecimalFormat DecimalFormat = new DecimalFormat("#.##");
 
-        double amount = Double.parseDouble(
+        double amount = (Constants.Interest_FlatRate == 0.0) ? Double.parseDouble(
             DecimalFormat.format(
                 Math.random() * (
                     Constants.Interest_Max_Interval - Constants.Interest_Min_Interval
@@ -22,7 +22,7 @@ public class Interest extends TimerTask {
                     Constants.Interest_Min_Interval
                 )
             )
-        );
+        ) : Constants.Interest_FlatRate;
 
         Player players[] = iConomy.getBukkitServer().getOnlinePlayers();
 

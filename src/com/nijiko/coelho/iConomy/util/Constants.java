@@ -15,6 +15,7 @@ public class Constants {
         "System.Initial_Balance:45.0",
         "System.Interest.Enabled:false",
         "System.Interest.IntervalSeconds:60",
+        "System.Interest.FlatRate:0.0",
         "System.Interest.MinimumPerInterval:1",
         "System.Interest.MaximumPerInterval:2",
         "System.Database.Type:SQLite",
@@ -39,6 +40,7 @@ public class Constants {
 
     // System Interest
     public static boolean Interest = false;
+    public static double Interest_FlatRate = 0.0;
     public static int Interest_Interval = 60;
     public static double Interest_Min_Interval = 1;
     public static double Interest_Max_Interval = 2;
@@ -68,6 +70,7 @@ public class Constants {
 
         // System Interest
         Interest = config.getBoolean("System.Interest.Enabled", Interest);
+        Interest_FlatRate = config.getDouble("System.Interest.FlatRate", Interest_FlatRate);
         Interest_Interval = config.getInt("System.Interest.IntervalSeconds", Interest_Interval);
         Interest_Min_Interval = config.getDouble("System.Interest.MinimumPerInterval", Interest_Min_Interval);
         Interest_Max_Interval = config.getDouble("System.Interest.MaximumPerInterval", Interest_Max_Interval);
@@ -98,7 +101,7 @@ public class Constants {
 
             for(String node : nodes) {
                 if(config.getProperty(node.split(":")[0]) == null) {
-                    System.out.println("    - "+ node.split(":")[0] +" is null, Defaulting to: " + node.split(":")[1]);
+                    System.out.println("    - "+ node.split(":")[0] +" is null or missing, Defaulting to: " + node.split(":")[1]);
                 }
             }
 

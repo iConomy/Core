@@ -15,6 +15,10 @@ System:
         Enabled: false
         # How many seconds for this to happen
         IntervalSeconds: 60
+        # Leave this at 0.0 if you wish to use Min/Max!
+        # Otherwise, this will over-ride that.
+        # This is the DIRECT amount, it's not dynamic and will not change.
+        FlatRate: 0.0
         # How much minimum money do they get per interval
         MinimumPerInterval: 1
         # How much maximum money do they get per interval
