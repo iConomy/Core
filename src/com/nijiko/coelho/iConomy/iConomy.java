@@ -100,7 +100,7 @@ public class iConomy extends JavaPlugin {
             iDatabase = new iDatabase();
         } catch (Exception e) {
             Server.getPluginManager().disablePlugin(this);
-            System.out.println("[iConomy] Failed to connect to database: " + e.getMessage());
+            System.out.println("[iConomy] Failed to connect to database: " + e);
             return;
         }
 
@@ -110,7 +110,7 @@ public class iConomy extends JavaPlugin {
             Transactions.load();
         } catch (Exception e) {
             Server.getPluginManager().disablePlugin(this);
-            System.out.println("[iConomy] Could not load transaction logger: " + e.getMessage());
+            System.out.println("[iConomy] Could not load transaction logger: " + e);
         }
 
         // Check version details before the system loads
@@ -122,7 +122,7 @@ public class iConomy extends JavaPlugin {
             Bank.load();
         } catch (Exception e) {
             Server.getPluginManager().disablePlugin(this);
-            System.out.println("[iConomy] Failed to load accounts from database: " + e.getMessage());
+            System.out.println("[iConomy] Failed to load accounts from database: " + e);
             return;
         }
 
@@ -134,7 +134,7 @@ public class iConomy extends JavaPlugin {
             }
         } catch (Exception e) {
             Server.getPluginManager().disablePlugin(this);
-            System.out.println("[iConomy] Failed to start interest system: " + e.getMessage());
+            System.out.println("[iConomy] Failed to start interest system: " + e);
             return;
         }
 
@@ -154,20 +154,24 @@ public class iConomy extends JavaPlugin {
     @Override
     public void onDisable() {
         try {
-            for (String account_name : Bank.getAccounts().keySet()) {
-                Account account = Bank.getAccount(account_name);
+            if(Bank != null) {
+                if(Bank.getAccounts() != null) {
+                    for (String account_name : Bank.getAccounts().keySet()) {
+                        Account account = Bank.getAccount(account_name);
 
-                // Only save unsaved data.
-                if(account.isAltered()) {
-                    account.save();
+                        // Only save unsaved data.
+                        if(account.isAltered()) {
+                            account.save();
+                        }
+                    }
                 }
             }
 
             iDatabase.getConnection().close();
 
-            System.out.println("[iConomy] Saved accounts and has been disabled.");
-        } catch (Exception e) {
-            System.out.println("[iConomy] Failed to save accounts and has been disabled.");
+            System.out.println("[iConomy] All un-saved account data has been saved, plugin is now disabling.");
+        } catch (SQLException e) {
+            System.out.println("[iConomy] An error occured upon disabling: " + e);
         } finally {
             if (Interest_Timer != null) {
                 Interest_Timer.cancel();
@@ -191,14 +195,17 @@ public class iConomy extends JavaPlugin {
                 Player player = (Player) sender;
                 String[] split = new String[args.length + 1];
                 split[0] = cmd.getName().toLowerCase();
+
                 for (int i = 0; i < args.length; i++) {
                     split[i + 1] = args[i];
                 }
+
                 playerListener.onPlayerCommand(player, split);
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
+
         return false;
     }
 
@@ -209,51 +216,53 @@ public class iConomy extends JavaPlugin {
             try {
                 double current = Double.parseDouble(file.getSource());
 
-                if (current != version) {
-                    if (!Constants.Database_Type.equalsIgnoreCase("flatfile")) {
-                        String[] SQL = {};
-
-                        String[] MySQL = {
-                            "RENAME TABLE ibalances TO " + Constants.SQL_Table + ";",
-                            "ALTER TABLE " + Constants.SQL_Table + " CHANGE  player  username TEXT NOT NULL, CHANGE balance balance DECIMAL(65, 2) NOT NULL;"
-                        };
-
-                        String[] SQLite = {
-                            "CREATE TABLE '" + Constants.SQL_Table + "' ('id' INT ( 10 ) PRIMARY KEY , 'username' TEXT , 'balance' DECIMAL ( 65 , 2 ));",
-                            "INSERT INTO " + Constants.SQL_Table + "(id, username, balance) SELECT id, player, balance FROM ibalances;",
-                            "DROP TABLE ibalances;"
-                        };
-
-                        try {
-                            DatabaseMetaData dbm = iDatabase.getConnection().getMetaData();
-                            ResultSet rs = dbm.getTables(null, null, "ibalances", null);
-
-                            if (rs.next()) {
-                                System.out.println(" - Updating " + Constants.Database_Type + " Database for latest iConomy");
-
-                                int i = 1;
-                                SQL = (Constants.Database_Type.equalsIgnoreCase("mysql")) ? MySQL : SQLite;
-
-                                for (String Query : SQL) {
-                                    iDatabase.executeQuery(Query);
-
-                                    System.out.println("   Executing SQL Query #" + i + " of " + (SQL.length));
-                                    ++i;
-                                }
-
-                                System.out.println(" + Database Update Complete.");
-                            }
-                            file.write(version);
-                        } catch (SQLException e) {
-                            System.out.println("[iConomy] Error updating database: " + e);
-                        }
-                    }
+                if(current != version) {
+                    file.write(version);
                 }
             } catch (Exception e) {
                 System.out.println("[iConomy] Invalid version file, deleting to be re-created on next load.");
                 file.delete();
             }
         } else {
+            if (!Constants.Database_Type.equalsIgnoreCase("flatfile")) {
+                String[] SQL = {};
+
+                String[] MySQL = {
+                    "RENAME TABLE ibalances TO " + Constants.SQL_Table + ";",
+                    "ALTER TABLE " + Constants.SQL_Table + " CHANGE  player  username TEXT NOT NULL, CHANGE balance balance DECIMAL(65, 2) NOT NULL;"
+                };
+
+                String[] SQLite = {
+                    "CREATE TABLE '" + Constants.SQL_Table + "' ('id' INT ( 10 ) PRIMARY KEY , 'username' TEXT , 'balance' DECIMAL ( 65 , 2 ));",
+                    "INSERT INTO " + Constants.SQL_Table + "(id, username, balance) SELECT id, player, balance FROM ibalances;",
+                    "DROP TABLE ibalances;"
+                };
+
+                try {
+                    DatabaseMetaData dbm = iDatabase.getConnection().getMetaData();
+                    ResultSet rs = dbm.getTables(null, null, "ibalances", null);
+
+                    if (rs.next()) {
+                        System.out.println(" - Updating " + Constants.Database_Type + " Database for latest iConomy");
+
+                        int i = 1;
+                        SQL = (Constants.Database_Type.equalsIgnoreCase("mysql")) ? MySQL : SQLite;
+
+                        for (String Query : SQL) {
+                            iDatabase.executeQuery(Query);
+
+                            System.out.println("   Executing SQL Query #" + i + " of " + (SQL.length));
+                            ++i;
+                        }
+
+                        System.out.println(" + Database Update Complete.");
+                    }
+                    file.write(version);
+                } catch (SQLException e) {
+                    System.out.println("[iConomy] Error updating database: " + e);
+                }
+            }
+
             file.create();
             file.write(version);
         }
