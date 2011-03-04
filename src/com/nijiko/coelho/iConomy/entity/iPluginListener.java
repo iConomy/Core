@@ -19,8 +19,11 @@ import org.bukkit.plugin.Plugin;
  *
  * @author Nijikokun
  */
+
 public class iPluginListener extends ServerListener {
-    public iPluginListener() { }
+    public iPluginListener() { 
+    	
+    }
 
     @Override
     public void onPluginEnabled(PluginEvent event) {
