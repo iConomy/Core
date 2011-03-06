@@ -246,11 +246,13 @@ public class iConomy extends JavaPlugin {
                 String[] SQL = {};
 
                 String[] MySQL = {
+                    "DROP TABLE " + Constants.SQL_Table + ";",
                     "RENAME TABLE ibalances TO " + Constants.SQL_Table + ";",
                     "ALTER TABLE " + Constants.SQL_Table + " CHANGE  player  username TEXT NOT NULL, CHANGE balance balance DECIMAL(65, 2) NOT NULL;"
                 };
 
                 String[] SQLite = {
+                    "DROP TABLE " + Constants.SQL_Table + ";",
                     "CREATE TABLE '" + Constants.SQL_Table + "' ('id' INT ( 10 ) PRIMARY KEY , 'username' TEXT , 'balance' DECIMAL ( 65 , 2 ));",
                     "INSERT INTO " + Constants.SQL_Table + "(id, username, balance) SELECT id, player, balance FROM ibalances;",
                     "DROP TABLE ibalances;"
