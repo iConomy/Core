@@ -30,6 +30,9 @@ public class Constants {
     // Files and Directories
     public static File Configuration;
     public static String Plugin_Directory;
+    public static String SQLite_Jar_Location = "http://mirror.anigaiku.com/Dependencies/sqlitejdbc-v056.jar";
+    public static String MySQL_Jar_Location = "http://mirror.anigaiku.com/Dependencies/mysql-connector-java-bin.jar";
+
 
     // System Data
     public static String Currency = "Coin";

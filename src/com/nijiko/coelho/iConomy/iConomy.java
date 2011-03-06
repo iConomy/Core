@@ -29,6 +29,7 @@ import com.nijiko.coelho.iConomy.system.Bank;
 import com.nijiko.coelho.iConomy.system.Interest;
 import com.nijiko.coelho.iConomy.util.Constants;
 import com.nijiko.coelho.iConomy.system.Transactions;
+import com.nijiko.coelho.iConomy.util.Downloader;
 import com.nijiko.coelho.iConomy.util.FileManager;
 import com.nijiko.permissions.PermissionHandler;
 
@@ -68,7 +69,12 @@ public class iConomy extends JavaPlugin {
         // Get the server
         Server = getServer();
 
-        // Directory
+        // Lib Directory
+        (new File("lib" + File.separator)).mkdir();
+        (new File("lib" + File.separator)).setWritable(true);
+        (new File("lib" + File.separator)).setExecutable(true);
+
+        // Plugin Directory
         getDataFolder().mkdir();
         getDataFolder().setWritable(true);
         getDataFolder().setExecutable(true);
@@ -84,6 +90,17 @@ public class iConomy extends JavaPlugin {
         // Default Files
         extractDefaultFile("iConomy.yml");
         extractDefaultFile("Messages.yml");
+
+        // Check Dependencies
+        if(Constants.Database_Type.equalsIgnoreCase("sqlite")) {
+            if(!(new File("lib" + File.separator, "sqlitejdbc-v056.jar").exists())) {
+                Downloader.install(Constants.SQLite_Jar_Location, "sqlitejdbc-v056.jar");
+            }
+        } else {
+            if(!(new File("lib" + File.separator, "mysql-connector-java-bin.jar").exists())) {
+                Downloader.install(Constants.SQLite_Jar_Location, "mysql-connector-java-bin.jar");
+            }
+        }
 
         // Configuration
         try {
