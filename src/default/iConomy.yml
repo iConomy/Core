@@ -26,6 +26,10 @@ System:
     Database:
         # Can be MySQL, or SQLite
         Type: SQLite
+        # Should balances be cached and saved when requested (true)
+        # Or do you wish for it to be constantly grabbing the balance
+        # from the database (false)
+        Cache: true
         # Name of the database
         Name: minecraft
         # Table, Flatfile uses this as the file name.
