@@ -98,7 +98,7 @@ public class iConomy extends JavaPlugin {
             }
         } else {
             if(!(new File("lib" + File.separator, "mysql-connector-java-bin.jar").exists())) {
-                Downloader.install(Constants.SQLite_Jar_Location, "mysql-connector-java-bin.jar");
+                Downloader.install(Constants.MySQL_Jar_Location, "mysql-connector-java-bin.jar");
             }
         }
 
@@ -116,9 +116,10 @@ public class iConomy extends JavaPlugin {
         try {
             iDatabase = new iDatabase();
         } catch (Exception e) {
-            Server.getPluginManager().disablePlugin(this);
             System.out.println("[iConomy] Failed to connect to database: " + e);
+            Server.getPluginManager().disablePlugin(this);
             return;
+
         }
 
         // File Logger
@@ -126,8 +127,8 @@ public class iConomy extends JavaPlugin {
             Transactions = new Transactions();
             Transactions.load();
         } catch (Exception e) {
-            Server.getPluginManager().disablePlugin(this);
             System.out.println("[iConomy] Could not load transaction logger: " + e);
+            Server.getPluginManager().disablePlugin(this);
         }
 
         // Check version details before the system loads
@@ -138,8 +139,8 @@ public class iConomy extends JavaPlugin {
             Bank = new Bank();
             Bank.load();
         } catch (Exception e) {
-            Server.getPluginManager().disablePlugin(this);
             System.out.println("[iConomy] Failed to load accounts from database: " + e);
+            Server.getPluginManager().disablePlugin(this);
             return;
         }
 
@@ -357,6 +358,8 @@ public class iConomy extends JavaPlugin {
     }
 
     public static boolean hasPermissions(Player p, String s) {
+        System.out.println("Permissions: " + (Permissions == null) + Permissions.permission(p, s));
+        
         if (Permissions != null) {
             return Permissions.permission(p, s);
         } else {
@@ -364,13 +367,8 @@ public class iConomy extends JavaPlugin {
         }
     }
 
-    public static boolean setPermissions(PermissionHandler ph) {
-        if (Permissions == null) {
-            Permissions = ph;
-        } else {
-            return false;
-        }
-        return true;
+    public static void setPermissions(PermissionHandler ph) {
+        Permissions = ph;
     }
 
     public static Server getBukkitServer() {

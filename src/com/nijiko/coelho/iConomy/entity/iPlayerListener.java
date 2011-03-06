@@ -52,8 +52,7 @@ public class iPlayerListener extends PlayerListener {
         if (iConomy.hasPermissions(player, "iConomy.rank")) {
             Messaging.send("&f/money rank (player) &6-&e Rank on the topcharts.   ");
         }
-
-
+        
         if (iConomy.hasPermissions(player, "iConomy.list")) {
             Messaging.send("&f/money top (amount) &6-&e Richest players listing.  ");
         }
