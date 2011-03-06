@@ -6,7 +6,7 @@ import org.bukkit.util.config.Configuration;
 
 public class Constants {
     // Code name
-    public static final String Codename = "Lind";
+    public static final String Codename = "Arcadia";
 
     // Nodes
     private static String[] nodes = new String[] {
