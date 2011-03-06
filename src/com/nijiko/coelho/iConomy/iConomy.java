@@ -358,8 +358,6 @@ public class iConomy extends JavaPlugin {
     }
 
     public static boolean hasPermissions(Player p, String s) {
-        System.out.println("Permissions: " + (Permissions == null) + Permissions.permission(p, s));
-        
         if (Permissions != null) {
             return Permissions.permission(p, s);
         } else {
