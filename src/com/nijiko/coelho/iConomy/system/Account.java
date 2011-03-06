@@ -20,11 +20,11 @@ public class Account {
     }
 
     public boolean exists() {
-        return exists;
+        return this.exists;
     }
 
     public boolean isAltered() {
-        return altered;
+        return this.altered;
     }
 
     private void setExists(boolean exists) {
