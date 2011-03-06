@@ -48,27 +48,34 @@ public class iPlayerListener extends PlayerListener {
         Messaging.send("&e----------------------------------------------------");
         Messaging.send("&f/money &6-&e Check your balance                     ");
         Messaging.send("&f/money ? &6-&e For help & Information               ");
-        Messaging.send("&f/money rank (player) &6-&e Rank on the topcharts.   ");
-        Messaging.send("&f/money top (amount) &6-&e Richest players listing.  ");
 
-        if (!iConomy.hasPermissions(player, "iConomy.payment")) {
+        if (iConomy.hasPermissions(player, "iConomy.rank")) {
+            Messaging.send("&f/money rank (player) &6-&e Rank on the topcharts.   ");
+        }
+
+
+        if (iConomy.hasPermissions(player, "iConomy.list")) {
+            Messaging.send("&f/money top (amount) &6-&e Richest players listing.  ");
+        }
+
+        if (iConomy.hasPermissions(player, "iConomy.payment")) {
             Messaging.send("&f/money pay [player] [amount] &6-&e Send money to a player.");
         }
 
-        if (!iConomy.hasPermissions(player, "iConomy.admin.grant")) {
+        if (iConomy.hasPermissions(player, "iConomy.admin.grant")) {
             Messaging.send("&f/money grant [player] [amount] &6-&e Give money.");
             Messaging.send("&f/money grant [player] -[amount] &6-&e Take money.");
         }
 
-        if (!iConomy.hasPermissions(player, "iConomy.admin.set")) {
+        if (iConomy.hasPermissions(player, "iConomy.admin.set")) {
             Messaging.send("&f/money set [player] [amount] &6-&e Sets a players balance.");
         }
 
-        if (!iConomy.hasPermissions(player, "iConomy.admin.reset")) {
+        if (iConomy.hasPermissions(player, "iConomy.admin.reset")) {
             Messaging.send("&f/money reset [player] &6-&e Reset player account.");
         }
 
-        if (!iConomy.hasPermissions(player, "iConomy.admin.stats")) {
+        if (iConomy.hasPermissions(player, "iConomy.admin.stats")) {
             Messaging.send("&f/money stats  &6-&e Check all economic stats.");
         }
 
