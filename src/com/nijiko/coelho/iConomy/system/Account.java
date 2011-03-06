@@ -40,12 +40,54 @@ public class Account {
     }
 
     public double getBalance() {
-        return this.balance;
+        if(Constants.Database_Cache) {
+            return this.balance;
+        }
+
+        try {
+            ResultSet rs = iConomy.getDatabase().resultQuery(
+                    "SELECT balance FROM `" + Constants.SQL_Table + "` WHERE username = ?",
+                    new Object[]{ this.name }
+            );
+            
+            if (rs.next()) {
+                return rs.getDouble("balance");
+            }
+        } catch (Exception e) {
+            System.out.println("[iConomy] Failed to grab player balance: " + e);
+        }
+
+        return 0.0;
     }
 
     public void setBalance(double balance) {
-        this.balance = balance;
-        this.setAltered(true);
+        if(Constants.Database_Cache) {
+            this.balance = balance;
+            this.setAltered(true);
+        }
+
+        try {
+            ResultSet rs = iConomy.getDatabase().resultQuery(
+                    "SELECT * FROM `" + Constants.SQL_Table + "` WHERE username = ?",
+                    new Object[]{ this.name }
+            );
+
+            if (!rs.next()) {
+                iConomy.getDatabase().executeQuery(
+                        "INSERT INTO `" + Constants.SQL_Table + "`(username, balance) VALUES (?, ?)",
+                        new Object[]{ this.name, balance }
+                );
+
+                this.setExists(true);
+            } else {
+                iConomy.getDatabase().executeQuery(
+                        "UPDATE `" + Constants.SQL_Table + "` SET balance = ? WHERE username = ?",
+                        new Object[]{ balance, this.name }
+                );
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void resetBalance() {
@@ -55,35 +97,51 @@ public class Account {
     }
 
     public boolean hasEnough(double amount) {
-        return amount <= this.balance;
+        return amount <= this.getBalance();
     }
 
     public boolean hasOver(double amount) {
-        return amount < this.balance;
+        return amount < this.getBalance();
     }
 
     public boolean isNegative() {
-        return this.balance < 0.0;
+        return this.getBalance() < 0.0;
     }
 
     public void add(double amount) {
-        this.balance = this.balance + amount;
-        this.setAltered(true);
+        if(Constants.Database_Cache) {
+            this.balance = this.balance + amount;
+            this.setAltered(true);
+        }
+
+        this.setBalance(this.getBalance() + amount);
     }
 
     public void multiply(double amount) {
-        this.balance = this.balance * amount;
-        this.setAltered(true);
+        if(Constants.Database_Cache) {
+            this.balance = this.balance * amount;
+            this.setAltered(true);
+        }
+
+        this.setBalance(this.getBalance() * amount);
     }
 
     public void divide(double amount) {
-        this.balance = this.balance / amount;
-        this.setAltered(true);
+        if(Constants.Database_Cache) {
+            this.balance = this.balance / amount;
+            this.setAltered(true);
+        }
+
+        this.setBalance(this.getBalance() / amount);
     }
 
     public void subtract(double amount) {
-        this.balance = this.balance - amount;
-        this.setAltered(true);
+        if(Constants.Database_Cache) {
+            this.balance = this.balance - amount;
+            this.setAltered(true);
+        }
+
+        this.setBalance(this.getBalance() / amount);
     }
 
     public void remove() {
@@ -106,36 +164,38 @@ public class Account {
     }
 
     public void save() {
-        try {
-            ResultSet rs = iConomy.getDatabase().resultQuery(
-                    "SELECT * FROM `" + Constants.SQL_Table + "` WHERE username = ?",
-                    new Object[]{ this.name }
-            );
-
-            if (!rs.next()) {
-                iConomy.getDatabase().executeQuery(
-                        "INSERT INTO `" + Constants.SQL_Table + "`(username, balance) VALUES (?, ?)",
-                        new Object[]{ this.name, this.balance }
+        if(Constants.Database_Cache) {
+            try {
+                ResultSet rs = iConomy.getDatabase().resultQuery(
+                        "SELECT * FROM `" + Constants.SQL_Table + "` WHERE username = ?",
+                        new Object[]{ this.name }
                 );
 
-                this.setExists(true);
-            } else {
-                iConomy.getDatabase().executeQuery(
-                        "UPDATE `" + Constants.SQL_Table + "` SET balance = ? WHERE username = ?",
-                        new Object[]{ this.balance, this.name }
-                );
+                if (!rs.next()) {
+                    iConomy.getDatabase().executeQuery(
+                            "INSERT INTO `" + Constants.SQL_Table + "`(username, balance) VALUES (?, ?)",
+                            new Object[]{ this.name, this.balance }
+                    );
+
+                    this.setExists(true);
+                } else {
+                    iConomy.getDatabase().executeQuery(
+                            "UPDATE `" + Constants.SQL_Table + "` SET balance = ? WHERE username = ?",
+                            new Object[]{ this.balance, this.name }
+                    );
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
 
-        this.setAltered(false);
+            this.setAltered(false);
+        }
     }
 
     @Override
     public String toString() {
         DecimalFormat formatter = new DecimalFormat("#,##0.##");
-        String formatted = formatter.format(this.balance);
+        String formatted = formatter.format(this.getBalance());
 
         if (formatted.endsWith(".")) {
             formatted = formatted.substring(0, formatted.length() - 1);
