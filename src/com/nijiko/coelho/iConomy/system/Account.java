@@ -64,6 +64,7 @@ public class Account {
         if(Constants.Database_Cache) {
             this.balance = balance;
             this.setAltered(true);
+            return;
         }
 
         try {
@@ -112,6 +113,7 @@ public class Account {
         if(Constants.Database_Cache) {
             this.balance = this.balance + amount;
             this.setAltered(true);
+            return;
         }
 
         this.setBalance(this.getBalance() + amount);
@@ -121,6 +123,7 @@ public class Account {
         if(Constants.Database_Cache) {
             this.balance = this.balance * amount;
             this.setAltered(true);
+            return;
         }
 
         this.setBalance(this.getBalance() * amount);
@@ -130,6 +133,7 @@ public class Account {
         if(Constants.Database_Cache) {
             this.balance = this.balance / amount;
             this.setAltered(true);
+            return;
         }
 
         this.setBalance(this.getBalance() / amount);
@@ -139,6 +143,7 @@ public class Account {
         if(Constants.Database_Cache) {
             this.balance = this.balance - amount;
             this.setAltered(true);
+            return;
         }
 
         this.setBalance(this.getBalance() / amount);
