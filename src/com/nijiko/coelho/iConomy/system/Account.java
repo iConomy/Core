@@ -146,7 +146,7 @@ public class Account {
             return;
         }
 
-        this.setBalance(this.getBalance() / amount);
+        this.setBalance(this.getBalance() - amount);
     }
 
     public void remove() {
