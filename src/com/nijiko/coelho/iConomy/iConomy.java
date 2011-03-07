@@ -172,22 +172,26 @@ public class iConomy extends JavaPlugin {
     @Override
     public void onDisable() {
         try {
-            if(Bank != null) {
-                if(Bank.getAccounts() != null) {
-                    for (String account_name : Bank.getAccounts().keySet()) {
-                        Account account = Bank.getAccount(account_name);
+            if(iDatabase != null) {
+                if(Bank != null) {
+                    if(Bank.getAccounts() != null) {
+                        for (String account_name : Bank.getAccounts().keySet()) {
+                            Account account = Bank.getAccount(account_name);
 
-                        // Only save unsaved data.
-                        if(account.isAltered()) {
-                            account.save();
+                            // Only save unsaved data.
+                            if(account.isAltered()) {
+                                account.save();
+                            }
                         }
                     }
                 }
+
+                iDatabase.getConnection().close();
+
+                System.out.println("[iConomy] All un-saved account data has been saved, plugin is now disabling.");
+            } else {
+                System.out.println("[iConomy] Plugin disabled.");
             }
-
-            iDatabase.getConnection().close();
-
-            System.out.println("[iConomy] All un-saved account data has been saved, plugin is now disabling.");
         } catch (SQLException e) {
             System.out.println("[iConomy] An error occured upon disabling: " + e);
         } finally {
