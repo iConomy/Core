@@ -17,12 +17,13 @@ import org.bukkit.event.Event;
 import org.bukkit.Server;
 import org.bukkit.event.Event.Priority;
 import org.bukkit.plugin.PluginDescriptionFile;
-import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.config.Configuration;
+import org.bukkit.event.server.PluginEvent;
+import org.bukkit.event.server.ServerListener;
+import org.bukkit.plugin.Plugin;
 
-import com.nijiko.coelho.iConomy.entity.iPlayerListener;
-import com.nijiko.coelho.iConomy.entity.iPluginListener;
+import com.nijiko.coelho.iConomy.entity.PListener;
 import com.nijiko.coelho.iConomy.net.iDatabase;
 import com.nijiko.coelho.iConomy.system.Account;
 import com.nijiko.coelho.iConomy.system.Bank;
@@ -32,6 +33,7 @@ import com.nijiko.coelho.iConomy.system.Transactions;
 import com.nijiko.coelho.iConomy.util.Downloader;
 import com.nijiko.coelho.iConomy.util.FileManager;
 import com.nijiko.permissions.PermissionHandler;
+import com.nijikokun.bukkit.Permissions.Permissions;
 
 /**
  * iConomy by Team iCo
@@ -60,8 +62,7 @@ public class iConomy extends JavaPlugin {
     private static iDatabase iDatabase = null;
     private static Transactions Transactions = null;
     private static PermissionHandler Permissions = null;
-    private static iPlayerListener playerListener = null;
-    private static iPluginListener pluginListener = null;
+    private static PListener playerListener = null;
     private static Timer Interest_Timer = null;
 
     @Override
@@ -81,7 +82,6 @@ public class iConomy extends JavaPlugin {
         Constants.Plugin_Directory = getDataFolder().getPath();
 
         // Grab plugin details
-        PluginManager pm = Server.getPluginManager();
         PluginDescriptionFile pdfFile = this.getDescription();
 
         // Versioning File
@@ -91,17 +91,6 @@ public class iConomy extends JavaPlugin {
         extractDefaultFile("iConomy.yml");
         extractDefaultFile("Messages.yml");
 
-        // Check Dependencies
-        if(Constants.Database_Type.equalsIgnoreCase("sqlite")) {
-            if(!(new File("lib" + File.separator, "sqlitejdbc-v056.jar").exists())) {
-                Downloader.install(Constants.SQLite_Jar_Location, "sqlitejdbc-v056.jar");
-            }
-        } else {
-            if(!(new File("lib" + File.separator, "mysql-connector-java-bin.jar").exists())) {
-                Downloader.install(Constants.MySQL_Jar_Location, "mysql-connector-java-bin.jar");
-            }
-        }
-
         // Configuration
         try {
             Constants.load(new Configuration(new File(getDataFolder(), "iConomy.yml")));
@@ -110,6 +99,16 @@ public class iConomy extends JavaPlugin {
             System.out.println("[iConomy] Failed to retrieve configuration from directory.");
             System.out.println("[iConomy] Please back up your current settings and let iConomy recreate it.");
             return;
+        }
+
+        if(Constants.Database_Type.equalsIgnoreCase("sqlite")) {
+            if(!(new File("lib" + File.separator, "sqlitejdbc-v056.jar").exists())) {
+                Downloader.install(Constants.SQLite_Jar_Location, "sqlitejdbc-v056.jar");
+            }
+        } else {
+            if(!(new File("lib" + File.separator, "mysql-connector-java-bin.jar").exists())) {
+                Downloader.install(Constants.MySQL_Jar_Location, "mysql-connector-java-bin.jar");
+            }
         }
 
         // Load the database
@@ -157,12 +156,11 @@ public class iConomy extends JavaPlugin {
         }
 
         // Initializing Listeners
-        pluginListener = new iPluginListener();
-        playerListener = new iPlayerListener(getDataFolder().getPath());
+        playerListener = new PListener(getDataFolder().getPath());
 
         // Event Registration
-        pm.registerEvent(Event.Type.PLAYER_JOIN, playerListener, Priority.Normal, this);
-        pm.registerEvent(Event.Type.PLUGIN_ENABLE, pluginListener, Priority.Monitor, this);
+        getServer().getPluginManager().registerEvent(Event.Type.PLAYER_JOIN, playerListener, Priority.Normal, this);
+        getServer().getPluginManager().registerEvent(Event.Type.PLUGIN_ENABLE, new Listener(this), Priority.Monitor, this);
 
         // Console Detail
         System.out.println("[iConomy] v" + pdfFile.getVersion() + " (" + Constants.Codename + ") loaded.");
@@ -205,7 +203,6 @@ public class iConomy extends JavaPlugin {
             Permissions = null;
             Transactions = null;
             playerListener = null;
-            pluginListener = null;
             Interest_Timer = null;
         }
     }
@@ -316,14 +313,12 @@ public class iConomy extends JavaPlugin {
                         if (input != null) {
                             input.close();
                         }
-                    } catch (Exception e) {
-                    }
+                    } catch (Exception e) { }
                     try {
                         if (output != null) {
                             output.close();
                         }
-                    } catch (Exception e) {
-                    }
+                    } catch (Exception e) { }
                 }
             }
         }
@@ -377,5 +372,28 @@ public class iConomy extends JavaPlugin {
 
     public static Server getBukkitServer() {
         return Server;
+    }
+
+    private class Listener extends ServerListener {
+
+        private iConomy plugin;
+
+        public Listener(iConomy thisPlugin) {
+            this.plugin = thisPlugin;
+        }
+
+        @Override
+        public void onPluginEnabled(PluginEvent event) {
+            if (plugin.Permissions == null) {
+                Plugin Permissions = plugin.getServer().getPluginManager().getPlugin("Permissions");
+
+                if (Permissions != null) {
+                    if (Permissions.isEnabled()) {
+                        plugin.Permissions = (((Permissions)Permissions).getHandler());
+                        System.out.println("[iConomy] hooked into Permissions.");
+                    }
+                }
+            }
+        }
     }
 }
