@@ -7,11 +7,11 @@ System:
     Currency: Coin
     # The initial balance a player logs on with
     Initial_Balance: 30.0
+    # Should we log transactions?
     Logging:
-        # Should we log transactions?
         Enabled: false
+    # Should we use this system?
     Interest:
-        # Should we use this system?
         Enabled: false
         # How many seconds for this to happen
         IntervalSeconds: 60
@@ -32,14 +32,14 @@ System:
         Cache: true
         # Name of the database
         Name: minecraft
-        # Table, Flatfile uses this as the file name.
+        # Table name
         Table: iConomy
         MySQL:
             # MySQL Login Username
-            Username: root
+            Username: 'root'
             # MySQL Login Password
-            Password: pass
+            Password: 'pass'
             # MySQL Connection Hostname (IP)
-            Hostname: localhost
+            Hostname: 'localhost'
             # MySQL Connection Port Number
             Port: 3306
