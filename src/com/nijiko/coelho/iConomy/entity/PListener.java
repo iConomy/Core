@@ -20,7 +20,7 @@ import org.bukkit.event.player.PlayerListener;
  *
  * @author Nijikokun
  */
-public class iPlayerListener extends PlayerListener {
+public class PListener extends PlayerListener {
 
     private Template Template = null;
 
@@ -30,7 +30,7 @@ public class iPlayerListener extends PlayerListener {
      *
      * @param directory
      */
-    public iPlayerListener(String directory) {
+    public PListener(String directory) {
         Template = new Template(directory, "Messages.yml");
     }
 
@@ -386,7 +386,7 @@ public class iPlayerListener extends PlayerListener {
 
                 case 2:
 
-                    if (Misc.isAny(split[1], new String[]{"rank", "-r"})) {
+                    if (Misc.is(split[1], new String[]{ "rank", "-r" })) {
                         if (!iConomy.hasPermissions(player, "iConomy.rank")) {
                             return;
                         }
@@ -395,7 +395,7 @@ public class iPlayerListener extends PlayerListener {
                         return;
                     }
 
-                    if (Misc.isAny(split[1], new String[]{"top", "-t"})) {
+                    if (Misc.is(split[1], new String[]{ "top", "-t" })) {
                         if (!iConomy.hasPermissions(player, "iConomy.list")) {
                             return;
                         }
@@ -404,7 +404,7 @@ public class iPlayerListener extends PlayerListener {
                         return;
                     }
 
-                    if (Misc.isAny(split[1], new String[]{"stats", "-s"})) {
+                    if (Misc.is(split[1], new String[]{ "stats", "-s" })) {
                         if (!iConomy.hasPermissions(player, "iConomy.admin.stats")) {
                             return;
                         }
@@ -437,7 +437,7 @@ public class iPlayerListener extends PlayerListener {
                         return;
                     }
 
-                    if (Misc.isAny(split[1], new String[]{"help", "?", "grant", "-g", "reset", "-x", "set", "-s", "pay", "-p"})) {
+                    if (Misc.is(split[1], new String[]{ "help", "?", "grant", "-g", "reset", "-x", "set", "-s", "pay", "-p" })) {
                         showHelp(player); return;
                     } else {
                         if (!iConomy.hasPermissions(player, "iConomy.access")) {
@@ -455,7 +455,7 @@ public class iPlayerListener extends PlayerListener {
 
                 case 3:
 
-                    if (Misc.isAny(split[1], new String[]{"rank", "-r"})) {
+                    if (Misc.is(split[1], new String[]{"rank", "-r"})) {
                         if (!iConomy.hasPermissions(player, "iConomy.rank")) {
                             return;
                         }
@@ -469,7 +469,7 @@ public class iPlayerListener extends PlayerListener {
                         return;
                     }
 
-                    if (Misc.isAny(split[1], new String[]{"top", "-t"})) {
+                    if (Misc.is(split[1], new String[]{"top", "-t"})) {
                         if (!iConomy.hasPermissions(player, "iConomy.list")) {
                             return;
                         }
@@ -483,7 +483,7 @@ public class iPlayerListener extends PlayerListener {
                         return;
                     }
 
-                    if (Misc.isAny(split[1], new String[]{"reset", "-x"})) {
+                    if (Misc.is(split[1], new String[]{"reset", "-x"})) {
                         if (!iConomy.hasPermissions(player, "iConomy.admin.reset")) {
                             return;
                         }
@@ -501,7 +501,7 @@ public class iPlayerListener extends PlayerListener {
 
                 case 4:
 
-                    if (Misc.isAny(split[1], new String[]{"pay", "-p"})) {
+                    if (Misc.is(split[1], new String[]{"pay", "-p"})) {
                         if (!iConomy.hasPermissions(player, "iConomy.payment")) {
                             return;
                         }
@@ -532,7 +532,7 @@ public class iPlayerListener extends PlayerListener {
                         return;
                     }
 
-                    if (Misc.isAny(split[1], new String[]{"grant", "-g"})) {
+                    if (Misc.is(split[1], new String[]{"grant", "-g"})) {
                         if (!iConomy.hasPermissions(player, "iConomy.admin.grant")) {
                             return;
                         }
@@ -557,7 +557,7 @@ public class iPlayerListener extends PlayerListener {
                         return;
                     }
 
-                    if (Misc.isAny(split[1], new String[]{"set", "-s"})) {
+                    if (Misc.is(split[1], new String[]{"set", "-s"})) {
                         if (!iConomy.hasPermissions(player, "iConomy.admin.set")) {
                             return;
                         }
