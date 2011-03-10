@@ -21,16 +21,6 @@ import com.nijiko.coelho.iConomy.iConomy;
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-/**
- * Messaging.java
- * <br /><br />
- * Let's us create an easier messaging format for any type of
- * user that bukkit will allow us to send messages to as well as
- * easily add colors or other effects that we might need without
- * extra coding in main classes.
- *
- * @author Nijikokun <nijikokun@gmail.com>
- */
 public class Messaging {
 
     private static CommandSender sender = null;
