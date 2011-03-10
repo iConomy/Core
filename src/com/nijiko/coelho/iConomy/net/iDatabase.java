@@ -35,9 +35,11 @@ public class iDatabase {
     public ResultSet resultQuery(String sql, Object[] parameters) {
         try {
             PreparedStatement ps = this.Connection.prepareStatement(sql);
+
             for (int i = 0; i < parameters.length; i++) {
                 ps.setString(i + 1, parameters[i].toString());
             }
+
             return ps.executeQuery();
         } catch (Exception e) {
             e.printStackTrace();
