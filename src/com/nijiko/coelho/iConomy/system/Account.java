@@ -9,13 +9,11 @@ import com.nijiko.coelho.iConomy.util.Constants;
 public class Account {
 
     private String name;
-    private double balance;
     private boolean altered = false;
     private boolean exists = false;
 
-    public Account(String name, double balance) {
+    public Account(String name) {
         this.name = name;
-        this.balance = balance;
         this.exists = true;
     }
 
@@ -40,14 +38,10 @@ public class Account {
     }
 
     public double getBalance() {
-        if(Constants.Database_Cache) {
-            return this.balance;
-        }
-
         try {
             ResultSet rs = iConomy.getDatabase().resultQuery(
-                    "SELECT balance FROM `" + Constants.SQL_Table + "` WHERE username = ?",
-                    new Object[]{ this.name }
+                "SELECT balance FROM " + Constants.SQL_Table + " WHERE username = ?",
+                new Object[]{ this.name }
             );
             
             if (rs.next()) {
@@ -57,44 +51,38 @@ public class Account {
             System.out.println("[iConomy] Failed to grab player balance: " + e);
         }
 
-        return 0.0;
+        return Constants.Initial_Balance;
     }
 
     public void setBalance(double balance) {
-        if(Constants.Database_Cache) {
-            this.balance = balance;
-            this.setAltered(true);
-            return;
-        }
-
         try {
             ResultSet rs = iConomy.getDatabase().resultQuery(
-                    "SELECT * FROM `" + Constants.SQL_Table + "` WHERE username = ?",
-                    new Object[]{ this.name }
+                "SELECT * FROM " + Constants.SQL_Table + " WHERE username = ?",
+                new Object[]{ this.name }
             );
 
             if (!rs.next()) {
                 iConomy.getDatabase().executeQuery(
-                        "INSERT INTO `" + Constants.SQL_Table + "`(username, balance) VALUES (?, ?)",
-                        new Object[]{ this.name, balance }
+                    "INSERT INTO " + Constants.SQL_Table + "(username, balance) VALUES (?, ?)",
+                    new Object[]{ this.name, balance }
                 );
 
                 this.setExists(true);
             } else {
                 iConomy.getDatabase().executeQuery(
-                        "UPDATE `" + Constants.SQL_Table + "` SET balance = ? WHERE username = ?",
-                        new Object[]{ balance, this.name }
+                    "UPDATE " + Constants.SQL_Table + " SET balance = ? WHERE username = ?",
+                    new Object[]{ balance, this.name }
                 );
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("[iConomy] Failed to set balance: " + e);
         }
+
+        this.setAltered(true);
     }
 
     public void resetBalance() {
         this.setBalance(Constants.Initial_Balance);
-        this.setAltered(true);
-        this.save();
     }
 
     public boolean hasEnough(double amount) {
@@ -110,54 +98,30 @@ public class Account {
     }
 
     public void add(double amount) {
-        if(Constants.Database_Cache) {
-            this.balance = this.balance + amount;
-            this.setAltered(true);
-            return;
-        }
-
         this.setBalance(this.getBalance() + amount);
     }
 
     public void multiply(double amount) {
-        if(Constants.Database_Cache) {
-            this.balance = this.balance * amount;
-            this.setAltered(true);
-            return;
-        }
-
         this.setBalance(this.getBalance() * amount);
     }
 
     public void divide(double amount) {
-        if(Constants.Database_Cache) {
-            this.balance = this.balance / amount;
-            this.setAltered(true);
-            return;
-        }
-
         this.setBalance(this.getBalance() / amount);
     }
 
     public void subtract(double amount) {
-        if(Constants.Database_Cache) {
-            this.balance = this.balance - amount;
-            this.setAltered(true);
-            return;
-        }
-
         this.setBalance(this.getBalance() - amount);
     }
 
     public void remove() {
         try {
             ResultSet rs = iConomy.getDatabase().resultQuery(
-                    "SELECT * FROM `" + Constants.SQL_Table + "` WHERE username = ?",
+                    "SELECT * FROM " + Constants.SQL_Table + " WHERE username = ?",
                     new Object[]{ this.name }
             );
             if (rs.next()) {
                 iConomy.getDatabase().executeQuery(
-                        "DELETE FROM `" + Constants.SQL_Table + "` WHERE username = ?",
+                        "DELETE FROM " + Constants.SQL_Table + " WHERE username = ?",
                         new Object[]{ this.name }
                 );
             }
@@ -168,34 +132,8 @@ public class Account {
         this.setExists(false);
     }
 
-    public void save() {
-        if(Constants.Database_Cache) {
-            try {
-                ResultSet rs = iConomy.getDatabase().resultQuery(
-                        "SELECT * FROM `" + Constants.SQL_Table + "` WHERE username = ?",
-                        new Object[]{ this.name }
-                );
-
-                if (!rs.next()) {
-                    iConomy.getDatabase().executeQuery(
-                            "INSERT INTO `" + Constants.SQL_Table + "`(username, balance) VALUES (?, ?)",
-                            new Object[]{ this.name, this.balance }
-                    );
-
-                    this.setExists(true);
-                } else {
-                    iConomy.getDatabase().executeQuery(
-                            "UPDATE `" + Constants.SQL_Table + "` SET balance = ? WHERE username = ?",
-                            new Object[]{ this.balance, this.name }
-                    );
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-            this.setAltered(false);
-        }
-    }
+    @Deprecated
+    public void save() { }
 
     @Override
     public String toString() {
