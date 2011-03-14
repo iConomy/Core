@@ -23,8 +23,7 @@ public class Bank {
     public void load() throws Exception {
         this.currency = Constants.Currency;
         this.initial = Constants.Initial_Balance;
-
-        HashMap<String, Account> accounts = new HashMap<String, Account>();
+        this.accounts = new HashMap<String, Account>();
 
         DatabaseMetaData dbm = iConomy.getDatabase().getConnection().getMetaData();
         ResultSet rs = dbm.getTables(null, null, Constants.SQL_Table, null);
@@ -39,12 +38,9 @@ public class Bank {
             rs = iConomy.getDatabase().resultQuery("SELECT * FROM " + Constants.SQL_Table + "");
 
             while (rs.next()) {
-                Account initialized = new Account(rs.getString("username"), rs.getDouble("balance"));
-                accounts.put(rs.getString("username").toLowerCase(), initialized);
+                accounts.put(rs.getString("username").toLowerCase(), new Account(rs.getString("username")));
             }
         }
-
-        this.accounts = accounts;
     }
 
     /**
@@ -84,7 +80,7 @@ public class Bank {
      * @return HashMap - All accounts existing in the bank.
      */
     public HashMap<String, Account> getAccounts() {
-        return this.accounts;
+        return accounts;
     }
 
     /**
@@ -94,7 +90,37 @@ public class Bank {
      * @return boolean - Does the account exist?
      */
     public boolean hasAccount(String account) {
-        return accounts.containsKey(account.toLowerCase());
+        try {
+            if(accounts.containsKey(account.toLowerCase())) {
+                return true;
+            }
+
+            if(reloadAccount(account)) {
+                return true;
+            }
+
+            return false;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /**
+     * Does the bank have record of the account in question?
+     *
+     * @param account The account in question
+     * @return boolean - Does the account exist?
+     */
+    public boolean reloadAccount(String account) throws Exception {
+        DatabaseMetaData dbm = iConomy.getDatabase().getConnection().getMetaData();
+        ResultSet rs = iConomy.getDatabase().resultQuery("SELECT * FROM " + Constants.SQL_Table + " WHERE username = ?", new Object[] { account });
+
+        if(rs.next()) {
+            accounts.put(rs.getString("username").toLowerCase(), new Account(rs.getString("username")));
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -104,8 +130,12 @@ public class Bank {
      * @param account The account to grab
      * @return Account - Child object of bank
      */
-    public Account getAccount(String accountName) {
-        return accounts.get(accountName.toLowerCase());
+    public Account getAccount(String account) {
+        if(hasAccount(account)) {
+            return accounts.get(account.toLowerCase());
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -213,12 +243,11 @@ public class Bank {
      */
     public void addAccount(String account) {
         if (!this.hasAccount(account)) {
-            Account initialized = new Account(account, this.initial);
-            this.accounts.put(account.toLowerCase(), initialized);
-            this.getAccount(account).save();
+            Account initialized = new Account(account);
+            initialized.setBalance(this.initial);
+            accounts.put(account.toLowerCase(), initialized);
         } else {
-            this.getAccount(account).setBalance(initial);
-            this.getAccount(account).save();
+            getAccount(account).setBalance(this.initial);
         }
     }
 
@@ -232,12 +261,11 @@ public class Bank {
      */
     public void addAccount(String account, double balance) {
         if (!this.hasAccount(account)) {
-            Account initialized = new Account(account, balance);
-            initialized.save();
-            this.accounts.put(account.toLowerCase(), initialized);
+            Account initialized = new Account(account);
+            initialized.setBalance(balance);
+            accounts.put(account.toLowerCase(), initialized);
         } else {
-            this.getAccount(account).setBalance(balance);
-            this.getAccount(account).save();
+            getAccount(account).setBalance(balance);
         }
     }
 
@@ -249,11 +277,10 @@ public class Bank {
      */
     public void updateAccount(String account, double amount) {
         if (this.hasAccount(account)) {
-            Account updating = this.getAccount(account);
+            Account updating = getAccount(account);
             updating.setBalance(amount);
-            updating.save();
         } else {
-            this.addAccount(account, amount);
+            addAccount(account, amount);
         }
     }
 
@@ -264,11 +291,10 @@ public class Bank {
      */
     public void resetAccount(String account) {
         if (this.hasAccount(account)) {
-            Account updating = this.getAccount(account);
-            updating.setBalance(this.initial);
-            updating.save();
+            Account updating = getAccount(account);
+            updating.setBalance(initial);
         } else {
-            this.addAccount(account, initial);
+            addAccount(account, initial);
         }
     }
 
