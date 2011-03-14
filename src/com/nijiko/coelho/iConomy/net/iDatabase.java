@@ -7,18 +7,23 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
 import com.nijiko.coelho.iConomy.util.Constants;
+import java.sql.SQLException;
 
 public class iDatabase {
 
     private Connection Connection;
 
     public iDatabase() throws Exception {
+        load();
+    }
+
+    public void load() throws Exception {
         if (Constants.Database_Type.equalsIgnoreCase("sqlite")) {
             Class.forName("org.sqlite.JDBC");
-            Connection = DriverManager.getConnection("jdbc:sqlite:" + Constants.Plugin_Directory + File.separator + Constants.SQL_Database + ".sqlite");
+            this.Connection = DriverManager.getConnection("jdbc:sqlite:" + Constants.Plugin_Directory + File.separator + Constants.SQL_Database + ".sqlite");
         } else if (Constants.Database_Type.equalsIgnoreCase("mysql")) {
             Class.forName("com.mysql.jdbc.Driver");
-            Connection = DriverManager.getConnection("jdbc:mysql://" + Constants.SQL_Hostname + ":" + Constants.SQL_Port + "/" + Constants.SQL_Database, Constants.SQL_Username, Constants.SQL_Password);
+            this.Connection = DriverManager.getConnection("jdbc:mysql://" + Constants.SQL_Hostname + ":" + Constants.SQL_Port + "/" + Constants.SQL_Database, Constants.SQL_Username, Constants.SQL_Password);
         }
     }
 
@@ -48,27 +53,52 @@ public class iDatabase {
     }
 
     public boolean executeQuery(String sql) {
+        PreparedStatement ps = null;
+
         try {
-            PreparedStatement ps = this.Connection.prepareStatement(sql);
+            ps = this.Connection.prepareStatement(sql);
             ps.executeUpdate();
             return true;
         } catch (Exception e) {
             e.printStackTrace();
             return false;
+        } finally {
+            try {
+                ps.close();
+                Connection.close();
+            } catch (SQLException ex) { }
+
+            try {
+                load();
+            } catch (Exception ex) { }
         }
     }
 
     public boolean executeQuery(String sql, Object[] parameters) {
+        PreparedStatement ps = null;
+        
         try {
-            PreparedStatement ps = this.Connection.prepareStatement(sql);
+            ps = this.Connection.prepareStatement(sql);
+
             for (int i = 0; i < parameters.length; i++) {
                 ps.setString(i + 1, parameters[i].toString());
             }
+
             ps.executeUpdate();
+
             return true;
         } catch (Exception e) {
             e.printStackTrace();
             return false;
+        } finally {
+            try {
+                ps.close();
+                Connection.close();
+            } catch (SQLException ex) { }
+
+            try {
+                load();
+            } catch (Exception ex) { }
         }
     }
 
