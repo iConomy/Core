@@ -230,9 +230,9 @@ public class PListener extends PlayerListener {
         }
 
         if (console) {
-            System.out.println("Player " + account + "'s account had " + amount + " grant to it.");
+            System.out.println("Player " + account.getName() + "'s account had " + amount + " grant to it.");
         } else {
-            System.out.println(Messaging.bracketize("iConomy") + "Player " + account + "'s account had " + amount + " grant to it by " + controller.getName() + ".");
+            System.out.println(Messaging.bracketize("iConomy") + "Player " + account.getName() + "'s account had " + amount + " grant to it by " + controller.getName() + ".");
         }
     }
 
