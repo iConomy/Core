@@ -9,6 +9,7 @@ import com.nijiko.coelho.iConomy.util.Constants;
 import com.nijiko.coelho.iConomy.util.Messaging;
 import com.nijiko.coelho.iConomy.util.Misc;
 import com.nijiko.coelho.iConomy.util.Template;
+import org.bukkit.command.CommandSender;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerEvent;
@@ -40,7 +41,7 @@ public class Players extends PlayerListener {
      * Allows us to easily utilize all throughout the class without having multiple
      * instances of the same help lines.
      */
-    private void showHelp(Player player) {
+    private void showHelp(CommandSender player) {
         Messaging.send("&e----------------------------------------------------");
         Messaging.send("&f iConomy (&c" + Constants.Codename + "&f)           ");
         Messaging.send("&e----------------------------------------------------");
@@ -88,9 +89,9 @@ public class Players extends PlayerListener {
      * @param viewing The player who is viewing the account
      * @param mine Is it the player who is trying to view?
      */
-    public void showBalance(String name, Player viewing, boolean mine) {
+    public void showBalance(String name, CommandSender viewing, boolean mine) {
         if (mine) {
-            Messaging.send(viewing, Template.color("tag") + Template.parse("personal.balance", new String[]{"+balance,+b"}, new String[]{iConomy.getBank().format(viewing.getName())}));
+            Messaging.send(viewing, Template.color("tag") + Template.parse("personal.balance", new String[]{"+balance,+b"}, new String[]{iConomy.getBank().format(((Player)viewing).getName())}));
         } else {
             Messaging.send(viewing, Template.color("tag") + Template.parse("player.balance", new String[]{"+balance,+b", "+name,+n"}, new String[]{iConomy.getBank().format(name), name}));
         }
@@ -257,7 +258,7 @@ public class Players extends PlayerListener {
                 Template.color("tag") + Template.parse(
                     "personal.set",
                     new String[]{"+by", "+amount,+a"},
-                    new String[]{(console) ? "console" : controller.getName(), iConomy.getBank().format(amount)}
+                    new String[]{(console) ? "Console" : controller.getName(), iConomy.getBank().format(amount)}
                 )
             );
 
@@ -268,8 +269,8 @@ public class Players extends PlayerListener {
             Messaging.send(
                 Template.color("tag") + Template.parse(
                     "player.set",
-                    new String[]{"+name,+n", "+amount,+a"},
-                    new String[]{name, iConomy.getBank().format(amount)}
+                    new String[]{ "+name,+n", "+amount,+a" },
+                    new String[]{ name, iConomy.getBank().format(amount) }
                 )
             );
         }
@@ -291,14 +292,16 @@ public class Players extends PlayerListener {
      * @param viewing
      * @param player
      */
-    public void showRank(Player viewing, String player) {
+    public void showRank(CommandSender viewing, String player) {
         if (iConomy.getBank().hasAccount(player)) {
             int rank = iConomy.getBank().getAccountRank(player);
+            boolean isPlayer = (viewing instanceof Player);
+            boolean isSelf = (isPlayer) ? ((((Player)viewing).getName().equalsIgnoreCase(player)) ? true : false) : false;
 
             Messaging.send(
                 viewing,
                 Template.color("tag") + Template.parse(
-                    ((viewing.getName().equalsIgnoreCase(player)) ? "personal.rank" : "player.rank"),
+                    ((isSelf) ? "personal.rank" : "player.rank"),
                     new Object[]{"+name,+n", "+rank,+r"},
                     new Object[]{player, rank}
                 )
@@ -324,7 +327,7 @@ public class Players extends PlayerListener {
      * @param viewing
      * @param amount
      */
-    public void showTop(Player viewing, int amount) {
+    public void showTop(CommandSender viewing, int amount) {
         ArrayList<String> als = iConomy.getBank().getAccountRanks(amount);
 
         Messaging.send(
@@ -374,20 +377,26 @@ public class Players extends PlayerListener {
      * @param player
      * @param split
      */
-    public void onPlayerCommand(Player player, String[] split) {
-        Messaging.save(player);
+    public void onPlayerCommand(CommandSender sender, String[] split) {
+        Messaging.save(sender);
+        boolean isPlayer = (sender instanceof Player);
+        Player player = (sender instanceof Player) ? (Player)sender : null;
 
         if (split[0].equalsIgnoreCase("money")) {
             switch (split.length) {
                 case 1:
+                    if(isPlayer)
+                        showBalance("", player, true);
+                    else {
+                        Messaging.send("&7Cannot show balance without organism.");
+                    }
 
-                    showBalance("", player, true);
                     return;
 
                 case 2:
 
                     if (Misc.is(split[1], new String[]{ "rank", "-r" })) {
-                        if (!iConomy.hasPermissions(player, "iConomy.rank")) {
+                        if (!iConomy.hasPermissions(sender, "iConomy.rank") || !isPlayer) {
                             return;
                         }
 
@@ -400,12 +409,12 @@ public class Players extends PlayerListener {
                             return;
                         }
 
-                        showTop(player, 5);
+                        showTop(sender, 5);
                         return;
                     }
 
                     if (Misc.is(split[1], new String[]{ "stats", "-s" })) {
-                        if (!iConomy.hasPermissions(player, "iConomy.admin.stats")) {
+                        if (!iConomy.hasPermissions(sender, "iConomy.admin.stats")) {
                             return;
                         }
 
@@ -440,12 +449,12 @@ public class Players extends PlayerListener {
                     if (Misc.is(split[1], new String[]{ "help", "?", "grant", "-g", "reset", "-x", "set", "-s", "pay", "-p" })) {
                         showHelp(player); return;
                     } else {
-                        if (!iConomy.hasPermissions(player, "iConomy.access")) {
+                        if (!iConomy.hasPermissions(sender, "iConomy.access")) {
                             return;
                         }
 
                         if (iConomy.getBank().hasAccount(split[1])) {
-                            showBalance(split[1], player, false);
+                            showBalance(split[1], sender, false);
                         } else {
                             Messaging.send(Template.parse("error.account", new String[]{"+name,+n"}, new String[]{split[1]}));
                         }
@@ -456,12 +465,12 @@ public class Players extends PlayerListener {
                 case 3:
 
                     if (Misc.is(split[1], new String[]{"rank", "-r"})) {
-                        if (!iConomy.hasPermissions(player, "iConomy.rank")) {
+                        if (!iConomy.hasPermissions(sender, "iConomy.rank")) {
                             return;
                         }
 
                         if (iConomy.getBank().hasAccount(split[2])) {
-                            showRank(player, split[2]);
+                            showRank(sender, split[2]);
                         } else {
                             Messaging.send(Template.parse("error.account", new String[]{"+name,+n"}, new String[]{split[2]}));
                         }
@@ -475,21 +484,25 @@ public class Players extends PlayerListener {
                         }
 
                         try {
-                            showTop(player, Integer.parseInt(split[2]) < 0 ? 5 : Integer.parseInt(split[2]));
+                            showTop(sender, Integer.parseInt(split[2]) < 0 ? 5 : Integer.parseInt(split[2]));
                         } catch (Exception e) {
-                            showTop(player, 5);
+                            showTop(sender, 5);
                         }
 
                         return;
                     }
 
                     if (Misc.is(split[1], new String[]{"reset", "-x"})) {
-                        if (!iConomy.hasPermissions(player, "iConomy.admin.reset")) {
+                        if (!iConomy.hasPermissions(sender, "iConomy.admin.reset")) {
                             return;
                         }
 
                         if (iConomy.getBank().hasAccount(split[2])) {
-                            showReset(split[2], player, false);
+                            if(isPlayer)
+                                showReset(split[2], player, false);
+                            else {
+                                showReset(split[2], null, true);
+                            }
                         } else {
                             Messaging.send(Template.parse("error.account", new String[]{"+name,+n"}, new String[]{split[2]}));
                         }
@@ -502,7 +515,7 @@ public class Players extends PlayerListener {
                 case 4:
 
                     if (Misc.is(split[1], new String[]{"pay", "-p"})) {
-                        if (!iConomy.hasPermissions(player, "iConomy.payment")) {
+                        if (!iConomy.hasPermissions(sender, "iConomy.payment") || !isPlayer) {
                             return;
                         }
 
@@ -533,7 +546,7 @@ public class Players extends PlayerListener {
                     }
 
                     if (Misc.is(split[1], new String[]{"grant", "-g"})) {
-                        if (!iConomy.hasPermissions(player, "iConomy.admin.grant")) {
+                        if (!iConomy.hasPermissions(sender, "iConomy.admin.grant")) {
                             return;
                         }
 
@@ -553,7 +566,12 @@ public class Players extends PlayerListener {
                             Messaging.send("&cUsage: &f/money &c[&f-g&c|&fgrant&c] <&fplayer&c> (&f-&c)&c<&famount&c>");
                         }
 
-                        showGrant(name, player, amount, true);
+                        if(isPlayer)
+                            showGrant(name, player, amount, false);
+                        else {
+                            showGrant(name, null, amount, true);
+                        }
+
                         return;
                     }
 
@@ -578,7 +596,12 @@ public class Players extends PlayerListener {
                             Messaging.send("&cUsage: &f/money &c[&f-g&c|&fgrant&c] <&fplayer&c> (&f-&c)&c<&famount&c>");
                         }
 
-                        showSet(name, player, amount, true);
+                        if(isPlayer)
+                            showSet(name, player, amount, false);
+                        else {
+                            showSet(name, null, amount, true);
+                        }
+
                         return;
                     }
 

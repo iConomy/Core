@@ -196,17 +196,14 @@ public class iConomy extends JavaPlugin {
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
         try {
-            if (sender instanceof Player) {
-                Player player = (Player) sender;
-                String[] split = new String[args.length + 1];
-                split[0] = cmd.getName().toLowerCase();
+            String[] split = new String[args.length + 1];
+            split[0] = cmd.getName().toLowerCase();
 
-                for (int i = 0; i < args.length; i++) {
-                    split[i + 1] = args[i];
-                }
-
-                playerListener.onPlayerCommand(player, split);
+            for (int i = 0; i < args.length; i++) {
+                split[i + 1] = args[i];
             }
+
+            playerListener.onPlayerCommand(sender, split);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -344,12 +341,17 @@ public class iConomy extends JavaPlugin {
         return Permissions;
     }
 
-    public static boolean hasPermissions(Player p, String s) {
-        if (Permissions != null) {
-            return Permissions.permission(p, s);
-        } else {
-            return p.isOp();
+    public static boolean hasPermissions(CommandSender sender, String node) {
+        if(sender instanceof Player) {
+            Player player = (Player)sender;
+            if(Permissions != null)
+                return Permissions.permission(player, node);
+            else {
+                return player.isOp();
+            }
         }
+
+        return true;
     }
 
     public static void setPermissions(PermissionHandler ph) {
