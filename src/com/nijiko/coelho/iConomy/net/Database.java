@@ -9,6 +9,8 @@ import java.sql.ResultSet;
 import com.nijiko.coelho.iConomy.util.Constants;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Database {
 
@@ -16,28 +18,37 @@ public class Database {
     private Statement Stmt;
     private PreparedStatement Statement;
     private ResultSet ResultSet;
+    private ConnectionPool Pool = null;
 
     public Database() { }
 
     public void initialize() {
-        try {
-            connection();
-        } catch (SQLException ex) {
-            System.out.println("[iConomy] Failed to connect: " + ex);
-        } catch (ClassNotFoundException e) {
-            System.out.println("[iConomy] Connector not found: " + e);
-        }
+        connection();
     }
 
-    public Connection connection() throws ClassNotFoundException, SQLException {
-        if (Constants.Database_Type.equalsIgnoreCase("sqlite")) {
-            Class.forName("org.sqlite.JDBC");
-            this.Connection = DriverManager.getConnection("jdbc:sqlite:" + Constants.Plugin_Directory + File.separator + Constants.SQL_Database + ".sqlite");
-        } else if (Constants.Database_Type.equalsIgnoreCase("mysql")) {
-            Class.forName("com.mysql.jdbc.Driver");
-            this.Connection = DriverManager.getConnection("jdbc:mysql://" + Constants.SQL_Hostname + ":" + Constants.SQL_Port + "/" + Constants.SQL_Database, Constants.SQL_Username, Constants.SQL_Password);
+    public Connection connection() {
+        if(Pool == null) {
+            if (Constants.Database_Type.equalsIgnoreCase("sqlite")) {
+                Pool = new ConnectionPool(
+                    "org.sqlite.JDBC",
+                    "jdbc:sqlite:" + Constants.Plugin_Directory + File.separator + Constants.SQL_Database + ".sqlite",
+                    "",
+                    ""
+                );
+            } else if (Constants.Database_Type.equalsIgnoreCase("mysql")) {
+                Pool = new ConnectionPool(
+                    "com.mysql.jdbc.Driver",
+                    "jdbc:mysql://" + Constants.SQL_Hostname + ":" + Constants.SQL_Port + "/" + Constants.SQL_Database,
+                    Constants.SQL_Username,
+                    Constants.SQL_Password
+                );
+            }
         }
 
+        // Checkout
+        this.Connection = Pool.checkOut();
+
+        // Return
         return this.Connection;
     }
 
@@ -79,6 +90,8 @@ public class Database {
             return true;
         } catch (SQLException ex) {
             System.out.println("[iConomy] Could not execute query: " + ex);
+        } finally {
+            close();
         }
 
         return false;
@@ -100,6 +113,8 @@ public class Database {
             return true;
         } catch (SQLException ex) {
             System.out.println("[iConomy] Could not execute query: " + ex);
+        } finally {
+            close();
         }
 
         return false;
@@ -121,12 +136,10 @@ public class Database {
                 this.ResultSet.close();
             }
 
-            if (this.Connection != null) {
-                this.Connection.close();
-            }
+            Pool.checkIn(this.Connection);
 
         } catch (SQLException ex) {
-            System.out.println("[iConomy] Failed to close connection: " + ex);
+            System.out.println("[iConomy] Failed to close / checkin connection: " + ex);
 
             // Close anyway.
             this.Connection = null;
@@ -135,7 +148,12 @@ public class Database {
         }
     }
 
+    @Override
     protected void finalize() {
+        try {
+            super.finalize();
+        } catch (Throwable ex) { }
+
         close();
     }
 }
