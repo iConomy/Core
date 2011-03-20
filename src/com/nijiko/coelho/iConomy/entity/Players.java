@@ -20,7 +20,7 @@ import org.bukkit.event.player.PlayerListener;
  *
  * @author Nijikokun
  */
-public class PListener extends PlayerListener {
+public class Players extends PlayerListener {
 
     private Template Template = null;
 
@@ -30,7 +30,7 @@ public class PListener extends PlayerListener {
      *
      * @param directory
      */
-    public PListener(String directory) {
+    public Players(String directory) {
         Template = new Template(directory, "Messages.yml");
     }
 
@@ -409,12 +409,12 @@ public class PListener extends PlayerListener {
                             return;
                         }
 
-                        Collection<Account> money = iConomy.getBank().getAccounts().values();
+                        Collection<Double> money = iConomy.getBank().getAccounts().values();
                         double totalMoney = 0;
                         int totalPlayers = money.size();
 
                         for (Object o : money.toArray()) {
-                            totalMoney += ((Account) o).getBalance();
+                            totalMoney += (Double)o;
                         }
 
                         Messaging.send(Template.color("statistics.opening"));
