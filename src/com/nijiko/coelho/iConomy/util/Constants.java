@@ -6,7 +6,7 @@ import org.bukkit.util.config.Configuration;
 
 public class Constants {
     // Code name
-    public static final String Codename = "Arcadia";
+    public static final String Codename = "Elektra";
 
     // Nodes
     private static String[] nodes = new String[] {
@@ -19,7 +19,6 @@ public class Constants {
         "System.Interest.MinimumPerInterval:1",
         "System.Interest.MaximumPerInterval:2",
         "System.Database.Type:SQLite",
-        "System.Database.Cache:true",
         "System.Database.MySQL.Hostname:localhost",
         "System.Database.MySQL.Port:3306",
         "System.Database.MySQL.Username:root",
@@ -51,7 +50,6 @@ public class Constants {
 
     // Database Type
     public static String Database_Type = "SQLite";
-    public static boolean Database_Cache = true;
 
     // Relational SQL Generics
     public static String SQL_Hostname = "localhost";
@@ -82,7 +80,6 @@ public class Constants {
 
         // Database Configuration
         Database_Type = config.getString("System.Database.Type", Database_Type);
-        Database_Cache = config.getBoolean("System.Database.Cache", Database_Cache);
 
         // MySQL
         SQL_Hostname = config.getString("System.Database.MySQL.Hostname", SQL_Hostname);

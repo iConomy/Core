@@ -9,9 +9,13 @@ System:
     Initial_Balance: 30.0
     # Should we log transactions?
     Logging:
+        # Logging is logged to a database table named [table]_Transactions
+        # It will not be in a file like before it is all through the transaction
+        # system which other plugins can tie into.
         Enabled: false
     # Should we use this system?
     Interest:
+        # Default is false
         Enabled: false
         # How many seconds for this to happen
         IntervalSeconds: 60
@@ -26,14 +30,11 @@ System:
     Database:
         # Can be MySQL, or SQLite
         Type: SQLite
-        # Should balances be cached and saved when requested (true)
-        # Or do you wish for it to be constantly grabbing the balance
-        # from the database (false)
-        Cache: true
         # Name of the database
         Name: minecraft
         # Table name
         Table: iConomy
+        # Mysql Details
         MySQL:
             # MySQL Login Username
             Username: 'root'
