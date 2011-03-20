@@ -107,7 +107,7 @@ public class Bank {
     }
 
     public HashMap<String, Double> getAccounts() {
-        HashMap<String, Double> accounts = null;
+        HashMap<String, Double> accounts = new HashMap<String, Double>();
         ResultSet rs = null;
 
         try {
