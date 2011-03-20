@@ -2,6 +2,7 @@ package com.nijiko.coelho.iConomy.system;
 
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,8 +11,6 @@ import com.nijiko.coelho.iConomy.iConomy;
 import com.nijiko.coelho.iConomy.util.Constants;
 
 public class Bank {
-
-    private HashMap<String, Account> accounts;
     private String currency;
     private double initial;
 
@@ -23,7 +22,6 @@ public class Bank {
     public void load() throws Exception {
         this.currency = Constants.Currency;
         this.initial = Constants.Initial_Balance;
-        this.accounts = new HashMap<String, Account>();
 
         DatabaseMetaData dbm = iConomy.getDatabase().getConnection().getMetaData();
         ResultSet rs = dbm.getTables(null, null, Constants.SQL_Table, null);
@@ -34,13 +32,15 @@ public class Bank {
             } else if (Constants.Database_Type.equalsIgnoreCase("sqlite")) {
                 iConomy.getDatabase().executeQuery("CREATE TABLE '" + Constants.SQL_Table + "' ('id' INT (10) PRIMARY KEY , 'username' TEXT , 'balance' DECIMAL (65, 2));");
             }
-        } else {
-            rs = iConomy.getDatabase().resultQuery("SELECT * FROM " + Constants.SQL_Table + "");
-
-            while (rs.next()) {
-                accounts.put(rs.getString("username").toLowerCase(), new Account(rs.getString("username")));
-            }
         }
+        
+        if(rs != null) {
+            try {
+                rs.close();
+            } catch (SQLException ex) { }
+        }
+
+        iConomy.getDatabase().close();
     }
 
     /**
@@ -75,52 +75,60 @@ public class Bank {
     }
 
     /**
-     * Grab the hashmap of all accounts relationed with account names.
-     *
-     * @return HashMap - All accounts existing in the bank.
-     */
-    public HashMap<String, Account> getAccounts() {
-        return accounts;
-    }
-
-    /**
      * Does the bank have record of the account in question?
      *
      * @param account The account in question
      * @return boolean - Does the account exist?
      */
     public boolean hasAccount(String account) {
+        boolean result = false;
+        ResultSet rs = null;
+
         try {
-            if(accounts.containsKey(account.toLowerCase())) {
-                return true;
-            }
+            rs = iConomy.getDatabase().resultQuery(
+                "SELECT * FROM " + Constants.SQL_Table + " WHERE username = ?",
+                new Object[]{ account }
+            );
 
-            if(reloadAccount(account)) {
-                return true;
-            }
-
-            return false;
+            result = rs.next();
         } catch (Exception e) {
-            return false;
+            System.out.println("[iConomy] Failed to check account " + e);
+        } finally {
+            if(rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) { }
+            }
+
+            iConomy.getDatabase().close();
         }
+
+        return result;
     }
 
-    /**
-     * Does the bank have record of the account in question?
-     *
-     * @param account The account in question
-     * @return boolean - Does the account exist?
-     */
-    public boolean reloadAccount(String account) throws Exception {
-        DatabaseMetaData dbm = iConomy.getDatabase().getConnection().getMetaData();
-        ResultSet rs = iConomy.getDatabase().resultQuery("SELECT * FROM " + Constants.SQL_Table + " WHERE username = ?", new Object[] { account });
+    public HashMap<String, Double> getAccounts() {
+        HashMap<String, Double> accounts = null;
+        ResultSet rs = null;
 
-        if(rs.next()) {
-            accounts.put(rs.getString("username").toLowerCase(), new Account(rs.getString("username")));
-            return true;
+        try {
+            rs = iConomy.getDatabase().resultQuery("SELECT * FROM " + Constants.SQL_Table + " ORDER BY balance DESC");
+
+            while (rs.next()) {
+                accounts.put(rs.getString("username"), rs.getDouble("balance"));
+            }
+        } catch (Exception e) {
+            return accounts;
+        } finally {
+            if(rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) { }
+            }
+
+            iConomy.getDatabase().close();
         }
 
-        return false;
+        return accounts;
     }
 
     /**
@@ -131,11 +139,31 @@ public class Bank {
      * @return Account - Child object of bank
      */
     public Account getAccount(String account) {
-        if(hasAccount(account)) {
-            return accounts.get(account.toLowerCase());
-        } else {
-            return null;
+        Account Account = null;
+        ResultSet rs = null;
+
+        try {
+            rs = iConomy.getDatabase().resultQuery(
+                "SELECT * FROM " + Constants.SQL_Table + " WHERE username = ? LIMIT 1",
+                new Object[]{ account }
+            );
+
+            if(rs.next()) {
+                Account = new Account(account);
+            }
+        } catch (Exception e) {
+            System.out.println("[iConomy] Failed to grab account " + e);
+        } finally {
+            if(rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) { }
+            }
+
+            iConomy.getDatabase().close();
         }
+
+        return Account;
     }
 
     /**
@@ -163,10 +191,13 @@ public class Bank {
      * @return Arraylist of account names
      */
     public ArrayList<String> getAccountRanks(int output) {
+        ResultSet rs = null;
+
         try {
             ArrayList<String> players = new ArrayList<String>();
 
-            ResultSet rs = iConomy.getDatabase().resultQuery("SELECT * FROM " + Constants.SQL_Table + " ORDER BY balance DESC");
+            rs = iConomy.getDatabase().resultQuery("SELECT * FROM " + Constants.SQL_Table + " ORDER BY balance DESC LIMIT " + output);
+
             for (int i = 0; i < output; i++) {
                 if (rs.next()) {
                     players.add(rs.getString("username"));
@@ -178,6 +209,14 @@ public class Bank {
             return players;
         } catch (Exception e) {
             return new ArrayList<String>();
+        } finally {
+            if(rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) { }
+            }
+
+            iConomy.getDatabase().close();
         }
     }
 
@@ -188,9 +227,12 @@ public class Bank {
      * @return Integer
      */
     public int getAccountRank(String name) {
+        ResultSet rs = null;
+
         try {
             int i = 1;
-            ResultSet rs = iConomy.getDatabase().resultQuery("SELECT * FROM " + Constants.SQL_Table + " ORDER BY balance DESC");
+            rs = iConomy.getDatabase().resultQuery("SELECT * FROM " + Constants.SQL_Table + " ORDER BY balance DESC");
+
             while (rs.next()) {
                 if (rs.getString("username").equalsIgnoreCase(name)) {
                     return i;
@@ -198,21 +240,19 @@ public class Bank {
                     i++;
                 }
             }
+
             return -1;
         } catch (Exception e) {
             return -1;
-        }
-    }
+        } finally {
+            if(rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) { }
+            }
 
-    /**
-     * Set the entire accounts hashmap.
-     * Warning, only use if you are an advanced java user.
-     * This could alter many... many... things.
-     *
-     * @param accounts
-     */
-    public void setAccounts(HashMap<String, Account> accounts) {
-        this.accounts = accounts;
+            iConomy.getDatabase().close();
+        }
     }
 
     /**
@@ -245,7 +285,6 @@ public class Bank {
         if (!this.hasAccount(account)) {
             Account initialized = new Account(account);
             initialized.setBalance(this.initial);
-            accounts.put(account.toLowerCase(), initialized);
         } else {
             getAccount(account).setBalance(this.initial);
         }
@@ -263,7 +302,6 @@ public class Bank {
         if (!this.hasAccount(account)) {
             Account initialized = new Account(account);
             initialized.setBalance(balance);
-            accounts.put(account.toLowerCase(), initialized);
         } else {
             getAccount(account).setBalance(balance);
         }
@@ -304,21 +342,31 @@ public class Bank {
      * @param account
      */
     public void removeAccount(String account) {
-        ResultSet rs = iConomy.getDatabase().resultQuery(
-                "SELECT * FROM `" + Constants.SQL_Table + "` WHERE username = ?",
-                new Object[]{account});
-
+        ResultSet rs = null;
         try {
+            rs = iConomy.getDatabase().resultQuery(
+                "SELECT * FROM `" + Constants.SQL_Table + "` WHERE username = ?",
+                new Object[]{account}
+            );
+            
             if (this.hasAccount(account)) {
-                this.getAccount(account).remove();
-                this.accounts.remove(account);
+                getAccount(account).remove();
             } else if (rs.next()) {
                 iConomy.getDatabase().executeQuery(
-                        "DELETE FROM `" + Constants.SQL_Table + "` WHERE username = ?",
-                        new Object[]{account});
+                    "DELETE FROM `" + Constants.SQL_Table + "` WHERE username = ?",
+                    new Object[]{ account }
+                );
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("[iConomy] Failed to remove account " + e);
+        } finally {
+            if(rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) { }
+            }
+
+            iConomy.getDatabase().close();
         }
     }
 }

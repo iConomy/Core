@@ -5,32 +5,15 @@ import java.text.DecimalFormat;
 
 import com.nijiko.coelho.iConomy.iConomy;
 import com.nijiko.coelho.iConomy.util.Constants;
+import java.sql.SQLException;
 
 public class Account {
-
     private String name;
     private boolean altered = false;
     private boolean exists = false;
 
     public Account(String name) {
         this.name = name;
-        this.exists = true;
-    }
-
-    public boolean exists() {
-        return this.exists;
-    }
-
-    public boolean isAltered() {
-        return this.altered;
-    }
-
-    private void setExists(boolean exists) {
-        this.exists = exists;
-    }
-
-    private void setAltered(boolean altered) {
-        this.altered = altered;
     }
 
     public String getName() {
@@ -38,26 +21,39 @@ public class Account {
     }
 
     public double getBalance() {
+        ResultSet rs = null;
+
         try {
-            ResultSet rs = iConomy.getDatabase().resultQuery(
-                "SELECT balance FROM " + Constants.SQL_Table + " WHERE username = ?",
+            rs = iConomy.getDatabase().resultQuery(
+                "SELECT balance FROM " + Constants.SQL_Table + " WHERE username = ? LIMIT 1",
                 new Object[]{ this.name }
             );
-            
+
+            if (rs != null)
             if (rs.next()) {
                 return rs.getDouble("balance");
             }
         } catch (Exception e) {
             System.out.println("[iConomy] Failed to grab player balance: " + e);
+        } finally {
+            if(rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) { }
+            }
+
+            iConomy.getDatabase().close();
         }
 
         return Constants.Initial_Balance;
     }
 
     public void setBalance(double balance) {
+        ResultSet rs = null;
+
         try {
-            ResultSet rs = iConomy.getDatabase().resultQuery(
-                "SELECT * FROM " + Constants.SQL_Table + " WHERE username = ?",
+            rs = iConomy.getDatabase().resultQuery(
+                "SELECT * FROM " + Constants.SQL_Table + " WHERE username = ? LIMIT 1",
                 new Object[]{ this.name }
             );
 
@@ -66,8 +62,6 @@ public class Account {
                     "INSERT INTO " + Constants.SQL_Table + "(username, balance) VALUES (?, ?)",
                     new Object[]{ this.name, balance }
                 );
-
-                this.setExists(true);
             } else {
                 iConomy.getDatabase().executeQuery(
                     "UPDATE " + Constants.SQL_Table + " SET balance = ? WHERE username = ?",
@@ -76,9 +70,15 @@ public class Account {
             }
         } catch (Exception e) {
             System.out.println("[iConomy] Failed to set balance: " + e);
-        }
+        } finally {
+            if(rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) { }
+            }
 
-        this.setAltered(true);
+            iConomy.getDatabase().close();
+        }
     }
 
     public void resetBalance() {
@@ -114,8 +114,10 @@ public class Account {
     }
 
     public void remove() {
+        ResultSet rs = null;
+
         try {
-            ResultSet rs = iConomy.getDatabase().resultQuery(
+            rs = iConomy.getDatabase().resultQuery(
                     "SELECT * FROM " + Constants.SQL_Table + " WHERE username = ?",
                     new Object[]{ this.name }
             );
@@ -127,9 +129,15 @@ public class Account {
             }
         } catch (Exception e) {
             e.printStackTrace();
-        }
+        } finally {
+            if(rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) { }
+            }
 
-        this.setExists(false);
+            iConomy.getDatabase().close();
+        }
     }
 
     @Deprecated
