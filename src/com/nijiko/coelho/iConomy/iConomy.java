@@ -23,8 +23,8 @@ import org.bukkit.event.server.PluginEvent;
 import org.bukkit.event.server.ServerListener;
 import org.bukkit.plugin.Plugin;
 
-import com.nijiko.coelho.iConomy.entity.PListener;
-import com.nijiko.coelho.iConomy.net.iDatabase;
+import com.nijiko.coelho.iConomy.entity.Players;
+import com.nijiko.coelho.iConomy.net.Database;
 import com.nijiko.coelho.iConomy.system.Account;
 import com.nijiko.coelho.iConomy.system.Bank;
 import com.nijiko.coelho.iConomy.system.Interest;
@@ -59,10 +59,10 @@ import com.nijikokun.bukkit.Permissions.Permissions;
 public class iConomy extends JavaPlugin {
     private static Server Server = null;
     private static Bank Bank = null;
-    private static iDatabase iDatabase = null;
+    private static Database iDatabase = null;
     private static Transactions Transactions = null;
     private static PermissionHandler Permissions = null;
-    private static PListener playerListener = null;
+    private static Players playerListener = null;
     private static Timer Interest_Timer = null;
 
     @Override
@@ -113,7 +113,7 @@ public class iConomy extends JavaPlugin {
 
         // Load the database
         try {
-            iDatabase = new iDatabase();
+            iDatabase = new Database();
         } catch (Exception e) {
             System.out.println("[iConomy] Failed to connect to database: " + e);
             Server.getPluginManager().disablePlugin(this);
@@ -156,7 +156,7 @@ public class iConomy extends JavaPlugin {
         }
 
         // Initializing Listeners
-        playerListener = new PListener(getDataFolder().getPath());
+        playerListener = new Players(getDataFolder().getPath());
 
         // Event Registration
         getServer().getPluginManager().registerEvent(Event.Type.PLAYER_JOIN, playerListener, Priority.Normal, this);
@@ -171,21 +171,7 @@ public class iConomy extends JavaPlugin {
     public void onDisable() {
         try {
             if(iDatabase != null) {
-                if(Bank != null) {
-                    if(Bank.getAccounts() != null) {
-                        for (String account_name : Bank.getAccounts().keySet()) {
-                            Account account = Bank.getAccount(account_name);
-
-                            // Only save unsaved data.
-                            if(account.isAltered()) {
-                                account.save();
-                            }
-                        }
-                    }
-                }
-
                 iDatabase.getConnection().close();
-
                 System.out.println("[iConomy] All un-saved account data has been saved, plugin is now disabling.");
             } else {
                 System.out.println("[iConomy] Plugin disabled.");
@@ -338,7 +324,7 @@ public class iConomy extends JavaPlugin {
      *
      * @return iDatabase
      */
-    public static iDatabase getDatabase() {
+    public static Database getDatabase() {
         return iDatabase;
     }
 
