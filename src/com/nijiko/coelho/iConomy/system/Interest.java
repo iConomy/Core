@@ -14,19 +14,22 @@ public class Interest extends TimerTask {
     public void run() {
         DecimalFormat DecimalFormat = new DecimalFormat("#.##");
         double amount = 0.0;
+        boolean percentage = (Constants.Interest_Percentage == 0.0);
 
-        try {
-            amount = (Constants.Interest_FlatRate == 0.0) ? Double.valueOf(
-                DecimalFormat.format(
-                    Math.random() * (
-                        Constants.Interest_Max_Interval - Constants.Interest_Min_Interval
-                    ) + (
-                        Constants.Interest_Min_Interval
+        if(!percentage) {
+            try {
+                amount = (Constants.Interest_FlatRate == 0.0) ? Double.valueOf(
+                    DecimalFormat.format(
+                        Math.random() * (
+                            Constants.Interest_Max_Interval - Constants.Interest_Min_Interval
+                        ) + (
+                            Constants.Interest_Min_Interval
+                        )
                     )
-                )
-            ).doubleValue() : Constants.Interest_FlatRate;
-        } catch (NumberFormatException e) {
-            System.out.println("[iConomy] Invalid Interest: " + e);
+                ).doubleValue() : Double.valueOf(Constants.Interest_FlatRate).doubleValue();
+            } catch (NumberFormatException e) {
+                System.out.println("[iConomy] Invalid Interest: " + e);
+            }
         }
 
         Player players[] = iConomy.getBukkitServer().getOnlinePlayers();
@@ -34,13 +37,20 @@ public class Interest extends TimerTask {
         for (Player p : players) {
             if (iConomy.getBank().hasAccount(p.getName())) {
                 Account account = iConomy.getBank().getAccount(p.getName());
-                account.add(amount);
-                account.save();
-                
-                if(amount < 0.0)
-                    iConomy.getTransactions().insert("[System Interest]", p.getName(), 0.0, account.getBalance(), 0.0, 0.0, amount);
-                else {
-                    iConomy.getTransactions().insert("[System Interest]", p.getName(), 0.0, account.getBalance(), 0.0, amount, 0.0);
+
+                if(account != null) {
+                    if(percentage) {
+                        amount = Math.round(account.getBalance()/Constants.Interest_Percentage);
+                    }
+
+                    account.add(amount);
+                    account.save();
+
+                    if(amount < 0.0)
+                        iConomy.getTransactions().insert("[System Interest]", p.getName(), 0.0, account.getBalance(), 0.0, 0.0, amount);
+                    else {
+                        iConomy.getTransactions().insert("[System Interest]", p.getName(), 0.0, account.getBalance(), 0.0, amount, 0.0);
+                    }
                 }
             }
         }
