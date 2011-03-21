@@ -41,13 +41,23 @@ payment:
     self: "<rose>Sorry, you cannot send money to yourself."
     to: "<green>You have sent <white>+amount<green> to <white>+name<green>."
     from: "<white>+name<green> has sent you <white>+amount<green>."
-    
+
+##
+# Statistics
+##
 statistics:
     opening: "<green>-----[ <white>iConomy Stats <green>]-----"
     total:  "<gray>Total +currency: <white>+amount"
     average: "<gray>Average +currency: <white>+amount"
     accounts: "<gray>Total Accounts: <white>+amount"
 
+##
+# Account Creation
+##
+accounts:
+    create: "<green>Created account with the name: <white>+name<green>."
+    remove: "<green>Deleted account: <white>+name<green>."
+    
 ##
 # Top-list Ranking
 ##
@@ -60,5 +70,6 @@ top:
 # Errors
 ##
 error:
+    exists: "<rose>Account already exists."
     account: "<rose>Player does not have account: <white>+name"
     funds: "<rose>Sorry, you do not have enough funds to do that."
