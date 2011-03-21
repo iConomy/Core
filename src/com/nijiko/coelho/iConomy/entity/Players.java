@@ -499,7 +499,7 @@ public class Players extends PlayerListener {
                         return;
                     }
 
-                    if (Misc.is(split[1], new String[]{ "help", "?", "grant", "-g", "reset", "-x", "set", "-s", "pay", "-p" })) {
+                    if (Misc.is(split[1], new String[]{ "help", "?", "grant", "-g", "reset", "-x", "set", "-s", "pay", "-p", })) {
                         showHelp(player); return;
                     } else {
                         if (!iConomy.hasPermissions(sender, "iConomy.access")) {
