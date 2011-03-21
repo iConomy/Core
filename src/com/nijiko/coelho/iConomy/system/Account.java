@@ -29,9 +29,10 @@ public class Account {
                 new Object[]{ this.name }
             );
 
-            if (rs != null)
-            if (rs.next()) {
-                return rs.getDouble("balance");
+            if (rs != null) {
+                if (rs.next()) {
+                    return rs.getDouble("balance");
+                }
             }
         } catch (Exception e) {
             System.out.println("[iConomy] Failed to grab player balance: " + e);
@@ -49,30 +50,8 @@ public class Account {
     }
 
     public void setBalance(double balance) {
-        ResultSet rs = null;
-        boolean hasAccount = false;
-
         try {
-            rs = iConomy.getDatabase().resultQuery(
-                "SELECT * FROM " + Constants.SQL_Table + " WHERE username = ? LIMIT 1",
-                new Object[]{ this.name }
-            );
-
-            hasAccount = rs.next();
-        } catch (Exception e) {
-            System.out.println("[iConomy] Failed to set balance: " + e);
-        } finally {
-            if(rs != null) {
-                try {
-                    rs.close();
-                } catch (SQLException ex) { }
-            }
-        }
-
-        iConomy.getDatabase().close();
-
-        try {
-            if (!hasAccount) {
+            if(!iConomy.getBank().hasAccount(this.name)) {
                 iConomy.getDatabase().executeQuery(
                     "INSERT INTO " + Constants.SQL_Table + "(username, balance) VALUES (?, ?)",
                     new Object[]{ this.name, balance }
@@ -123,30 +102,8 @@ public class Account {
     }
 
     public void remove() {
-        ResultSet rs = null;
-        boolean hasAccount = false;
-
         try {
-            rs = iConomy.getDatabase().resultQuery(
-                    "SELECT * FROM " + Constants.SQL_Table + " WHERE username = ?",
-                    new Object[]{ this.name }
-            );
-
-            hasAccount = rs.next();
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if(rs != null) {
-                try {
-                    rs.close();
-                } catch (SQLException ex) { }
-            }
-        }
-
-        iConomy.getDatabase().close();
-
-        try {
-            if (hasAccount) {
+            if(iConomy.getBank().hasAccount(this.name)) {
                 iConomy.getDatabase().executeQuery(
                         "DELETE FROM " + Constants.SQL_Table + " WHERE username = ?",
                         new Object[]{ this.name }

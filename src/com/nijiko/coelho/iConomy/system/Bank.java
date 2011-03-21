@@ -344,31 +344,17 @@ public class Bank {
      * @param account
      */
     public void removeAccount(String account) {
-        ResultSet rs = null;
-        try {
-            rs = iConomy.getDatabase().resultQuery(
-                "SELECT * FROM `" + Constants.SQL_Table + "` WHERE username = ?",
-                new Object[]{account}
-            );
-            
-            if (this.hasAccount(account)) {
-                getAccount(account).remove();
-            } else if (rs.next()) {
+        if(hasAccount(account)) {
+            try {
                 iConomy.getDatabase().executeQuery(
                     "DELETE FROM `" + Constants.SQL_Table + "` WHERE username = ?",
                     new Object[]{ account }
                 );
+            } catch(Exception e) {
+                System.out.println("[iConomy] Failed to remove account: " + e);
             }
-        } catch (Exception e) {
-            System.out.println("[iConomy] Failed to remove account " + e);
-        } finally {
-            if(rs != null) {
-                try {
-                    rs.close();
-                } catch (SQLException ex) { }
-            }
-        }
 
-        iConomy.getDatabase().close();
+            iConomy.getDatabase().close();
+        }
     }
 }
