@@ -71,6 +71,14 @@ public class Players extends PlayerListener {
             Messaging.send("&f/money set [player] [amount] &6-&e Sets a players balance.");
         }
 
+        if (iConomy.hasPermissions(player, "iConomy.admin.account.create")) {
+            Messaging.send("&f/money create [player] &6-&e Create player account.");
+        }
+
+        if (iConomy.hasPermissions(player, "iConomy.admin.account.remove")) {
+            Messaging.send("&f/money remove [player] &6-&e Remove player account.");
+        }
+
         if (iConomy.hasPermissions(player, "iConomy.admin.reset")) {
             Messaging.send("&f/money reset [player] &6-&e Reset player account.");
         }
@@ -80,6 +88,22 @@ public class Players extends PlayerListener {
         }
 
         Messaging.send("&e----------------------------------------------------");
+    }
+
+    /**
+     * Account Creation
+     */
+    public void createAccount(String name) {
+        iConomy.getBank().addAccount(name);
+        Messaging.send(Template.color("tag") + Template.parse("accounts.create", new String[]{ "+name,+n" }, new String[]{ name }));
+    }
+    
+    /**
+     * Account Removal
+     */
+    public void removeAccount(String name) {
+        iConomy.getBank().removeAccount(name);
+        Messaging.send(Template.color("tag") + Template.parse("accounts.remove", new String[]{ "+name,+n" }, new String[]{ name }));
     }
 
     /**
@@ -210,7 +234,7 @@ public class Players extends PlayerListener {
      */
     public void showGrant(String name, Player controller, double amount, boolean console) {
         Player online = iConomy.getBukkitServer().getPlayer(name);
-        
+
         if(online != null) {
             name = online.getName();
         }
@@ -522,6 +546,34 @@ public class Players extends PlayerListener {
                             showTop(sender, Integer.parseInt(split[2]) < 0 ? 5 : Integer.parseInt(split[2]));
                         } catch (Exception e) {
                             showTop(sender, 5);
+                        }
+
+                        return;
+                    }
+
+                    if (Misc.is(split[1], new String[]{"create", "-c"})) {
+                        if (!iConomy.hasPermissions(sender, "iConomy.admin.account.create")) {
+                            return;
+                        }
+
+                        if (!iConomy.getBank().hasAccount(split[2])) {
+                            createAccount(split[2]);
+                        } else {
+                            Messaging.send(Template.parse("error.exists", new String[]{"+name,+n"}, new String[]{split[2]}));
+                        }
+
+                        return;
+                    }
+
+                    if (Misc.is(split[1], new String[]{"remove", "-v"})) {
+                        if (!iConomy.hasPermissions(sender, "iConomy.admin.account.remove")) {
+                            return;
+                        }
+
+                        if (iConomy.getBank().hasAccount(split[2])) {
+                            removeAccount(split[2]);
+                        } else {
+                            Messaging.send(Template.parse("error.account", new String[]{"+name,+n"}, new String[]{split[2]}));
                         }
 
                         return;
