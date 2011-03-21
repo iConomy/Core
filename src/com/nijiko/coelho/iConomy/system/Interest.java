@@ -14,7 +14,7 @@ public class Interest extends TimerTask {
     public void run() {
         DecimalFormat DecimalFormat = new DecimalFormat("#.##");
         double amount = 0.0;
-        boolean percentage = (Constants.Interest_Percentage == 0.0);
+        boolean percentage = (Constants.Interest_Percentage != 0.0);
 
         if(!percentage) {
             try {
