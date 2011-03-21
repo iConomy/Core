@@ -1,4 +1,4 @@
-wget <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <project basedir="." default="build" name="iConomy">
     <property environment="env"/>
     <property name="debuglevel" value="source,lines,vars"/>
