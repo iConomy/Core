@@ -85,9 +85,9 @@ public class Account {
             }
         } catch (Exception e) {
             System.out.println("[iConomy] Failed to set balance: " + e);
-        } finally {
-            iConomy.getDatabase().close();
         }
+
+        iConomy.getDatabase().close();
     }
 
     public void resetBalance() {
@@ -141,9 +141,9 @@ public class Account {
                     rs.close();
                 } catch (SQLException ex) { }
             }
-
-            iConomy.getDatabase().close();
         }
+
+        iConomy.getDatabase().close();
 
         try {
             if (hasAccount) {
@@ -154,15 +154,9 @@ public class Account {
             }
         } catch (Exception e) {
             e.printStackTrace();
-        } finally {
-            if(rs != null) {
-                try {
-                    rs.close();
-                } catch (SQLException ex) { }
-            }
-
-            iConomy.getDatabase().close();
         }
+
+        iConomy.getDatabase().close();
     }
 
     @Deprecated

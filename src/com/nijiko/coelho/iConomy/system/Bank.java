@@ -99,9 +99,9 @@ public class Bank {
                     rs.close();
                 } catch (SQLException ex) { }
             }
-
-            iConomy.getDatabase().close();
         }
+
+        iConomy.getDatabase().close();
 
         return result;
     }
@@ -124,9 +124,9 @@ public class Bank {
                     rs.close();
                 } catch (SQLException ex) { }
             }
-
-            iConomy.getDatabase().close();
         }
+
+        iConomy.getDatabase().close();
 
         return accounts;
     }
@@ -159,9 +159,9 @@ public class Bank {
                     rs.close();
                 } catch (SQLException ex) { }
             }
-
-            iConomy.getDatabase().close();
         }
+
+        iConomy.getDatabase().close();
 
         return Account;
     }
@@ -208,16 +208,17 @@ public class Bank {
 
             return players;
         } catch (Exception e) {
-            return new ArrayList<String>();
         } finally {
             if(rs != null) {
                 try {
                     rs.close();
                 } catch (SQLException ex) { }
             }
-
-            iConomy.getDatabase().close();
         }
+
+        iConomy.getDatabase().close();
+
+        return new ArrayList<String>();
     }
 
     /**
@@ -243,16 +244,17 @@ public class Bank {
 
             return -1;
         } catch (Exception e) {
-            return -1;
         } finally {
             if(rs != null) {
                 try {
                     rs.close();
                 } catch (SQLException ex) { }
             }
-
-            iConomy.getDatabase().close();
         }
+
+        iConomy.getDatabase().close();
+
+        return -1;
     }
 
     /**
@@ -365,8 +367,8 @@ public class Bank {
                     rs.close();
                 } catch (SQLException ex) { }
             }
-
-            iConomy.getDatabase().close();
         }
+
+        iConomy.getDatabase().close();
     }
 }
