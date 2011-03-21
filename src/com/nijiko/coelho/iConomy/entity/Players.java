@@ -107,6 +107,15 @@ public class Players extends PlayerListener {
     public void showPayment(String from, String to, double amount) {
         Player paymentFrom = iConomy.getBukkitServer().getPlayer(from);
         Player paymentTo = iConomy.getBukkitServer().getPlayer(to);
+
+        if(paymentFrom != null) {
+            from = paymentFrom.getName();
+        }
+
+        if(paymentTo != null) {
+            to = paymentTo.getName();
+        }
+
         Account balanceFrom = iConomy.getBank().getAccount(from);
         Account balanceTo = iConomy.getBank().getAccount(to);
 
@@ -161,6 +170,10 @@ public class Players extends PlayerListener {
     public void showReset(String account, Player controller, boolean console) {
         Player player = iConomy.getBukkitServer().getPlayer(account);
 
+        if(player != null) {
+            account = player.getName();
+        }
+
         // Log Transaction
         iConomy.getTransactions().insert(account, "[System]", 0.0, 0.0, 0.0, 0.0, iConomy.getBank().getAccount(account).getBalance());
 
@@ -197,43 +210,51 @@ public class Players extends PlayerListener {
      */
     public void showGrant(String name, Player controller, double amount, boolean console) {
         Player online = iConomy.getBukkitServer().getPlayer(name);
+        
+        if(online != null) {
+            name = online.getName();
+        }
+
         Account account = iConomy.getBank().getAccount(name);
-        account.add(amount);
-        account.save();
 
-        // Log Transaction
-        if (amount < 0.0) {
-            iConomy.getTransactions().insert("[System]", name, 0.0, account.getBalance(), 0.0, 0.0, amount);
-        } else {
-            iConomy.getTransactions().insert("[System]", name, 0.0, account.getBalance(), 0.0, amount, 0.0);
-        }
+        if(account != null) {
+            account.add(amount);
+            account.save();
 
-        if (online != null) {
-            Messaging.send(online,
-                Template.color("tag") + Template.parse(
-                    (amount < 0.0) ? "personal.debit" : "personal.credit",
-                    new String[]{"+by", "+amount,+a"},
-                    new String[]{(console) ? "console" : controller.getName(), iConomy.getBank().format(((amount < 0.0) ? amount * -1 : amount))}
-                )
-            );
+            // Log Transaction
+            if (amount < 0.0) {
+                iConomy.getTransactions().insert("[System]", name, 0.0, account.getBalance(), 0.0, 0.0, amount);
+            } else {
+                iConomy.getTransactions().insert("[System]", name, 0.0, account.getBalance(), 0.0, amount, 0.0);
+            }
 
-            showBalance(name, online, true);
-        }
+            if (online != null) {
+                Messaging.send(online,
+                    Template.color("tag") + Template.parse(
+                        (amount < 0.0) ? "personal.debit" : "personal.credit",
+                        new String[]{"+by", "+amount,+a"},
+                        new String[]{(console) ? "console" : controller.getName(), iConomy.getBank().format(((amount < 0.0) ? amount * -1 : amount))}
+                    )
+                );
 
-        if (controller != null) {
-            Messaging.send(
-                Template.color("tag") + Template.parse(
-                    (amount < 0.0) ? "player.debit" : "player.credit",
-                    new String[]{"+name,+n", "+amount,+a"},
-                    new String[]{name, iConomy.getBank().format(amount)}
-                )
-            );
-        }
+                showBalance(name, online, true);
+            }
 
-        if (console) {
-            System.out.println("Player " + account.getName() + "'s account had " + amount + " grant to it.");
-        } else {
-            System.out.println(Messaging.bracketize("iConomy") + "Player " + account.getName() + "'s account had " + amount + " grant to it by " + controller.getName() + ".");
+            if (controller != null) {
+                Messaging.send(
+                    Template.color("tag") + Template.parse(
+                        (amount < 0.0) ? "player.debit" : "player.credit",
+                        new String[]{"+name,+n", "+amount,+a"},
+                        new String[]{name, iConomy.getBank().format(amount)}
+                    )
+                );
+            }
+
+            if (console) {
+                System.out.println("Player " + account.getName() + "'s account had " + amount + " grant to it.");
+            } else {
+                System.out.println(Messaging.bracketize("iConomy") + "Player " + account.getName() + "'s account had " + amount + " grant to it by " + controller.getName() + ".");
+            }
         }
     }
 
@@ -246,39 +267,47 @@ public class Players extends PlayerListener {
      */
     public void showSet(String name, Player controller, double amount, boolean console) {
         Player online = iConomy.getBukkitServer().getPlayer(name);
+
+        if(online != null) {
+            name = online.getName();
+        }
+
         Account account = iConomy.getBank().getAccount(name);
-        account.setBalance(amount);
-        account.save();
 
-        // Log Transaction
-        iConomy.getTransactions().insert("[System]", name, 0.0, account.getBalance(), amount, 0.0, 0.0);
+        if(account != null) {
+            account.setBalance(amount);
+            account.save();
 
-        if (online != null) {
-            Messaging.send(online,
-                Template.color("tag") + Template.parse(
-                    "personal.set",
-                    new String[]{"+by", "+amount,+a"},
-                    new String[]{(console) ? "Console" : controller.getName(), iConomy.getBank().format(amount)}
-                )
-            );
+            // Log Transaction
+            iConomy.getTransactions().insert("[System]", name, 0.0, account.getBalance(), amount, 0.0, 0.0);
 
-            showBalance(name, online, true);
-        }
+            if (online != null) {
+                Messaging.send(online,
+                    Template.color("tag") + Template.parse(
+                        "personal.set",
+                        new String[]{"+by", "+amount,+a"},
+                        new String[]{(console) ? "Console" : controller.getName(), iConomy.getBank().format(amount)}
+                    )
+                );
 
-        if (controller != null) {
-            Messaging.send(
-                Template.color("tag") + Template.parse(
-                    "player.set",
-                    new String[]{ "+name,+n", "+amount,+a" },
-                    new String[]{ name, iConomy.getBank().format(amount) }
-                )
-            );
-        }
+                showBalance(name, online, true);
+            }
 
-        if (console) {
-            System.out.println("Player " + account + "'s account had " + amount + " set to it.");
-        } else {
-            System.out.println(Messaging.bracketize("iConomy") + "Player " + account + "'s account had " + amount + " set to it by " + controller.getName() + ".");
+            if (controller != null) {
+                Messaging.send(
+                    Template.color("tag") + Template.parse(
+                        "player.set",
+                        new String[]{ "+name,+n", "+amount,+a" },
+                        new String[]{ name, iConomy.getBank().format(amount) }
+                    )
+                );
+            }
+
+            if (console) {
+                System.out.println("Player " + account + "'s account had " + amount + " set to it.");
+            } else {
+                System.out.println(Messaging.bracketize("iConomy") + "Player " + account + "'s account had " + amount + " set to it by " + controller.getName() + ".");
+            }
         }
     }
 
@@ -451,6 +480,12 @@ public class Players extends PlayerListener {
                     } else {
                         if (!iConomy.hasPermissions(sender, "iConomy.access")) {
                             return;
+                        }
+
+                        Player online = iConomy.getBukkitServer().getPlayer(split[1]);
+
+                        if(online != null) {
+                            split[1] = online.getName();
                         }
 
                         if (iConomy.getBank().hasAccount(split[1])) {
