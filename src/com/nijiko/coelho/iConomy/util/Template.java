@@ -11,6 +11,35 @@ public class Template {
     public Template(String directory, String filename) {
         this.tpl = new Configuration(new File(directory, filename));
         this.tpl.load();
+
+        upgrade();
+    }
+
+    public void upgrade() {
+        String[] nodes = null;
+        String[] templates = null;
+
+        if(this.tpl.getString("accounts.create") == null) {
+            nodes = new String[]{ "accounts.create", "accounts.remove", "error.exists" };
+            templates = new String[]{
+                "<green>Created account with the name: <white>+name<green>.",
+                "<green>Deleted account: <white>+name<green>.",
+                "<rose>Account already exists."
+            };
+        }
+
+        if(nodes != null) {
+            System.out.println(" - Upgrading Messages.yml for iConomy");
+
+            for(int i = 0; i < nodes.length; i++) {
+                System.out.println("   Adding node ["+nodes[i]+"] #" + (i+1) + " of " + nodes.length);
+                this.tpl.setProperty(nodes[i], templates[i]);
+            }
+
+            this.tpl.save();
+
+            System.out.println(" + Messages Upgrade Complete.");
+        }
     }
 
     /**
