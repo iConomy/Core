@@ -19,6 +19,10 @@ System:
         Enabled: false
         # How many seconds for this to happen
         IntervalSeconds: 60
+        # Percentage
+        # 10 is a good number
+        # This overrides all below if used.
+        Percentage: 0.0
         # Leave this at 0.0 if you wish to use Min/Max!
         # Otherwise, this will over-ride that.
         # This is the DIRECT amount, it's not dynamic and will not change.
