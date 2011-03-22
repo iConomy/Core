@@ -34,6 +34,8 @@ import com.nijiko.coelho.iConomy.util.Downloader;
 import com.nijiko.coelho.iConomy.util.FileManager;
 import com.nijiko.permissions.PermissionHandler;
 import com.nijikokun.bukkit.Permissions.Permissions;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 
 /**
  * iConomy by Team iCo
@@ -170,13 +172,8 @@ public class iConomy extends JavaPlugin {
     @Override
     public void onDisable() {
         try {
-            if(iDatabase != null) {
-                iDatabase.getConnection().close();
-                System.out.println("[iConomy] All un-saved account data has been saved, plugin is now disabling.");
-            } else {
-                System.out.println("[iConomy] Plugin disabled.");
-            }
-        } catch (SQLException e) {
+            System.out.println("[iConomy] Plugin disabled.");
+        } catch (Exception e) {
             System.out.println("[iConomy] An error occured upon disabling: " + e);
         } finally {
             if (Interest_Timer != null) {
@@ -241,10 +238,15 @@ public class iConomy extends JavaPlugin {
                     "INSERT INTO " + Constants.SQL_Table + "(id, username, balance) SELECT id, player, balance FROM ibalances;",
                     "DROP TABLE ibalances;"
                 };
+                Connection conn = null;
+                ResultSet rs = null;
+                PreparedStatement ps = null;
 
                 try {
-                    DatabaseMetaData dbm = iDatabase.getConnection().getMetaData();
-                    ResultSet rs = dbm.getTables(null, null, "ibalances", null);
+                    conn = iConomy.getDatabase().checkOut();
+                    DatabaseMetaData dbm = conn.getMetaData();
+                    rs = dbm.getTables(null, null, "ibalances", null);
+                    ps = null;
 
                     if (rs.next()) {
                         System.out.println(" - Updating " + Constants.Database_Type + " Database for latest iConomy");
@@ -253,7 +255,8 @@ public class iConomy extends JavaPlugin {
                         SQL = (Constants.Database_Type.equalsIgnoreCase("mysql")) ? MySQL : SQLite;
 
                         for (String Query : SQL) {
-                            iDatabase.executeQuery(Query);
+                            ps = conn.prepareStatement(Query);
+                            ps.executeQuery(Query);
 
                             System.out.println("   Executing SQL Query #" + i + " of " + (SQL.length));
                             ++i;
@@ -264,6 +267,15 @@ public class iConomy extends JavaPlugin {
                     file.write(version);
                 } catch (SQLException e) {
                     System.out.println("[iConomy] Error updating database: " + e);
+                } finally {
+                    if(ps != null)
+                        try { ps.close(); } catch (SQLException ex) { }
+
+                    if(rs != null)
+                        try { rs.close(); } catch (SQLException ex) { }
+
+                    if(conn != null)
+                        iConomy.getDatabase().checkIn(conn);
                 }
             }
 

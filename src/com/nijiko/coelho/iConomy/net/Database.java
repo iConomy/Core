@@ -20,13 +20,7 @@ public class Database {
     private ResultSet ResultSet;
     private ConnectionPool Pool = null;
 
-    public Database() { }
-
-    public void initialize() {
-        connection();
-    }
-
-    public Connection connection() {
+    public Database() {
         if(Pool == null) {
             if (Constants.Database_Type.equalsIgnoreCase("sqlite")) {
                 Pool = new ConnectionPool(
@@ -44,116 +38,13 @@ public class Database {
                 );
             }
         }
-
-        // Checkout
-        this.Connection = Pool.checkOut();
-
-        // Return
-        return this.Connection;
     }
 
-    public ResultSet resultQuery(String query) {
-        initialize();
-
-        try {
-            this.Statement = this.Connection.prepareStatement(query);
-            return this.Statement.executeQuery();
-        } catch (Exception e) {
-            return null;
-        }
+    public Connection checkOut() {
+        return Pool.checkOut();
     }
 
-    public ResultSet resultQuery(String query, Object[] parameters) {
-        initialize();
-
-        try {
-            this.Statement = this.Connection.prepareStatement(query);
-            int i = 1;
-
-            for (Object obj : parameters) {
-                this.Statement.setObject(i, obj);
-                i++;
-            }
-
-            return this.Statement.executeQuery();
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
-    public boolean executeQuery(String query) {
-        initialize();
-
-        try {
-            this.Statement = this.Connection.prepareStatement(query);
-            this.Statement.executeUpdate();
-            return true;
-        } catch (SQLException ex) {
-            System.out.println("[iConomy] Could not execute query: " + ex);
-        } finally {
-            close();
-        }
-
-        return false;
-    }
-
-    public boolean executeQuery(String query, Object[] parameters) {
-        initialize();
-
-        try {
-            this.Statement = this.Connection.prepareStatement(query);
-            int i = 1;
-
-            for (Object obj : parameters) {
-                this.Statement.setObject(i, obj);
-                i++;
-            }
-
-            this.Statement.executeUpdate();
-            return true;
-        } catch (SQLException ex) {
-            System.out.println("[iConomy] Could not execute query: " + ex);
-        } finally {
-            close();
-        }
-
-        return false;
-    }
-
-    public Connection getConnection() {
-        initialize();
-
-        return this.Connection;
-    }
-
-    public void close() {
-        try {
-            if (this.Statement != null) {
-                this.Statement.close();
-            }
-
-            if (this.ResultSet != null) {
-                this.ResultSet.close();
-            }
-
-            Pool.checkIn(this.Connection);
-
-        } catch (SQLException ex) {
-            System.out.println("[iConomy] Failed to close / checkin connection: " + ex);
-
-            // Close anyway.
-            this.Connection = null;
-            this.Statement = null;
-            this.ResultSet = null;
-        }
-    }
-
-    @Override
-    protected void finalize() {
-        try {
-            super.finalize();
-        } catch (Throwable ex) { }
-
-        close();
+    public void checkIn(Connection connection) {
+        this.Pool.checkIn(connection);
     }
 }

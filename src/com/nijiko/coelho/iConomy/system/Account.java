@@ -5,6 +5,8 @@ import java.text.DecimalFormat;
 
 import com.nijiko.coelho.iConomy.iConomy;
 import com.nijiko.coelho.iConomy.util.Constants;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 public class Account {
@@ -21,13 +23,15 @@ public class Account {
     }
 
     public double getBalance() {
+        Connection conn = null;
         ResultSet rs = null;
+        PreparedStatement ps = null;
 
         try {
-            rs = iConomy.getDatabase().resultQuery(
-                "SELECT balance FROM " + Constants.SQL_Table + " WHERE username = ? LIMIT 1",
-                new Object[]{ this.name }
-            );
+            conn = iConomy.getDatabase().checkOut();
+            ps = conn.prepareStatement("SELECT balance FROM " + Constants.SQL_Table + " WHERE username = ? LIMIT 1");
+            ps.setString(1, this.name);
+            rs = ps.executeQuery();
 
             if (rs != null) {
                 if (rs.next()) {
@@ -37,36 +41,47 @@ public class Account {
         } catch (Exception e) {
             System.out.println("[iConomy] Failed to grab player balance: " + e);
         } finally {
-            if(rs != null) {
-                try {
-                    rs.close();
-                } catch (SQLException ex) { }
-            }
+            if(ps != null)
+                try { ps.close(); } catch (SQLException ex) { }
 
-            iConomy.getDatabase().close();
+            if(rs != null)
+                try { rs.close(); } catch (SQLException ex) { }
+
+            if(conn != null)
+                iConomy.getDatabase().checkIn(conn);
         }
 
         return Constants.Initial_Balance;
     }
 
     public void setBalance(double balance) {
+        Connection conn = null;
+        ResultSet rs = null;
+        PreparedStatement ps = null;
+
         try {
+            conn = iConomy.getDatabase().checkOut();
+
             if(!iConomy.getBank().hasAccount(this.name)) {
-                iConomy.getDatabase().executeQuery(
-                    "INSERT INTO " + Constants.SQL_Table + "(username, balance) VALUES (?, ?)",
-                    new Object[]{ this.name, balance }
-                );
+                ps = conn.prepareStatement("INSERT INTO " + Constants.SQL_Table + "(username, balance) VALUES (?, ?)");
+                ps.setString(1, this.name);
+                ps.setDouble(2, balance);
             } else {
-                iConomy.getDatabase().executeQuery(
-                    "UPDATE " + Constants.SQL_Table + " SET balance = ? WHERE username = ?",
-                    new Object[]{ balance, this.name }
-                );
+                ps = conn.prepareStatement("UPDATE " + Constants.SQL_Table + " SET balance = ? WHERE username = ?");
+                ps.setDouble(1, balance);
+                ps.setString(2, this.name);
             }
+
+            ps.executeUpdate();
         } catch (Exception e) {
             System.out.println("[iConomy] Failed to set balance: " + e);
-        }
+        } finally {
+            if(ps != null)
+                try { ps.close(); } catch (SQLException ex) { }
 
-        iConomy.getDatabase().close();
+            if(conn != null)
+                iConomy.getDatabase().checkIn(conn);
+        }
     }
 
     public void resetBalance() {
@@ -102,18 +117,23 @@ public class Account {
     }
 
     public void remove() {
-        try {
-            if(iConomy.getBank().hasAccount(this.name)) {
-                iConomy.getDatabase().executeQuery(
-                        "DELETE FROM " + Constants.SQL_Table + " WHERE username = ?",
-                        new Object[]{ this.name }
-                );
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        Connection conn = null;
+        PreparedStatement ps = null;
 
-        iConomy.getDatabase().close();
+        try {
+            conn = iConomy.getDatabase().checkOut();
+            ps = conn.prepareStatement("DELETE FROM `" + Constants.SQL_Table + "` WHERE username = ?");
+            ps.setString(1, this.name);
+            ps.executeUpdate();
+        } catch(Exception e) {
+            System.out.println("[iConomy] Failed to remove account: " + e);
+        } finally {
+            if(ps != null)
+                try { ps.close(); } catch (SQLException ex) { }
+
+            if(conn != null)
+                iConomy.getDatabase().checkIn(conn);
+        }
     }
 
     @Deprecated
