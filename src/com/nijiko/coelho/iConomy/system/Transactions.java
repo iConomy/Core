@@ -24,6 +24,7 @@ public class Transactions {
             if (Misc.is(Constants.Database_Type, new String[] { "sqlite", "h2", "h2sql" })) {
                 try {
                     ps = conn.prepareStatement("CREATE TABLE " + Constants.SQL_Table + "_Transactions(id INT AUTO_INCREMENT PRIMARY KEY, account_from TEXT , account_to TEXT, account_from_balance DECIMAL(65, 2), account_to_balance DECIMAL(65, 2), timestamp TEXT , set DECIMAL(65, 2), gain DECIMAL(65, 2), loss DECIMAL(65, 2));");
+                    ps.executeUpdate();
                 } catch(SQLException E) { }
             } else {
                 conn = iConomy.getDatabase().checkOut();

@@ -34,6 +34,7 @@ public class Bank {
         if (Misc.is(Constants.Database_Type, new String[] { "sqlite", "h2", "h2sql" })) {
             try {
                 ps = conn.prepareStatement("CREATE TABLE " + Constants.SQL_Table + "(id INT auto_increment PRIMARY KEY, username VARCHAR(32), balance DECIMAL (65, 2));");
+                ps.executeUpdate();
             } catch(SQLException E) { }
         } else {
             DatabaseMetaData dbm = conn.getMetaData();
@@ -51,6 +52,9 @@ public class Bank {
                 }
             }
         }
+
+        if(conn != null)
+            iConomy.getDatabase().checkIn(conn);
 
         conn = iConomy.getDatabase().checkOut();
         ps = conn.prepareStatement("SELECT * FROM " + Constants.SQL_Table);
