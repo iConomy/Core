@@ -32,7 +32,7 @@ System:
         # How much maximum money do they get per interval
         MaximumPerInterval: 2
     Database:
-        # Can be MySQL, or SQLite
+        # Can be MySQL, or H2SQL
         Type: SQLite
         # Name of the database
         Name: minecraft
