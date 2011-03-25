@@ -32,6 +32,7 @@ import com.nijiko.coelho.iConomy.util.Constants;
 import com.nijiko.coelho.iConomy.system.Transactions;
 import com.nijiko.coelho.iConomy.util.Downloader;
 import com.nijiko.coelho.iConomy.util.FileManager;
+import com.nijiko.coelho.iConomy.util.Misc;
 import com.nijiko.permissions.PermissionHandler;
 import com.nijikokun.bukkit.Permissions.Permissions;
 import java.sql.Connection;
@@ -103,9 +104,9 @@ public class iConomy extends JavaPlugin {
             return;
         }
 
-        if(Constants.Database_Type.equalsIgnoreCase("sqlite")) {
-            if(!(new File("lib" + File.separator, "sqlitejdbc-v056.jar").exists())) {
-                Downloader.install(Constants.SQLite_Jar_Location, "sqlitejdbc-v056.jar");
+        if(Misc.is(Constants.Database_Type, new String[] { "sqlite", "h2", "h2sql" })) {
+            if(!(new File("lib" + File.separator, "h2.jar").exists())) {
+                Downloader.install(Constants.H2_Jar_Location, "h2.jar");
             }
         } else {
             if(!(new File("lib" + File.separator, "mysql-connector-java-bin.jar").exists())) {
