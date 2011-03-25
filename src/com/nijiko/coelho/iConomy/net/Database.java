@@ -7,6 +7,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
 import com.nijiko.coelho.iConomy.util.Constants;
+import com.nijiko.coelho.iConomy.util.Misc;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.logging.Level;
@@ -22,12 +23,12 @@ public class Database {
 
     public Database() {
         if(Pool == null) {
-            if (Constants.Database_Type.equalsIgnoreCase("sqlite")) {
+            if(Misc.is(Constants.Database_Type, new String[] { "sqlite", "h2", "h2sql" })) {
                 Pool = new ConnectionPool(
-                    "org.sqlite.JDBC",
-                    "jdbc:sqlite:" + Constants.Plugin_Directory + File.separator + Constants.SQL_Database + ".sqlite",
-                    "",
-                    ""
+                    "org.h2.Driver",
+                    "jdbc:h2:" + Constants.Plugin_Directory + File.separator + Constants.SQL_Database + ";AUTO_RECONNECT=TRUE;FILE_LOCK=SERIALIZED",
+                    "sa",
+                    "sa"
                 );
             } else if (Constants.Database_Type.equalsIgnoreCase("mysql")) {
                 Pool = new ConnectionPool(
