@@ -9,12 +9,14 @@ import java.util.HashMap;
 
 import com.nijiko.coelho.iConomy.iConomy;
 import com.nijiko.coelho.iConomy.util.Constants;
+import com.nijiko.coelho.iConomy.util.Misc;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 
 public class Bank {
     private String currency;
     private double initial;
+    public ArrayList<String> accounts = new ArrayList<String>();
 
     /**
      * Loads all bank accounts into a hashmap.
@@ -26,20 +28,36 @@ public class Bank {
         this.initial = Constants.Initial_Balance;
 
         Connection conn = iConomy.getDatabase().checkOut();
-        DatabaseMetaData dbm = conn.getMetaData();
-        ResultSet rs = dbm.getTables(null, null, Constants.SQL_Table, null);
         PreparedStatement ps = null;
+        ResultSet rs = null;
 
-        if (!rs.next()) {
-            if (Constants.Database_Type.equalsIgnoreCase("mysql")) {
-                ps = conn.prepareStatement("CREATE TABLE " + Constants.SQL_Table + " (`id` INT(10) NOT NULL AUTO_INCREMENT, `username` TEXT NOT NULL, `balance` DECIMAL(65, 2) NOT NULL, PRIMARY KEY (`id`))");
-            } else if (Constants.Database_Type.equalsIgnoreCase("sqlite")) {
-                ps = conn.prepareStatement("CREATE TABLE '" + Constants.SQL_Table + "' ('id' INT (10) PRIMARY KEY , 'username' TEXT , 'balance' DECIMAL (65, 2));");
-            }
+        if (Misc.is(Constants.Database_Type, new String[] { "sqlite", "h2", "h2sql" })) {
+            try {
+                ps = conn.prepareStatement("CREATE TABLE " + Constants.SQL_Table + "(id INT auto_increment PRIMARY KEY, username VARCHAR(32), balance DECIMAL (65, 2));");
+            } catch(SQLException E) { }
+        } else {
+            DatabaseMetaData dbm = conn.getMetaData();
+            rs = dbm.getTables(null, null, Constants.SQL_Table, null);
 
-            if(ps != null) {
-                ps.executeUpdate();
+            if (!rs.next()) {
+                if (Constants.Database_Type.equalsIgnoreCase("mysql")) {
+                    ps = conn.prepareStatement("CREATE TABLE " + Constants.SQL_Table + " (`id` INT(10) NOT NULL AUTO_INCREMENT, `username` TEXT NOT NULL, `balance` DECIMAL(65, 2) NOT NULL, PRIMARY KEY (`id`))");
+                } else if (Misc.is(Constants.Database_Type, new String[] { "sqlite", "h2", "h2sql" })) {
+                    ps = conn.prepareStatement("CREATE TABLE " + Constants.SQL_Table + "(id INT auto_increment PRIMARY KEY, username VARCHAR(32), balance DECIMAL (65, 2));");
+                }
+
+                if(ps != null) {
+                    ps.executeUpdate();
+                }
             }
+        }
+
+        conn = iConomy.getDatabase().checkOut();
+        ps = conn.prepareStatement("SELECT * FROM " + Constants.SQL_Table);
+        rs = ps.executeQuery();
+
+        while (rs.next()) {
+            accounts.add(rs.getString("username").toLowerCase());
         }
         
         if(ps != null)
@@ -90,32 +108,7 @@ public class Bank {
      * @return boolean - Does the account exist?
      */
     public boolean hasAccount(String account) {
-        boolean result = false;
-        Connection conn = null;
-        ResultSet rs = null;
-        PreparedStatement ps = null;
-
-        try {
-            conn = iConomy.getDatabase().checkOut();
-            ps = conn.prepareStatement("SELECT * FROM " + Constants.SQL_Table + " WHERE username = ?  LIMIT 1");
-            ps.setString(1, account);
-            rs = ps.executeQuery();
-
-            result = rs.next();
-        } catch (Exception e) {
-            System.out.println("[iConomy] Failed to check account " + e);
-        } finally {
-            if(ps != null)
-                try { ps.close(); } catch (SQLException ex) { }
-
-            if(rs != null)
-                try { rs.close(); } catch (SQLException ex) { }
-
-            if(conn != null)
-                iConomy.getDatabase().checkIn(conn);
-        }
-
-        return result;
+        return accounts.contains(account.toLowerCase());
     }
 
     public HashMap<String, Double> getAccounts() {
@@ -316,6 +309,7 @@ public class Bank {
         if (!this.hasAccount(account)) {
             Account initialized = new Account(account);
             initialized.setBalance(this.initial);
+            accounts.add(account);
         } else {
             getAccount(account).setBalance(this.initial);
         }
@@ -333,6 +327,7 @@ public class Bank {
         if (!this.hasAccount(account)) {
             Account initialized = new Account(account);
             initialized.setBalance(balance);
+            accounts.add(account);
         } else {
             getAccount(account).setBalance(balance);
         }
@@ -348,6 +343,7 @@ public class Bank {
         if (this.hasAccount(account)) {
             Account updating = getAccount(account);
             updating.setBalance(amount);
+            accounts.add(account);
         } else {
             addAccount(account, amount);
         }
@@ -385,6 +381,8 @@ public class Bank {
             } catch(Exception e) {
                 System.out.println("[iConomy] Failed to remove account: " + e);
             } finally {
+                accounts.remove(account);
+
                 if(ps != null)
                     try { ps.close(); } catch (SQLException ex) { }
 

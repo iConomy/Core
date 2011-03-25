@@ -66,6 +66,7 @@ public class Account {
                 ps = conn.prepareStatement("INSERT INTO " + Constants.SQL_Table + "(username, balance) VALUES (?, ?)");
                 ps.setString(1, this.name);
                 ps.setDouble(2, balance);
+                iConomy.getBank().accounts.add(this.name);
             } else {
                 ps = conn.prepareStatement("UPDATE " + Constants.SQL_Table + " SET balance = ? WHERE username = ?");
                 ps.setDouble(1, balance);
@@ -128,6 +129,8 @@ public class Account {
         } catch(Exception e) {
             System.out.println("[iConomy] Failed to remove account: " + e);
         } finally {
+            iConomy.getBank().accounts.remove(this.name);
+
             if(ps != null)
                 try { ps.close(); } catch (SQLException ex) { }
 
