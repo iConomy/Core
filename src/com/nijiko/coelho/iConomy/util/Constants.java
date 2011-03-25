@@ -19,7 +19,7 @@ public class Constants {
         "System.Interest.Percentage:0.0",
         "System.Interest.MinimumPerInterval:1",
         "System.Interest.MaximumPerInterval:2",
-        "System.Database.Type:SQLite",
+        "System.Database.Type:H2SQL",
         "System.Database.MySQL.Hostname:localhost",
         "System.Database.MySQL.Port:3306",
         "System.Database.MySQL.Username:root",
@@ -31,7 +31,7 @@ public class Constants {
     // Files and Directories
     public static File Configuration;
     public static String Plugin_Directory;
-    public static String SQLite_Jar_Location = "http://mirror.anigaiku.com/Dependencies/sqlitejdbc-v056.jar";
+    public static String H2_Jar_Location = "http://mirror.nexua.org/Dependencies/h2.jar";
     public static String MySQL_Jar_Location = "http://mirror.anigaiku.com/Dependencies/mysql-connector-java-bin.jar";
 
 
@@ -51,7 +51,7 @@ public class Constants {
     public static double Interest_Max_Interval = 2;
 
     // Database Type
-    public static String Database_Type = "SQLite";
+    public static String Database_Type = "H2SQL";
 
     // Relational SQL Generics
     public static String SQL_Hostname = "localhost";
