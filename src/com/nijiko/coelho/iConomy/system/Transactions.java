@@ -5,6 +5,7 @@ import java.sql.ResultSet;
 
 import com.nijiko.coelho.iConomy.iConomy;
 import com.nijiko.coelho.iConomy.util.Constants;
+import com.nijiko.coelho.iConomy.util.Misc;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -20,25 +21,27 @@ public class Transactions {
         PreparedStatement ps = null;
 
         if (Constants.Log_Data) {
-            conn = iConomy.getDatabase().checkOut();
-            DatabaseMetaData dbm = conn.getMetaData();
-            rs = dbm.getTables(null, null, Constants.SQL_Table + "_Transactions", null);
+            if (Misc.is(Constants.Database_Type, new String[] { "sqlite", "h2", "h2sql" })) {
+                try {
+                    ps = conn.prepareStatement("CREATE TABLE " + Constants.SQL_Table + "_Transactions(id INT AUTO_INCREMENT PRIMARY KEY, account_from TEXT , account_to TEXT, account_from_balance DECIMAL(65, 2), account_to_balance DECIMAL(65, 2), timestamp TEXT , set DECIMAL(65, 2), gain DECIMAL(65, 2), loss DECIMAL(65, 2));");
+                } catch(SQLException E) { }
+            } else {
+                conn = iConomy.getDatabase().checkOut();
+                DatabaseMetaData dbm = conn.getMetaData();
+                rs = dbm.getTables(null, null, Constants.SQL_Table + "_Transactions", null);
 
-            if (!rs.next()) {
-                System.out.println("[iConomy] Creating logging database.. [" + Constants.SQL_Table + "_Transactions]");
+                if (!rs.next()) {
+                    System.out.println("[iConomy] Creating logging database.. [" + Constants.SQL_Table + "_Transactions]");
 
-                if (Constants.Database_Type.equalsIgnoreCase("mysql")) {
                     ps = conn.prepareStatement("CREATE TABLE " + Constants.SQL_Table + "_Transactions (`id` INT(255) NOT NULL AUTO_INCREMENT, `account_from` TEXT NOT NULL, `account_to` TEXT NOT NULL, `account_from_balance` DECIMAL(65, 2) NOT NULL, `account_to_balance` DECIMAL(65, 2) NOT NULL, `timestamp` TEXT NOT NULL, `set` DECIMAL(65, 2) NOT NULL, `gain` DECIMAL(65, 2) NOT NULL, `loss` DECIMAL(65, 2) NOT NULL, PRIMARY KEY (`id`))");
-                } else if (Constants.Database_Type.equalsIgnoreCase("sqlite")) {
-                    ps = conn.prepareStatement("CREATE TABLE '" + Constants.SQL_Table + "_Transactions' ('id' INT ( 255 ) PRIMARY KEY , 'account_from' TEXT , 'account_to' TEXT , 'account_from_balance' DECIMAL ( 65 , 2 ), 'account_to_balance' DECIMAL ( 65 , 2 ), 'timestamp' TEXT , 'set' DECIMAL ( 65 , 2 ), 'gain' DECIMAL ( 65 , 2 ), 'loss' DECIMAL ( 65 , 2 ));");
-                }
 
-                if(ps != null) {
-                    ps.executeUpdate();
-                    System.out.println("[iConomy] Database Created.");
+                    if(ps != null) {
+                        ps.executeUpdate();
+                        System.out.println("[iConomy] Database Created.");
+                    }
                 }
+                System.out.println("[iConomy] Logging enabled.");
             }
-            System.out.println("[iConomy] Logging enabled.");
         } else {
             System.out.println("[iConomy] Logging is currently disabled.");
         }
