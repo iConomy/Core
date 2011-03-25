@@ -141,7 +141,7 @@ public class iConomy extends JavaPlugin {
             Bank = new Bank();
             Bank.load();
         } catch (Exception e) {
-            System.out.println("[iConomy] Failed to load accounts from database: " + e);
+            System.out.println("[iConomy] Failed to load database: " + e);
             Server.getPluginManager().disablePlugin(this);
             return;
         }
