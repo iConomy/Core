@@ -53,17 +53,6 @@ public class Bank {
             }
         }
 
-        if(conn != null)
-            iConomy.getDatabase().checkIn(conn);
-
-        conn = iConomy.getDatabase().checkOut();
-        ps = conn.prepareStatement("SELECT * FROM " + Constants.SQL_Table);
-        rs = ps.executeQuery();
-
-        while (rs.next()) {
-            accounts.add(rs.getString("username").toLowerCase());
-        }
-        
         if(ps != null)
             try { ps.close(); } catch (SQLException ex) { }
 
@@ -72,6 +61,26 @@ public class Bank {
 
         if(conn != null)
             iConomy.getDatabase().checkIn(conn);
+
+        try {
+            conn = iConomy.getDatabase().checkOut();
+            ps = conn.prepareStatement("SELECT * FROM " + Constants.SQL_Table);
+            rs = ps.executeQuery();
+
+            while (rs.next()) {
+                accounts.add(rs.getString("username").toLowerCase());
+            }
+        } catch (SQLException E) {
+        } finally {
+            if(ps != null)
+                try { ps.close(); } catch (SQLException ex) { }
+
+            if(rs != null)
+                try { rs.close(); } catch (SQLException ex) { }
+
+            if(conn != null)
+                iConomy.getDatabase().checkIn(conn);
+        }
     }
 
     /**
