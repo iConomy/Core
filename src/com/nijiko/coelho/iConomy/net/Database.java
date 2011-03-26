@@ -7,17 +7,19 @@ import java.sql.DriverManager;
 import com.nijiko.coelho.iConomy.util.Constants;
 import com.nijiko.coelho.iConomy.util.Misc;
 import java.sql.SQLException;
+import org.h2.jdbcx.JdbcConnectionPool;
 
 public class Database {
+    private JdbcConnectionPool h2pool;
     private String driver;
     private String dsn;
     private String username;
     private String password;
 
     public Database() {
-        if(Misc.is(Constants.Database_Type, new String[] { "sqlite", "h2", "h2sql" })) {
+        if(Misc.is(Constants.Database_Type, new String[] { "sqlite", "h2", "h2sql", "h2db" })) {
             driver = "org.h2.Driver";
-            dsn = "jdbc:h2:" + Constants.Plugin_Directory + File.separator + Constants.SQL_Database + ";AUTO_RECONNECT=TRUE;FILE_LOCK=SERIALIZED";
+            dsn = "jdbc:h2:" + Constants.Plugin_Directory + File.separator + Constants.SQL_Database + ";AUTO_RECONNECT=TRUE";
             username = "sa";
             password = "sa";
         } else if (Constants.Database_Type.equalsIgnoreCase("mysql")) {
@@ -30,6 +32,12 @@ public class Database {
         try {
             Class.forName(driver).newInstance();
         } catch (Exception e) { System.out.println("[iConomy] Driver error: " + e); }
+
+        if(Misc.is(Constants.Database_Type, new String[] { "sqlite", "h2", "h2sql", "h2db" })) {
+            if(h2pool == null) {
+                h2pool = JdbcConnectionPool.create(dsn, username, password);
+            }
+        }
     }
 
     public Connection checkOut() {
@@ -37,7 +45,11 @@ public class Database {
             if(username.equalsIgnoreCase("") && password.equalsIgnoreCase(""))
                 return (DriverManager.getConnection(dsn));
             else {
-                return (DriverManager.getConnection(dsn, username, password));
+                if(Misc.is(Constants.Database_Type, new String[] { "sqlite", "h2", "h2sql", "h2db" })) {
+                    return h2pool.getConnection();
+                } else {
+                    return (DriverManager.getConnection(dsn, username, password));
+                }
             }
         } catch (SQLException e) {
             System.out.println("[iConomy] Could not create connection: " + e);
