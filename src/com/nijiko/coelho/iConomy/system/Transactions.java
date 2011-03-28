@@ -23,7 +23,7 @@ public class Transactions {
         if (Constants.Log_Data) {
             if (Misc.is(Constants.Database_Type, new String[] { "sqlite", "h2", "h2sql" })) {
                 try {
-                    ps = conn.prepareStatement("CREATE TABLE " + Constants.SQL_Table + "_Transactions(id INT AUTO_INCREMENT PRIMARY KEY, account_from TEXT , account_to TEXT, account_from_balance DECIMAL(65, 2), account_to_balance DECIMAL(65, 2), timestamp TEXT , set DECIMAL(65, 2), gain DECIMAL(65, 2), loss DECIMAL(65, 2));");
+                    ps = conn.prepareStatement("CREATE TABLE " + Constants.SQL_Table + "_Transactions(id INT AUTO_INCREMENT PRIMARY KEY, account_from TEXT, account_to TEXT, account_from_balance DECIMAL(65, 2), account_to_balance DECIMAL(65, 2), timestamp TEXT , set DECIMAL(65, 2), gain DECIMAL(65, 2), loss DECIMAL(65, 2));");
                     ps.executeUpdate();
                 } catch(SQLException E) { }
             } else {
@@ -81,7 +81,7 @@ public class Transactions {
 
         try {
             conn = iConomy.getDatabase().checkOut();
-            ps = conn.prepareStatement("INSERT INTO `" + Constants.SQL_Table + "_Transactions`(account_from, account_to, account_from_balance, account_to_balance, `timestamp`, `set`, gain, loss) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+            ps = conn.prepareStatement("INSERT INTO " + Constants.SQL_Table + "_Transactions(account_from, account_to, account_from_balance, account_to_balance, `timestamp`, `set`, gain, loss) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
 
             for (Object obj : data) {
                 ps.setObject(i, obj);
@@ -90,7 +90,6 @@ public class Transactions {
 
             ps.executeUpdate();
         } catch (SQLException e) {
-
         } finally {
             if(ps != null)
                 try { ps.close(); } catch (SQLException ex) { }
