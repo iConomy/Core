@@ -16,6 +16,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.Server;
 import org.bukkit.event.Event.Priority;
+import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.config.Configuration;
@@ -33,8 +34,10 @@ import com.nijiko.coelho.iConomy.system.Transactions;
 import com.nijiko.coelho.iConomy.util.Downloader;
 import com.nijiko.coelho.iConomy.util.FileManager;
 import com.nijiko.coelho.iConomy.util.Misc;
+
 import com.nijiko.permissions.PermissionHandler;
 import com.nijikokun.bukkit.Permissions.Permissions;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 
@@ -62,7 +65,7 @@ import java.sql.PreparedStatement;
 public class iConomy extends JavaPlugin {
     private static Server Server = null;
     private static Bank Bank = null;
-    private static Database iDatabase = null;
+    private static Database Database = null;
     private static Transactions Transactions = null;
     private static PermissionHandler Permissions = null;
     private static Players playerListener = null;
@@ -116,7 +119,7 @@ public class iConomy extends JavaPlugin {
 
         // Load the database
         try {
-            iDatabase = new Database();
+            Database = new Database();
         } catch (Exception e) {
             System.out.println("[iConomy] Failed to connect to database: " + e);
             Server.getPluginManager().disablePlugin(this);
@@ -173,9 +176,13 @@ public class iConomy extends JavaPlugin {
     @Override
     public void onDisable() {
         try {
+            if(Misc.is(Constants.Database_Type, new String[] { "sqlite", "h2", "h2sql", "h2db" })) {
+                Database.connectionPool().dispose();
+            }
+            
             System.out.println("[iConomy] Plugin disabled.");
         } catch (Exception e) {
-            System.out.println("[iConomy] An error occured upon disabling: " + e);
+            System.out.println("[iConomy] Plugin disabled.");
         } finally {
             if (Interest_Timer != null) {
                 Interest_Timer.cancel();
@@ -183,7 +190,7 @@ public class iConomy extends JavaPlugin {
 
             Server = null;
             Bank = null;
-            iDatabase = null;
+            Database = null;
             Permissions = null;
             Transactions = null;
             playerListener = null;
@@ -335,7 +342,7 @@ public class iConomy extends JavaPlugin {
      * @return iDatabase
      */
     public static Database getDatabase() {
-        return iDatabase;
+        return Database;
     }
 
     /**
@@ -384,7 +391,7 @@ public class iConomy extends JavaPlugin {
         }
 
         @Override
-        public void onPluginEnabled(PluginEvent event) {
+        public void onPluginEnable(PluginEnableEvent event) {
             if (plugin.Permissions == null) {
                 Plugin Permissions = plugin.getServer().getPluginManager().getPlugin("Permissions");
 
