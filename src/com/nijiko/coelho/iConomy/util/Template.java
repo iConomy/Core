@@ -28,6 +28,14 @@ public class Template {
             };
         }
 
+        if(this.tpl.getString("accounts.status") == null) {
+            nodes = new String[]{ "error.online", "accounts.status" };
+            templates = new String[]{
+                "<rose>Sorry, nobody else is online.",
+                "<green>Account status is now: <white>+status<green>."
+            };
+        }
+
         if(nodes != null) {
             System.out.println(" - Upgrading Messages.yml for iConomy");
 
@@ -67,6 +75,7 @@ public class Template {
 
     public void save(String key, String line) {
         this.tpl.setProperty(key, line);
+        this.tpl.save();
     }
 
     public String color(String key) {
