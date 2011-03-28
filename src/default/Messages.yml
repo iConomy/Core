@@ -57,6 +57,7 @@ statistics:
 accounts:
     create: "<green>Created account with the name: <white>+name<green>."
     remove: "<green>Deleted account: <white>+name<green>."
+    status: "<green>Account status is now: <white>+status<green>."
     
 ##
 # Top-list Ranking
@@ -70,6 +71,7 @@ top:
 # Errors
 ##
 error:
+    online: "<rose>Sorry, nobody else is online."
     exists: "<rose>Account already exists."
     account: "<rose>Player does not have account: <white>+name"
     funds: "<rose>Sorry, you do not have enough funds to do that."
