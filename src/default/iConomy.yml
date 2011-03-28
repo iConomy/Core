@@ -5,6 +5,7 @@
 System:
     # The name of your currency
     Currency: Coin
+    Currency_Plural: Coins
     # The initial balance a player logs on with
     Initial_Balance: 30.0
     # Should we log transactions?
