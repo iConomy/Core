@@ -62,4 +62,8 @@ public class Database {
             connection.close();
         } catch (SQLException ex) {}
     }
+
+    public JdbcConnectionPool connectionPool() {
+        return h2pool;
+    }
 }
