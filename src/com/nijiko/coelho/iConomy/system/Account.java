@@ -1,5 +1,9 @@
 package com.nijiko.coelho.iConomy.system;
 
+import com.nijiko.coelho.iConomy.events.AccountRemoveEvent;
+import com.nijiko.coelho.iConomy.events.AccountResetEvent;
+import com.nijiko.coelho.iConomy.events.AccountSetEvent;
+import com.nijiko.coelho.iConomy.events.AccountUpdateEvent;
 import java.sql.ResultSet;
 import java.text.DecimalFormat;
 
@@ -53,6 +57,9 @@ public class Account {
     }
 
     public void setBalance(double balance) {
+        AccountSetEvent Event = new AccountSetEvent(name, balance);
+        iConomy.getBukkitServer().getPluginManager().callEvent(Event);
+
         Connection conn = null;
         ResultSet rs = null;
         PreparedStatement ps = null;
@@ -82,8 +89,42 @@ public class Account {
         }
     }
 
+    public boolean setHidden(boolean hidden) {
+        Connection conn = null;
+        ResultSet rs = null;
+        PreparedStatement ps = null;
+
+        try {
+            conn = iConomy.getDatabase().checkOut();
+
+            if(!iConomy.getBank().hasAccount(this.name)) {
+                return false;
+            } else {
+                ps = conn.prepareStatement("UPDATE " + Constants.SQL_Table + " SET hidden = ? WHERE username = ?");
+                ps.setBoolean(1, hidden);
+                ps.setString(2, this.name);
+            }
+
+            ps.executeUpdate();
+        } catch (Exception e) {
+            System.out.println("[iConomy] Failed to set balance: " + e);
+        } finally {
+            if(ps != null)
+                try { ps.close(); } catch (SQLException ex) { }
+
+            if(conn != null)
+                iConomy.getDatabase().checkIn(conn);
+        }
+
+        return true;
+    }
+
     public void resetBalance() {
-        this.setBalance(Constants.Initial_Balance);
+        AccountResetEvent Event = new AccountResetEvent(name);
+        iConomy.getBukkitServer().getPluginManager().callEvent(Event);
+
+        if(!Event.isCancelled())
+            this.setBalance(Constants.Initial_Balance);
     }
 
     public boolean hasEnough(double amount) {
@@ -94,43 +135,108 @@ public class Account {
         return amount < this.getBalance();
     }
 
+    public boolean isHidden() {
+        Connection conn = null;
+        ResultSet rs = null;
+        PreparedStatement ps = null;
+
+        try {
+            conn = iConomy.getDatabase().checkOut();
+            ps = conn.prepareStatement("SELECT hidden FROM " + Constants.SQL_Table + " WHERE username = ? LIMIT 1");
+            ps.setString(1, this.name);
+            rs = ps.executeQuery();
+
+            if (rs != null) {
+                if (rs.next()) {
+                    return rs.getBoolean("hidden");
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("[iConomy] Failed to grab player balance: " + e);
+        } finally {
+            if(ps != null)
+                try { ps.close(); } catch (SQLException ex) { }
+
+            if(rs != null)
+                try { rs.close(); } catch (SQLException ex) { }
+
+            if(conn != null)
+                iConomy.getDatabase().checkIn(conn);
+        }
+
+        return false;
+    }
+
     public boolean isNegative() {
         return this.getBalance() < 0.0;
     }
 
     public void add(double amount) {
-        this.setBalance(this.getBalance() + amount);
+        double balance = this.getBalance();
+        double ending = (balance + amount);
+
+        AccountUpdateEvent Event = new AccountUpdateEvent(name, balance, ending, amount);
+        iConomy.getBukkitServer().getPluginManager().callEvent(Event);
+
+        if(!Event.isCancelled())
+            this.setBalance(ending);
     }
 
     public void multiply(double amount) {
-        this.setBalance(this.getBalance() * amount);
+        double balance = this.getBalance();
+        double ending = (balance * amount);
+
+        AccountUpdateEvent Event = new AccountUpdateEvent(name, balance, ending, amount);
+        iConomy.getBukkitServer().getPluginManager().callEvent(Event);
+
+        if(!Event.isCancelled())
+            this.setBalance(ending);
     }
 
     public void divide(double amount) {
-        this.setBalance(this.getBalance() / amount);
+        double balance = this.getBalance();
+        double ending = (balance / amount);
+
+        AccountUpdateEvent Event = new AccountUpdateEvent(name, balance, ending, amount);
+        iConomy.getBukkitServer().getPluginManager().callEvent(Event);
+
+        if(!Event.isCancelled())
+            this.setBalance(ending);
     }
 
     public void subtract(double amount) {
-        this.setBalance(this.getBalance() - amount);
+        double balance = this.getBalance();
+        double ending = (balance - amount);
+
+        AccountUpdateEvent Event = new AccountUpdateEvent(name, balance, ending, amount);
+        iConomy.getBukkitServer().getPluginManager().callEvent(Event);
+
+        if(!Event.isCancelled())
+            this.setBalance(ending);
     }
 
     public void remove() {
-        Connection conn = null;
-        PreparedStatement ps = null;
+        AccountRemoveEvent Event = new AccountRemoveEvent(name);
+        iConomy.getBukkitServer().getPluginManager().callEvent(Event);
+        
+        if(!Event.isCancelled()) {
+            Connection conn = null;
+            PreparedStatement ps = null;
 
-        try {
-            conn = iConomy.getDatabase().checkOut();
-            ps = conn.prepareStatement("DELETE FROM `" + Constants.SQL_Table + "` WHERE username = ?");
-            ps.setString(1, this.name);
-            ps.executeUpdate();
-        } catch(Exception e) {
-            System.out.println("[iConomy] Failed to remove account: " + e);
-        } finally {
-            if(ps != null)
-                try { ps.close(); } catch (SQLException ex) { }
+            try {
+                conn = iConomy.getDatabase().checkOut();
+                ps = conn.prepareStatement("DELETE FROM `" + Constants.SQL_Table + "` WHERE username = ?");
+                ps.setString(1, this.name);
+                ps.executeUpdate();
+            } catch(Exception e) {
+                System.out.println("[iConomy] Failed to remove account: " + e);
+            } finally {
+                if(ps != null)
+                    try { ps.close(); } catch (SQLException ex) { }
 
-            if(conn != null)
-                iConomy.getDatabase().checkIn(conn);
+                if(conn != null)
+                    iConomy.getDatabase().checkIn(conn);
+            }
         }
     }
 
@@ -139,11 +245,11 @@ public class Account {
 
     @Override
     public String toString() {
-        DecimalFormat formatter = new DecimalFormat("#"+Constants.GroupSeperator+"##0"+Constants.DecimalSeperator+"##");
+        DecimalFormat formatter = new DecimalFormat("#,##0.##");
         Double balance = this.getBalance();
         String formatted = formatter.format(balance);
         
-        if (formatted.endsWith(String.valueOf(Constants.DecimalSeperator))) {
+        if (formatted.endsWith(".")) {
             formatted = formatted.substring(0, formatted.length() - 1);
         }
 
