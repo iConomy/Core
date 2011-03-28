@@ -1,6 +1,8 @@
 package com.nijiko.coelho.iConomy.util;
 
 import java.io.File;
+import java.text.DecimalFormatSymbols;
+import java.util.Locale;
 
 import org.bukkit.util.config.Configuration;
 
@@ -12,6 +14,7 @@ public class Constants {
     private static String[] nodes = new String[] {
         "System.Logging.Enabled:false",
         "System.Currency:Coin",
+        "System.Currency_Plural:Coins",
         "System.Initial_Balance:45.0",
         "System.Interest.Enabled:false",
         "System.Interest.IntervalSeconds:60",
@@ -34,9 +37,15 @@ public class Constants {
     public static String H2_Jar_Location = "http://mirror.nexua.org/Dependencies/h2.jar";
     public static String MySQL_Jar_Location = "http://mirror.anigaiku.com/Dependencies/mysql-connector-java-bin.jar";
 
+    // Local Data
+    public static DecimalFormatSymbols symbols = DecimalFormatSymbols.getInstance();
+    public static Locale Default_Locale = Locale.getDefault();
+    public static char DecimalSeperator = symbols.getDecimalSeparator();
+    public static char GroupSeperator = symbols.getGroupingSeparator();
 
-    // System Data
+    // iConomy basics
     public static String Currency = "Coin";
+    public static String Currency_Plural = "Coins";
     public static double Initial_Balance = 45.0;
 
     // System Logging
@@ -68,6 +77,7 @@ public class Constants {
 
         // System Configuration
         Currency = config.getString("System.Currency", Currency);
+        Currency_Plural = config.getString("System.Currency_Plural", Currency_Plural);
         Initial_Balance = config.getDouble("System.Initial_Balance", Initial_Balance);
 
         // System Logging
