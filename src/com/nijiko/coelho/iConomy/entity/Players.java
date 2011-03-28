@@ -12,7 +12,6 @@ import com.nijiko.coelho.iConomy.util.Template;
 import org.bukkit.command.CommandSender;
 
 import org.bukkit.entity.Player;
-import org.bukkit.event.player.PlayerEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerListener;
 
@@ -72,6 +71,10 @@ public class Players extends PlayerListener {
             Messaging.send("&f/money set [player] [amount] &6-&e Sets a players balance.");
         }
 
+        if (iConomy.hasPermissions(player, "iConomy.admin.hide")) {
+            Messaging.send("&f/money hide [player] true/false &6-&e Hide or show an account.");
+        }
+
         if (iConomy.hasPermissions(player, "iConomy.admin.account.create")) {
             Messaging.send("&f/money create [player] &6-&e Create player account.");
         }
@@ -97,6 +100,10 @@ public class Players extends PlayerListener {
     public void createAccount(String name) {
         iConomy.getBank().addAccount(name);
         Messaging.send(Template.color("tag") + Template.parse("accounts.create", new String[]{ "+name,+n" }, new String[]{ name }));
+    }
+
+    public boolean setHidden(String name, boolean hidden) {
+        return iConomy.getBank().setHidden(name, hidden);
     }
     
     /**
@@ -544,7 +551,8 @@ public class Players extends PlayerListener {
                         }
 
                         try {
-                            showTop(sender, Integer.parseInt(split[2]) < 0 ? 5 : Integer.parseInt(split[2]));
+                            int top = Integer.parseInt(split[2]);
+                            showTop(sender, top < 0 ? 5 : ((top > 100) ? 100 : top));
                         } catch (Exception e) {
                             showTop(sender, 5);
                         }
@@ -613,8 +621,7 @@ public class Players extends PlayerListener {
                         if (iConomy.getBank().hasAccount(split[2])) {
                             name = split[2];
                         } else {
-                            Messaging.send(Template.parse("error.account", new String[]{"+name,+n"}, new String[]{split[2]}));
-                            return;
+                            Messaging.send(Template.parse("error.account", new String[]{"+name,+n"}, new String[]{split[2]})); return;
                         }
 
                         try {
@@ -625,8 +632,7 @@ public class Players extends PlayerListener {
                             }
                         } catch (NumberFormatException ex) {
                             Messaging.send("&cInvalid amount: &f" + amount);
-                            Messaging.send("&cUsage: &f/money &c[&f-p&c|&fpay&c] <&fplayer&c> &c<&famount&c>");
-                            return;
+                            Messaging.send("&cUsage: &f/money &c[&f-p&c|&fpay&c] <&fplayer&c> &c<&famount&c>"); return;
                         }
 
                         showPayment(player.getName(), name, amount);
@@ -638,26 +644,88 @@ public class Players extends PlayerListener {
                             return;
                         }
 
-                        String name = "";
+                        ArrayList<String> accounts = new ArrayList<String>();
+                        boolean console = (isPlayer) ? false : true;
                         double amount = 0.0;
 
-                        if (iConomy.getBank().hasAccount(split[2])) {
-                            name = split[2];
+                        if(split[2].startsWith("g:")) {
+                            if(iConomy.getPermissions() == null) {
+                                Messaging.send(Messaging.colorize("<rose>Sorry, you need permissions to use this feature.")); return;
+                            }
+
+                            if(iConomy.getBukkitServer().getOnlinePlayers().length < 1) {
+                                Messaging.send(Template.color("error.online")); return;
+                            }
+
+                            String group = split[2].substring(2);
+
+                            for(Player p : iConomy.getBukkitServer().getOnlinePlayers()) {
+                                if(iConomy.getPermissions().inGroup(p.getWorld().getName(), p.getName(), group)) {
+                                    accounts.add(p.getName());
+                                }
+                            }
                         } else {
-                            Messaging.send(Template.parse("error.account", new String[]{"+name,+n"}, new String[]{split[2]}));
+                            Player check = Misc.playerMatch(split[2]);
+                            String name = "";
+
+                            if(check != null) {
+                                name = check.getName();
+                            } else {
+                                name = split[2];
+                            }
+
+                            if (iConomy.getBank().hasAccount(name)) {
+                                accounts.add(name);
+                            } else {
+                                Messaging.send(Template.parse("error.account", new String[]{ "+name,+n" }, new String[]{ name })); return;
+                            }
                         }
 
                         try {
                             amount = Double.parseDouble(split[3]);
                         } catch (NumberFormatException e) {
                             Messaging.send("&cInvalid amount: &f" + split[3]);
-                            Messaging.send("&cUsage: &f/money &c[&f-g&c|&fgrant&c] <&fplayer&c> (&f-&c)&c<&famount&c>");
+                            Messaging.send("&cUsage: &f/money &c[&f-g&c|&fgrant&c] <&fplayer&c> (&f-&c)&c<&famount&c>"); return;
                         }
 
-                        if(isPlayer)
-                            showGrant(name, player, amount, false);
-                        else {
-                            showGrant(name, null, amount, true);
+                        if(accounts.size() < 1 || accounts.isEmpty()) {
+                            Messaging.send(Template.color("<rose>Grant Query returned 0 accounts to alter.")); return;
+                        }
+
+                        for(String name : accounts) {
+                            showGrant(name, player, amount, console);
+                        }
+
+                        return;
+                    }
+
+                    if (Misc.is(split[1], new String[]{"hide", "-h"})) {
+                        if (!iConomy.hasPermissions(sender, "iConomy.admin.hide")) {
+                            return;
+                        }
+
+                        String name = "";
+                        Player check = Misc.playerMatch(split[2]);
+                        boolean hidden = false;
+
+                        if(check != null) {
+                            name = check.getName();
+                        } else {
+                            name = split[2];
+                        }
+
+                        if (!iConomy.getBank().hasAccount(name)) {
+                            Messaging.send(Template.parse("error.account", new String[]{"+name,+n"}, new String[]{ split[2] })); return;
+                        }
+
+                        if (Misc.is(split[3], new String[]{"true", "t", "-t", "yes", "da", "-d"})) {
+                            hidden = true;
+                        }
+
+                        if(!setHidden(name, hidden)) {
+                            Messaging.send(Template.parse("error.account", new String[]{ "+name,+n" }, new String[]{ name }));
+                        } else {
+                            Messaging.send(Template.parse("accounts.status", new String[]{ "+status,+s" }, new String[]{ (hidden) ? "hidden" : "visible" }));
                         }
 
                         return;
@@ -671,17 +739,23 @@ public class Players extends PlayerListener {
                         String name = "";
                         double amount = 0.0;
 
-                        if (iConomy.getBank().hasAccount(split[2])) {
-                            name = split[2];
+                        Player check = Misc.playerMatch(split[2]);
+
+                        if(check != null) {
+                            name = check.getName();
                         } else {
-                            Messaging.send(Template.parse("error.account", new String[]{"+name,+n"}, new String[]{split[2]}));
+                            name = split[2];
+                        }
+
+                        if (!iConomy.getBank().hasAccount(name)) {
+                            Messaging.send(Template.parse("error.account", new String[]{"+name,+n"}, new String[]{split[2]})); return;
                         }
 
                         try {
                             amount = Double.parseDouble(split[3]);
                         } catch (NumberFormatException e) {
                             Messaging.send("&cInvalid amount: &f" + split[3]);
-                            Messaging.send("&cUsage: &f/money &c[&f-g&c|&fgrant&c] <&fplayer&c> (&f-&c)&c<&famount&c>");
+                            Messaging.send("&cUsage: &f/money &c[&f-g&c|&fgrant&c] <&fplayer&c> (&f-&c)&c<&famount&c>"); return;
                         }
 
                         if(isPlayer)
