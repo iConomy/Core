@@ -13,6 +13,7 @@ import org.bukkit.command.CommandSender;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerListener;
 
 /**
@@ -416,7 +417,7 @@ public class Players extends PlayerListener {
      * @return <code>boolean</code> - True denotes that the command existed, false the command doesn't.
      */
     @Override
-    public void onPlayerJoin(PlayerEvent event) {
+    public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
 
         if (!iConomy.getBank().hasAccount(player.getName())) {
