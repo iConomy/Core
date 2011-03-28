@@ -8,7 +8,7 @@ import org.bukkit.util.config.Configuration;
 
 public class Constants {
     // Code name
-    public static final String Codename = "Elektra";
+    public static final String Codename = "Kenzi";
 
     // Nodes
     private static String[] nodes = new String[] {
@@ -36,12 +36,6 @@ public class Constants {
     public static String Plugin_Directory;
     public static String H2_Jar_Location = "http://mirror.nexua.org/Dependencies/h2.jar";
     public static String MySQL_Jar_Location = "http://mirror.anigaiku.com/Dependencies/mysql-connector-java-bin.jar";
-
-    // Local Data
-    public static DecimalFormatSymbols symbols = DecimalFormatSymbols.getInstance();
-    public static Locale Default_Locale = Locale.getDefault();
-    public static char DecimalSeperator = symbols.getDecimalSeparator();
-    public static char GroupSeperator = symbols.getGroupingSeparator();
 
     // iConomy basics
     public static String Currency = "Coin";
