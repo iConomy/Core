@@ -39,9 +39,9 @@ public class Bank {
 
             if (!rs.next()) {
                 if (Constants.Database_Type.equalsIgnoreCase("mysql")) {
-                    ps = conn.prepareStatement("CREATE TABLE " + Constants.SQL_Table + " (`id` INT(10) NOT NULL AUTO_INCREMENT, `username` TEXT NOT NULL, `balance` DECIMAL(65, 2) NOT NULL, PRIMARY KEY (`id`))");
+                    ps = conn.prepareStatement("CREATE TABLE " + Constants.SQL_Table + " (`id` INT(10) NOT NULL AUTO_INCREMENT, `username` TEXT NOT NULL, `balance` DECIMAL(65, 2) NOT NULL, `hidden` BOOLEAN NOT NULL DEFAULT '0', PRIMARY KEY (`id`))");
                 } else if (Misc.is(Constants.Database_Type, new String[] { "sqlite", "h2", "h2sql" })) {
-                    ps = conn.prepareStatement("CREATE TABLE " + Constants.SQL_Table + "(id INT auto_increment PRIMARY KEY, username VARCHAR(32), balance DECIMAL (65, 2));");
+                    ps = conn.prepareStatement("CREATE TABLE " + Constants.SQL_Table + "(id INT auto_increment PRIMARY KEY, username VARCHAR(32), balance DECIMAL (65, 2), hidden BOOLEAN DEFAULT '0');");
                 }
 
                 if(ps != null) {
@@ -81,11 +81,11 @@ public class Bank {
      * @return String
      */
     public String format(double amount) {
-        DecimalFormat formatter = new DecimalFormat("#"+Constants.GroupSeperator+"##0"+Constants.DecimalSeperator+"##");
+        DecimalFormat formatter = new DecimalFormat("#,##0.##");
         String formatted = formatter.format(amount);
         String currency = "";
 
-        if (formatted.endsWith(String.valueOf(Constants.DecimalSeperator))) {
+        if (formatted.endsWith(".")) {
             formatted = formatted.substring(0, formatted.length() - 1);
         }
 
@@ -225,7 +225,7 @@ public class Bank {
 
         try {
             conn = iConomy.getDatabase().checkOut();
-            ps = conn.prepareStatement("SELECT * FROM " + Constants.SQL_Table + " ORDER BY balance DESC LIMIT " + output);
+            ps = conn.prepareStatement("SELECT * FROM " + Constants.SQL_Table + " WHERE hidden = 0 ORDER BY balance DESC LIMIT " + output);
             rs = ps.executeQuery();
 
             for (int i = 0; i < output; i++) {
@@ -267,7 +267,7 @@ public class Bank {
         
         try {
             conn = iConomy.getDatabase().checkOut();
-            ps = conn.prepareStatement("SELECT * FROM " + Constants.SQL_Table + " ORDER BY balance DESC");
+            ps = conn.prepareStatement("SELECT * FROM " + Constants.SQL_Table + " WHERE hidden = 0 ORDER BY balance DESC");
             rs = ps.executeQuery();
 
             while (rs.next()) {
@@ -308,6 +308,21 @@ public class Bank {
      */
     public void setInitial(double initial) {
         this.initial = initial;
+    }
+
+    /**
+     * Set an account to be hidden or not.
+     *
+     * @param account
+     * @param hidden
+     * @return true if the account existed, false if it didn't.
+     */
+    public boolean setHidden(String account, boolean hidden) {
+        if (!this.hasAccount(account)) {
+            return false;
+        } else {
+            return getAccount(account).setHidden(hidden);
+        }
     }
 
     /**
@@ -380,23 +395,7 @@ public class Bank {
      */
     public void removeAccount(String account) {
         if(hasAccount(account)) {
-            Connection conn = null;
-            PreparedStatement ps = null;
-
-            try {
-                conn = iConomy.getDatabase().checkOut();
-                ps = conn.prepareStatement("DELETE FROM `" + Constants.SQL_Table + "` WHERE username = ?");
-                ps.setString(1, account);
-                ps.executeUpdate();
-            } catch(Exception e) {
-                System.out.println("[iConomy] Failed to remove account: " + e);
-            } finally {
-                if(ps != null)
-                    try { ps.close(); } catch (SQLException ex) { }
-
-                if(conn != null)
-                    iConomy.getDatabase().checkIn(conn);
-            }
+            (new Account(account)).remove();
         }
     }
 }
