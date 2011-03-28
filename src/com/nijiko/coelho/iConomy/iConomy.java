@@ -16,17 +16,14 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.Server;
 import org.bukkit.event.Event.Priority;
-import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.config.Configuration;
-import org.bukkit.event.server.PluginEvent;
 import org.bukkit.event.server.ServerListener;
 import org.bukkit.plugin.Plugin;
 
 import com.nijiko.coelho.iConomy.entity.Players;
 import com.nijiko.coelho.iConomy.net.Database;
-import com.nijiko.coelho.iConomy.system.Account;
 import com.nijiko.coelho.iConomy.system.Bank;
 import com.nijiko.coelho.iConomy.system.Interest;
 import com.nijiko.coelho.iConomy.util.Constants;
@@ -40,6 +37,10 @@ import com.nijikokun.bukkit.Permissions.Permissions;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.Statement;
+import java.util.Locale;
+import org.bukkit.event.server.PluginEnableEvent;
+import org.bukkit.event.server.PluginEvent;
 
 /**
  * iConomy by Team iCo
@@ -73,6 +74,8 @@ public class iConomy extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        Locale.setDefault(Locale.US);
+
         // Get the server
         Server = getServer();
 
@@ -167,7 +170,7 @@ public class iConomy extends JavaPlugin {
         // Event Registration
         getServer().getPluginManager().registerEvent(Event.Type.PLAYER_JOIN, playerListener, Priority.Normal, this);
         getServer().getPluginManager().registerEvent(Event.Type.PLUGIN_ENABLE, new Listener(this), Priority.Monitor, this);
-
+        
         // Console Detail
         System.out.println("[iConomy] v" + pdfFile.getVersion() + " (" + Constants.Codename + ") loaded.");
         System.out.println("[iConomy] Developed by: " + pdfFile.getAuthors());
@@ -224,10 +227,60 @@ public class iConomy extends JavaPlugin {
                 double current = Double.parseDouble(file.getSource());
 
                 if(current != version) {
-                    file.write(version);
+                    if(current < 4.61) {
+                        String[] SQL = {};
+
+                        String[] MySQL = {
+                            "ALTER TABLE " + Constants.SQL_Table + " ADD hidden boolean DEFAULT '0';"
+                        };
+
+                        String[] GENERIC = {
+                            "ALTER TABLE " + Constants.SQL_Table + " ADD HIDDEN BOOLEAN DEFAULT '0';",
+                        };
+
+                        Connection conn = null;
+                        ResultSet rs = null;
+                        Statement stmt = null;
+
+                        try {
+                            conn = iConomy.getDatabase().checkOut();
+                            stmt = null;
+
+                            System.out.println(" - Updating " + Constants.Database_Type + " Database for latest iConomy");
+
+                            int i = 1;
+                            SQL = (Constants.Database_Type.equalsIgnoreCase("mysql")) ? MySQL : GENERIC;
+
+                            for (String Query : SQL) {
+                                stmt = conn.createStatement();
+                                stmt.execute(Query);
+
+                                System.out.println("   Executing SQL Query #" + i + " of " + (SQL.length));
+                                ++i;
+                            }
+
+                            file.write(version);
+
+                            System.out.println(" + Database Update Complete.");
+                        } catch (SQLException e) {
+                            System.out.println("[iConomy] Error updating database: " + e);
+                        } finally {
+                            if(stmt != null)
+                                try { stmt.close(); } catch (SQLException ex) { }
+
+                            if(rs != null)
+                                try { rs.close(); } catch (SQLException ex) { }
+
+                            if(conn != null)
+                                iConomy.getDatabase().checkIn(conn);
+                        }
+                    } else {
+                        file.write(version);
+                    }
                 }
             } catch (Exception e) {
-                System.out.println("[iConomy] Invalid version file, deleting to be re-created on next load.");
+                System.out.println("[iConomy] Error on version check: ");
+                e.printStackTrace();
                 file.delete();
             }
         } else {
@@ -246,6 +299,7 @@ public class iConomy extends JavaPlugin {
                     "INSERT INTO " + Constants.SQL_Table + "(id, username, balance) SELECT id, player, balance FROM ibalances;",
                     "DROP TABLE ibalances;"
                 };
+
                 Connection conn = null;
                 ResultSet rs = null;
                 PreparedStatement ps = null;
@@ -272,6 +326,7 @@ public class iConomy extends JavaPlugin {
 
                         System.out.println(" + Database Update Complete.");
                     }
+
                     file.write(version);
                 } catch (SQLException e) {
                     System.out.println("[iConomy] Error updating database: " + e);
