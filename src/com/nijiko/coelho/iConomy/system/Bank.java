@@ -14,9 +14,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 
 public class Bank {
-    private String currency;
     private double initial;
-    public ArrayList<String> accounts = new ArrayList<String>();
 
     /**
      * Loads all bank accounts into a hashmap.
@@ -24,7 +22,6 @@ public class Bank {
      * @throws Exception
      */
     public void load() throws Exception {
-        this.currency = Constants.Currency;
         this.initial = Constants.Initial_Balance;
 
         Connection conn = iConomy.getDatabase().checkOut();
@@ -61,26 +58,6 @@ public class Bank {
 
         if(conn != null)
             iConomy.getDatabase().checkIn(conn);
-
-        try {
-            conn = iConomy.getDatabase().checkOut();
-            ps = conn.prepareStatement("SELECT * FROM " + Constants.SQL_Table);
-            rs = ps.executeQuery();
-
-            while (rs.next()) {
-                accounts.add(rs.getString("username").toLowerCase());
-            }
-        } catch (SQLException E) {
-        } finally {
-            if(ps != null)
-                try { ps.close(); } catch (SQLException ex) { }
-
-            if(rs != null)
-                try { rs.close(); } catch (SQLException ex) { }
-
-            if(conn != null)
-                iConomy.getDatabase().checkIn(conn);
-        }
     }
 
     /**
@@ -92,7 +69,7 @@ public class Bank {
      * @return String
      */
     public String format(String account) {
-        return this.getAccount(account).toString() + " " + this.currency;
+        return this.getAccount(account).toString();
     }
 
     /**
@@ -104,14 +81,15 @@ public class Bank {
      * @return String
      */
     public String format(double amount) {
-        DecimalFormat formatter = new DecimalFormat("#,##0.##");
+        DecimalFormat formatter = new DecimalFormat("#"+Constants.GroupSeperator+"##0"+Constants.DecimalSeperator+"##");
         String formatted = formatter.format(amount);
+        String currency = "";
 
-        if (formatted.endsWith(".")) {
+        if (formatted.endsWith(String.valueOf(Constants.DecimalSeperator))) {
             formatted = formatted.substring(0, formatted.length() - 1);
         }
 
-        return formatted + " " + this.currency;
+        return formatted + " " + ((amount <= 1 && amount >= -1) ? Constants.Currency : Constants.Currency_Plural);
     }
 
     /**
@@ -121,7 +99,29 @@ public class Bank {
      * @return boolean - Does the account exist?
      */
     public boolean hasAccount(String account) {
-        return accounts.contains(account.toLowerCase());
+        Connection conn = null;
+        ResultSet rs = null;
+        PreparedStatement ps = null;
+
+        try {
+            conn = iConomy.getDatabase().checkOut();
+            ps = conn.prepareStatement("SELECT * FROM " + Constants.SQL_Table + " WHERE username = ? LIMIT 1");
+            ps.setString(1, account);
+            rs = ps.executeQuery();
+
+            return (rs.next());
+        } catch (Exception e) {
+            return false;
+        } finally {
+            if(ps != null)
+                try { ps.close(); } catch (SQLException ex) { }
+
+            if(rs != null)
+                try { rs.close(); } catch (SQLException ex) { }
+
+            if(conn != null)
+                iConomy.getDatabase().checkIn(conn);
+        }
     }
 
     public HashMap<String, Double> getAccounts() {
@@ -198,7 +198,7 @@ public class Bank {
      * @return String - Currency name
      */
     public String getCurrency() {
-        return currency;
+        return Constants.Currency;
     }
 
     /**
@@ -298,7 +298,7 @@ public class Bank {
      * @param currency
      */
     public void setCurrency(String currency) {
-        this.currency = currency;
+        Constants.Currency = currency;
     }
 
     /**
@@ -322,7 +322,6 @@ public class Bank {
         if (!this.hasAccount(account)) {
             Account initialized = new Account(account);
             initialized.setBalance(this.initial);
-            accounts.add(account);
         } else {
             getAccount(account).setBalance(this.initial);
         }
@@ -340,7 +339,6 @@ public class Bank {
         if (!this.hasAccount(account)) {
             Account initialized = new Account(account);
             initialized.setBalance(balance);
-            accounts.add(account);
         } else {
             getAccount(account).setBalance(balance);
         }
@@ -356,7 +354,6 @@ public class Bank {
         if (this.hasAccount(account)) {
             Account updating = getAccount(account);
             updating.setBalance(amount);
-            accounts.add(account);
         } else {
             addAccount(account, amount);
         }
@@ -394,8 +391,6 @@ public class Bank {
             } catch(Exception e) {
                 System.out.println("[iConomy] Failed to remove account: " + e);
             } finally {
-                accounts.remove(account);
-
                 if(ps != null)
                     try { ps.close(); } catch (SQLException ex) { }
 
