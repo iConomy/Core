@@ -1,6 +1,6 @@
 name: iConomy
 main: com.nijiko.coelho.iConomy.iConomy
-version: 4.62
+version: 4.63
 authors: [Nijikokun, Coelho]
 commands:
     money:
