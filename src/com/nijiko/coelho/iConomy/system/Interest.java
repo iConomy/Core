@@ -50,7 +50,7 @@ public class Interest extends TimerTask {
         }
 
         try {
-            conn = iConomy.getDatabase().checkOut();
+            conn = iConomy.getDatabase().getConnection();
             conn.setAutoCommit(false);
 
             String updateSQL = "UPDATE " + Constants.SQL_Table + " SET balance = ? WHERE username = ?";
@@ -96,7 +96,7 @@ public class Interest extends TimerTask {
                 try { ps.close(); } catch (SQLException ex) { }
 
             if(conn != null)
-                iConomy.getDatabase().checkIn(conn);
+                iConomy.getDatabase().close(conn);
         }
     }
 }
