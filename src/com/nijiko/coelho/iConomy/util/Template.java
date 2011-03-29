@@ -36,6 +36,13 @@ public class Template {
             };
         }
 
+        if(this.tpl.getString("interest.announcement") == null) {
+            nodes = new String[]{ "interest.announcement" };
+            templates = new String[]{
+                "+amount <green>interest gained."
+            };
+        }
+
         if(nodes != null) {
             System.out.println(" - Upgrading Messages.yml for iConomy");
 
