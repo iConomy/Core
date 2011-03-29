@@ -18,6 +18,9 @@ System:
     Interest:
         # Default is false
         Enabled: false
+        # Announce a message to the user?
+        # Message located in: Messages.yml under interest
+        Announce: false
         # How many seconds for this to happen
         IntervalSeconds: 60
         # Percentage
@@ -34,7 +37,7 @@ System:
         MaximumPerInterval: 2
     Database:
         # Can be MySQL, or H2SQL
-        Type: SQLite
+        Type: H2SQL
         # Name of the database
         Name: minecraft
         # Table name

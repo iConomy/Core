@@ -52,6 +52,12 @@ statistics:
     accounts: "<gray>Total Accounts: <white>+amount"
 
 ##
+# Interest Message
+##
+interest:
+    announcement: "+amount <green>interest gained."
+
+##
 # Account Creation
 ##
 accounts:
