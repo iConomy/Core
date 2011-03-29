@@ -3,10 +3,11 @@ package com.nijiko.coelho.iConomy.net;
 import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.SQLException;
 
 import com.nijiko.coelho.iConomy.util.Constants;
 import com.nijiko.coelho.iConomy.util.Misc;
-import java.sql.SQLException;
+
 import org.h2.jdbcx.JdbcConnectionPool;
 
 public class Database {
@@ -40,7 +41,7 @@ public class Database {
         }
     }
 
-    public Connection checkOut() {
+    public Connection getConnection() {
         try {
             if(username.equalsIgnoreCase("") && password.equalsIgnoreCase(""))
                 return (DriverManager.getConnection(dsn));
@@ -57,10 +58,12 @@ public class Database {
         }
     }
 
-    public void checkIn(Connection connection) {
-        try {
-            connection.close();
-        } catch (SQLException ex) {}
+    public void close(Connection connection) {
+        if(connection != null) {
+            try {
+                connection.close();
+            } catch (SQLException ex) { }
+        }
     }
 
     public JdbcConnectionPool connectionPool() {
