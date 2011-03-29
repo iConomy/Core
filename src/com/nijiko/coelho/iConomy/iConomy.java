@@ -38,6 +38,8 @@ import com.nijikokun.bukkit.Permissions.Permissions;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.Locale;
 import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.event.server.PluginEvent;
@@ -135,8 +137,8 @@ public class iConomy extends JavaPlugin {
             Transactions = new Transactions();
             Transactions.load();
         } catch (Exception e) {
-            System.out.println("[iConomy] Could not load transaction logger: " + e);
-            Server.getPluginManager().disablePlugin(this);
+            System.out.println("[iConomy] Could not load transaction logger: ");
+            e.printStackTrace();
         }
 
         // Check version details before the system loads
@@ -159,8 +161,8 @@ public class iConomy extends JavaPlugin {
                         Constants.Interest_Interval * 1000L, Constants.Interest_Interval * 1000L);
             }
         } catch (Exception e) {
-            Server.getPluginManager().disablePlugin(this);
             System.out.println("[iConomy] Failed to start interest system: " + e);
+            Server.getPluginManager().disablePlugin(this);
             return;
         }
 
@@ -225,25 +227,28 @@ public class iConomy extends JavaPlugin {
 
             try {
                 double current = Double.parseDouble(file.getSource());
+                LinkedList<String> MySQL = new LinkedList<String>();
+                LinkedList<String> GENERIC = new LinkedList<String>();
+                LinkedList<String> SQL = new LinkedList<String>();
 
                 if(current != version) {
+                    if(current < 4.62) {
+                        MySQL.add("ALTER TABLE " + Constants.SQL_Table + " ADD UNIQUE(username);");
+                        GENERIC.add("ALTER TABLE " + Constants.SQL_Table + " ADD UNIQUE(username);");
+                    }
+
                     if(current < 4.61) {
-                        String[] SQL = {};
+                        MySQL.add("ALTER TABLE " + Constants.SQL_Table + " ADD hidden boolean DEFAULT '0';");
+                        GENERIC.add("ALTER TABLE " + Constants.SQL_Table + " ADD HIDDEN BOOLEAN DEFAULT '0';");
+                    }
 
-                        String[] MySQL = {
-                            "ALTER TABLE " + Constants.SQL_Table + " ADD hidden boolean DEFAULT '0';"
-                        };
-
-                        String[] GENERIC = {
-                            "ALTER TABLE " + Constants.SQL_Table + " ADD HIDDEN BOOLEAN DEFAULT '0';",
-                        };
-
+                    if(!MySQL.isEmpty() && !GENERIC.isEmpty()) {
                         Connection conn = null;
                         ResultSet rs = null;
                         Statement stmt = null;
 
                         try {
-                            conn = iConomy.getDatabase().checkOut();
+                            conn = iConomy.getDatabase().getConnection();
                             stmt = null;
 
                             System.out.println(" - Updating " + Constants.Database_Type + " Database for latest iConomy");
@@ -255,7 +260,7 @@ public class iConomy extends JavaPlugin {
                                 stmt = conn.createStatement();
                                 stmt.execute(Query);
 
-                                System.out.println("   Executing SQL Query #" + i + " of " + (SQL.length));
+                                System.out.println("   Executing SQL Query #" + i + " of " + (SQL.size()));
                                 ++i;
                             }
 
@@ -271,12 +276,11 @@ public class iConomy extends JavaPlugin {
                             if(rs != null)
                                 try { rs.close(); } catch (SQLException ex) { }
 
-                            if(conn != null)
-                                iConomy.getDatabase().checkIn(conn);
+                            iConomy.getDatabase().close(conn);
                         }
-                    } else {
-                        file.write(version);
                     }
+                } else {
+                    file.write(version);
                 }
             } catch (Exception e) {
                 System.out.println("[iConomy] Error on version check: ");
@@ -305,7 +309,7 @@ public class iConomy extends JavaPlugin {
                 PreparedStatement ps = null;
 
                 try {
-                    conn = iConomy.getDatabase().checkOut();
+                    conn = iConomy.getDatabase().getConnection();
                     DatabaseMetaData dbm = conn.getMetaData();
                     rs = dbm.getTables(null, null, "ibalances", null);
                     ps = null;
@@ -338,7 +342,7 @@ public class iConomy extends JavaPlugin {
                         try { rs.close(); } catch (SQLException ex) { }
 
                     if(conn != null)
-                        iConomy.getDatabase().checkIn(conn);
+                        iConomy.getDatabase().close(conn);
                 }
             }
 
