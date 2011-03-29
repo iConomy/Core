@@ -24,7 +24,7 @@ public class Bank {
     public void load() throws Exception {
         this.initial = Constants.Initial_Balance;
 
-        Connection conn = iConomy.getDatabase().checkOut();
+        Connection conn = iConomy.getDatabase().getConnection();
         PreparedStatement ps = null;
         ResultSet rs = null;
 
@@ -38,6 +38,8 @@ public class Bank {
             rs = dbm.getTables(null, null, Constants.SQL_Table, null);
 
             if (!rs.next()) {
+                System.out.println("[iConomy] Creating table: " + Constants.SQL_Table);
+
                 if (Constants.Database_Type.equalsIgnoreCase("mysql")) {
                     ps = conn.prepareStatement("CREATE TABLE " + Constants.SQL_Table + " (`id` INT(10) NOT NULL AUTO_INCREMENT, `username` TEXT NOT NULL, `balance` DECIMAL(65, 2) NOT NULL, `hidden` BOOLEAN NOT NULL DEFAULT '0', PRIMARY KEY (`id`))");
                 } else if (Misc.is(Constants.Database_Type, new String[] { "sqlite", "h2", "h2sql" })) {
@@ -47,6 +49,8 @@ public class Bank {
                 if(ps != null) {
                     ps.executeUpdate();
                 }
+
+                System.out.println("[iConomy] Table Created.");
             }
         }
 
@@ -56,8 +60,7 @@ public class Bank {
         if(rs != null)
             try { rs.close(); } catch (SQLException ex) { }
 
-        if(conn != null)
-            iConomy.getDatabase().checkIn(conn);
+        iConomy.getDatabase().close(conn);
     }
 
     /**
@@ -102,16 +105,16 @@ public class Bank {
         Connection conn = null;
         ResultSet rs = null;
         PreparedStatement ps = null;
+        boolean exist = false;
 
         try {
-            conn = iConomy.getDatabase().checkOut();
+            conn = iConomy.getDatabase().getConnection();
             ps = conn.prepareStatement("SELECT * FROM " + Constants.SQL_Table + " WHERE username = ? LIMIT 1");
             ps.setString(1, account);
             rs = ps.executeQuery();
-
-            return (rs.next());
+            exist = rs.next();
         } catch (Exception e) {
-            return false;
+            exist = false;
         } finally {
             if(ps != null)
                 try { ps.close(); } catch (SQLException ex) { }
@@ -119,9 +122,10 @@ public class Bank {
             if(rs != null)
                 try { rs.close(); } catch (SQLException ex) { }
 
-            if(conn != null)
-                iConomy.getDatabase().checkIn(conn);
+            iConomy.getDatabase().close(conn);
         }
+
+        return exist;
     }
 
     public HashMap<String, Double> getAccounts() {
@@ -131,7 +135,7 @@ public class Bank {
         PreparedStatement ps = null;
 
         try {
-            conn = iConomy.getDatabase().checkOut();
+            conn = iConomy.getDatabase().getConnection();
             ps = conn.prepareStatement("SELECT * FROM " + Constants.SQL_Table + " ORDER BY balance DESC");
             rs = ps.executeQuery();
 
@@ -147,8 +151,7 @@ public class Bank {
             if(rs != null)
                 try { rs.close(); } catch (SQLException ex) { }
 
-            if(conn != null)
-                iConomy.getDatabase().checkIn(conn);
+            iConomy.getDatabase().close(conn);
         }
 
         return accounts;
@@ -168,7 +171,7 @@ public class Bank {
         PreparedStatement ps = null;
         
         try {
-            conn = iConomy.getDatabase().checkOut();
+            conn = iConomy.getDatabase().getConnection();
             ps = conn.prepareStatement("SELECT * FROM " + Constants.SQL_Table + " WHERE username = ? LIMIT 1");
             ps.setString(1, account);
             rs = ps.executeQuery();
@@ -185,8 +188,7 @@ public class Bank {
             if(rs != null)
                 try { rs.close(); } catch (SQLException ex) { }
 
-            if(conn != null)
-                iConomy.getDatabase().checkIn(conn);
+            iConomy.getDatabase().close(conn);
         }
 
         return Account;
@@ -224,7 +226,7 @@ public class Bank {
         PreparedStatement ps = null;
 
         try {
-            conn = iConomy.getDatabase().checkOut();
+            conn = iConomy.getDatabase().getConnection();
             ps = conn.prepareStatement("SELECT * FROM " + Constants.SQL_Table + " WHERE hidden = 0 ORDER BY balance DESC LIMIT " + output);
             rs = ps.executeQuery();
 
@@ -245,8 +247,7 @@ public class Bank {
             if(rs != null)
                 try { rs.close(); } catch (SQLException ex) { }
 
-            if(conn != null)
-                iConomy.getDatabase().checkIn(conn);
+            iConomy.getDatabase().close(conn);
         }
 
         return new ArrayList<String>();
@@ -266,7 +267,7 @@ public class Bank {
         PreparedStatement ps = null;
         
         try {
-            conn = iConomy.getDatabase().checkOut();
+            conn = iConomy.getDatabase().getConnection();
             ps = conn.prepareStatement("SELECT * FROM " + Constants.SQL_Table + " WHERE hidden = 0 ORDER BY balance DESC");
             rs = ps.executeQuery();
 
@@ -285,8 +286,7 @@ public class Bank {
             if(rs != null)
                 try { rs.close(); } catch (SQLException ex) { }
 
-            if(conn != null)
-                iConomy.getDatabase().checkIn(conn);
+            iConomy.getDatabase().close(conn);
         }
 
         return -1;
