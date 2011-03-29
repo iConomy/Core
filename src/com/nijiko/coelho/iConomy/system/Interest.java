@@ -1,5 +1,6 @@
 package com.nijiko.coelho.iConomy.system;
 
+import com.nijiko.Messaging;
 import java.text.DecimalFormat;
 import java.util.TimerTask;
 
@@ -7,12 +8,18 @@ import org.bukkit.entity.Player;
 
 import com.nijiko.coelho.iConomy.iConomy;
 import com.nijiko.coelho.iConomy.util.Constants;
+import com.nijiko.coelho.iConomy.util.Template;
 import java.sql.BatchUpdateException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 public class Interest extends TimerTask {
+    Template Template = null;
+
+    public Interest(String directory) {
+        Template = new Template(directory, "Messages.yml");
+    }
 
     @Override
     public void run() {
@@ -70,6 +77,17 @@ public class Interest extends TimerTask {
                         ps.setDouble(1, balance+amount);
                         ps.setString(2, p.getName());
                         ps.addBatch();
+
+                        if(Constants.Interest_Announce) {
+                            Messaging.send(
+                                p,
+                                Template.parse(
+                                    "interest.announcement",
+                                    new String[]{ "+amount,+money,+interest,+a,+m,+i" },
+                                    new Object[]{ amount }
+                                )
+                            );
+                        }
 
                         if(amount < 0.0)
                             iConomy.getTransactions().insert("[System Interest]", p.getName(), 0.0, account.getBalance(), 0.0, 0.0, amount);

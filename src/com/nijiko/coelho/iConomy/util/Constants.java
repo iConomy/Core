@@ -22,6 +22,7 @@ public class Constants {
         "System.Interest.Percentage:0.0",
         "System.Interest.MinimumPerInterval:1",
         "System.Interest.MaximumPerInterval:2",
+        "System.Interest.Announce:false",
         "System.Database.Type:H2SQL",
         "System.Database.MySQL.Hostname:localhost",
         "System.Database.MySQL.Port:3306",
@@ -52,6 +53,7 @@ public class Constants {
     public static int Interest_Interval = 60;
     public static double Interest_Min_Interval = 1;
     public static double Interest_Max_Interval = 2;
+    public static boolean Interest_Announce = false;
 
     // Database Type
     public static String Database_Type = "H2SQL";
@@ -79,6 +81,7 @@ public class Constants {
 
         // System Interest
         Interest = config.getBoolean("System.Interest.Enabled", Interest);
+        Interest_Announce = config.getBoolean("System.Interest.Announce", Interest_Announce);
         Interest_Interval = config.getInt("System.Interest.IntervalSeconds", Interest_Interval);
         Interest_FlatRate = config.getDouble("System.Interest.FlatRate", Interest_FlatRate);
         Interest_Percentage = config.getDouble("System.Interest.Percentage", Interest_Percentage);

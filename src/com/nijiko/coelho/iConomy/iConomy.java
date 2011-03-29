@@ -4,10 +4,15 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 
+import java.sql.PreparedStatement;
 import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Connection;
+import java.sql.Statement;
+import java.sql.ResultSet;
 
+import java.util.LinkedList;
+import java.util.Locale;
 import java.util.Timer;
 
 import org.bukkit.command.Command;
@@ -21,6 +26,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.config.Configuration;
 import org.bukkit.event.server.ServerListener;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.event.server.PluginEvent;
 
 import com.nijiko.coelho.iConomy.entity.Players;
 import com.nijiko.coelho.iConomy.net.Database;
@@ -34,15 +40,8 @@ import com.nijiko.coelho.iConomy.util.Misc;
 
 import com.nijiko.permissions.PermissionHandler;
 import com.nijikokun.bukkit.Permissions.Permissions;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.Locale;
+import java.io.IOException;
 import org.bukkit.event.server.PluginEnableEvent;
-import org.bukkit.event.server.PluginEvent;
 
 /**
  * iConomy by Team iCo
@@ -90,6 +89,8 @@ public class iConomy extends JavaPlugin {
         getDataFolder().mkdir();
         getDataFolder().setWritable(true);
         getDataFolder().setExecutable(true);
+
+        // Setup the path.
         Constants.Plugin_Directory = getDataFolder().getPath();
 
         // Grab plugin details
@@ -112,7 +113,7 @@ public class iConomy extends JavaPlugin {
             return;
         }
 
-        if(Misc.is(Constants.Database_Type, new String[] { "sqlite", "h2", "h2sql" })) {
+        if(Misc.is(Constants.Database_Type, new String[] { "sqlite", "h2", "h2sql", "h2db" })) {
             if(!(new File("lib" + File.separator, "h2.jar").exists())) {
                 Downloader.install(Constants.H2_Jar_Location, "h2.jar");
             }
@@ -157,7 +158,7 @@ public class iConomy extends JavaPlugin {
         try {
             if (Constants.Interest) {
                 Interest_Timer = new Timer();
-                Interest_Timer.scheduleAtFixedRate(new Interest(),
+                Interest_Timer.scheduleAtFixedRate(new Interest(getDataFolder().getPath()),
                         Constants.Interest_Interval * 1000L, Constants.Interest_Interval * 1000L);
             }
         } catch (Exception e) {
