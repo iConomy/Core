@@ -40,7 +40,6 @@ import com.nijiko.coelho.iConomy.util.Misc;
 
 import com.nijiko.permissions.PermissionHandler;
 import com.nijikokun.bukkit.Permissions.Permissions;
-import java.io.IOException;
 import org.bukkit.event.server.PluginEnableEvent;
 
 /**
@@ -234,7 +233,7 @@ public class iConomy extends JavaPlugin {
 
                 if(current != version) {
                     if(current < 4.62) {
-                        MySQL.add("ALTER TABLE " + Constants.SQL_Table + " ADD UNIQUE(username);");
+                        MySQL.add("ALTER TABLE " + Constants.SQL_Table + " ADD UNIQUE(username(32));");
                         GENERIC.add("ALTER TABLE " + Constants.SQL_Table + " ADD UNIQUE(username);");
                     }
 
