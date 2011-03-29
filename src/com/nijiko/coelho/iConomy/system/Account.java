@@ -30,7 +30,7 @@ public class Account {
         PreparedStatement ps = null;
 
         try {
-            conn = iConomy.getDatabase().checkOut();
+            conn = iConomy.getDatabase().getConnection();
             ps = conn.prepareStatement("SELECT balance FROM " + Constants.SQL_Table + " WHERE username = ? LIMIT 1");
             ps.setString(1, this.name);
             rs = ps.executeQuery();
@@ -50,7 +50,7 @@ public class Account {
                 try { rs.close(); } catch (SQLException ex) { }
 
             if(conn != null)
-                iConomy.getDatabase().checkIn(conn);
+                iConomy.getDatabase().close(conn);
         }
 
         return Constants.Initial_Balance;
@@ -65,7 +65,7 @@ public class Account {
         PreparedStatement ps = null;
 
         try {
-            conn = iConomy.getDatabase().checkOut();
+            conn = iConomy.getDatabase().getConnection();
 
             if(!iConomy.getBank().hasAccount(this.name)) {
                 ps = conn.prepareStatement("INSERT INTO " + Constants.SQL_Table + "(username, balance) VALUES (?, ?)");
@@ -85,7 +85,7 @@ public class Account {
                 try { ps.close(); } catch (SQLException ex) { }
 
             if(conn != null)
-                iConomy.getDatabase().checkIn(conn);
+                iConomy.getDatabase().close(conn);
         }
     }
 
@@ -95,7 +95,7 @@ public class Account {
         PreparedStatement ps = null;
 
         try {
-            conn = iConomy.getDatabase().checkOut();
+            conn = iConomy.getDatabase().getConnection();
 
             if(!iConomy.getBank().hasAccount(this.name)) {
                 return false;
@@ -113,7 +113,7 @@ public class Account {
                 try { ps.close(); } catch (SQLException ex) { }
 
             if(conn != null)
-                iConomy.getDatabase().checkIn(conn);
+                iConomy.getDatabase().close(conn);
         }
 
         return true;
@@ -141,7 +141,7 @@ public class Account {
         PreparedStatement ps = null;
 
         try {
-            conn = iConomy.getDatabase().checkOut();
+            conn = iConomy.getDatabase().getConnection();
             ps = conn.prepareStatement("SELECT hidden FROM " + Constants.SQL_Table + " WHERE username = ? LIMIT 1");
             ps.setString(1, this.name);
             rs = ps.executeQuery();
@@ -161,7 +161,7 @@ public class Account {
                 try { rs.close(); } catch (SQLException ex) { }
 
             if(conn != null)
-                iConomy.getDatabase().checkIn(conn);
+                iConomy.getDatabase().close(conn);
         }
 
         return false;
@@ -224,7 +224,7 @@ public class Account {
             PreparedStatement ps = null;
 
             try {
-                conn = iConomy.getDatabase().checkOut();
+                conn = iConomy.getDatabase().getConnection();
                 ps = conn.prepareStatement("DELETE FROM `" + Constants.SQL_Table + "` WHERE username = ?");
                 ps.setString(1, this.name);
                 ps.executeUpdate();
@@ -235,7 +235,7 @@ public class Account {
                     try { ps.close(); } catch (SQLException ex) { }
 
                 if(conn != null)
-                    iConomy.getDatabase().checkIn(conn);
+                    iConomy.getDatabase().close(conn);
             }
         }
     }
