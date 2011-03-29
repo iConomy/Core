@@ -9,9 +9,10 @@ import com.nijiko.coelho.iConomy.util.Constants;
 import com.nijiko.coelho.iConomy.util.Messaging;
 import com.nijiko.coelho.iConomy.util.Misc;
 import com.nijiko.coelho.iConomy.util.Template;
-import org.bukkit.command.CommandSender;
 
 import org.bukkit.entity.Player;
+import org.bukkit.command.CommandSender;
+import org.bukkit.event.player.PlayerEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerListener;
 
