@@ -20,7 +20,7 @@ public class Transactions {
         PreparedStatement ps = null;
 
         if (Constants.Log_Data) {
-            conn = iConomy.getDatabase().getConnection();
+            conn = iConomy.getLocalDatabase().getConnection();
 
             if (Misc.is(Constants.Database_Type, new String[] { "sqlite", "h2", "h2sql", "h2db" })) {
                 try {
@@ -53,7 +53,7 @@ public class Transactions {
             try { rs.close(); } catch (SQLException ex) { }
 
         if(conn != null)
-            iConomy.getDatabase().close(conn);
+            iConomy.getLocalDatabase().close(conn);
     }
 
     /**
@@ -79,7 +79,7 @@ public class Transactions {
         PreparedStatement ps = null;
 
         try {
-            conn = iConomy.getDatabase().getConnection();
+            conn = iConomy.getLocalDatabase().getConnection();
             ps = conn.prepareStatement("INSERT INTO " + Constants.SQL_Table + "_Transactions(account_from, account_to, account_from_balance, account_to_balance, `timestamp`, `set`, gain, loss) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
 
             for (Object obj : data) {
@@ -96,7 +96,7 @@ public class Transactions {
             if(rs != null)
                 try { rs.close(); } catch (SQLException ex) { }
 
-            iConomy.getDatabase().close(conn);
+            iConomy.getLocalDatabase().close(conn);
         }
     }
 }

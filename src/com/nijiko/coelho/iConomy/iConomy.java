@@ -26,7 +26,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.config.Configuration;
 import org.bukkit.event.server.ServerListener;
 import org.bukkit.plugin.Plugin;
-import org.bukkit.event.server.PluginEvent;
 
 import com.nijiko.coelho.iConomy.entity.Players;
 import com.nijiko.coelho.iConomy.net.Database;
@@ -248,7 +247,7 @@ public class iConomy extends JavaPlugin {
                         Statement stmt = null;
 
                         try {
-                            conn = iConomy.getDatabase().getConnection();
+                            conn = iConomy.getLocalDatabase().getConnection();
                             stmt = null;
 
                             System.out.println(" - Updating " + Constants.Database_Type + " Database for latest iConomy");
@@ -276,7 +275,7 @@ public class iConomy extends JavaPlugin {
                             if(rs != null)
                                 try { rs.close(); } catch (SQLException ex) { }
 
-                            iConomy.getDatabase().close(conn);
+                            iConomy.getLocalDatabase().close(conn);
                         }
                     }
                 } else {
@@ -309,7 +308,7 @@ public class iConomy extends JavaPlugin {
                 PreparedStatement ps = null;
 
                 try {
-                    conn = iConomy.getDatabase().getConnection();
+                    conn = iConomy.getLocalDatabase().getConnection();
                     DatabaseMetaData dbm = conn.getMetaData();
                     rs = dbm.getTables(null, null, "ibalances", null);
                     ps = null;
@@ -342,7 +341,7 @@ public class iConomy extends JavaPlugin {
                         try { rs.close(); } catch (SQLException ex) { }
 
                     if(conn != null)
-                        iConomy.getDatabase().close(conn);
+                        iConomy.getLocalDatabase().close(conn);
                 }
             }
 
@@ -400,7 +399,7 @@ public class iConomy extends JavaPlugin {
      *
      * @return iDatabase
      */
-    public static Database getDatabase() {
+    public static Database getLocalDatabase() {
         return Database;
     }
 
