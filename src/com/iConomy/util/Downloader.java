@@ -1,4 +1,4 @@
-package com.nijiko.coelho.iConomy.util;
+package com.iConomy.util;
 
 import java.io.File;
 import java.io.FileOutputStream;

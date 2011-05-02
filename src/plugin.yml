@@ -1,8 +1,11 @@
 name: iConomy
-main: com.nijiko.coelho.iConomy.iConomy
-version: 4.63
-authors: [Nijikokun, Coelho]
+main: com.iConomy.iConomy
+version: 5.0
+authors: [Nijikokun]
 commands:
     money:
-        description:
+        description: Controls account balances and more
+        usage:
+    bank:
+        description: Control, list, create, and do various bank features.
         usage:

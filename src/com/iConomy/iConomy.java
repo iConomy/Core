@@ -1,4 +1,4 @@
-package com.nijiko.coelho.iConomy;
+package com.iConomy;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -26,20 +26,23 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.config.Configuration;
 import org.bukkit.event.server.ServerListener;
 import org.bukkit.plugin.Plugin;
-import org.bukkit.event.server.PluginEvent;
 
-import com.nijiko.coelho.iConomy.entity.Players;
-import com.nijiko.coelho.iConomy.net.Database;
-import com.nijiko.coelho.iConomy.system.Bank;
-import com.nijiko.coelho.iConomy.system.Interest;
-import com.nijiko.coelho.iConomy.util.Constants;
-import com.nijiko.coelho.iConomy.system.Transactions;
-import com.nijiko.coelho.iConomy.util.Downloader;
-import com.nijiko.coelho.iConomy.util.FileManager;
-import com.nijiko.coelho.iConomy.util.Misc;
+import com.iConomy.entity.Players;
+import com.iConomy.net.Database;
+import com.iConomy.system.Account;
+import com.iConomy.system.Accounts;
+import com.iConomy.system.Bank;
+import com.iConomy.system.Banks;
+import com.iConomy.system.Interest;
+import com.iConomy.util.Constants;
+import com.iConomy.system.Transactions;
+import com.iConomy.util.Downloader;
+import com.iConomy.util.FileManager;
+import com.iConomy.util.Misc;
 
 import com.nijiko.permissions.PermissionHandler;
 import com.nijikokun.bukkit.Permissions.Permissions;
+import java.text.DecimalFormat;
 import org.bukkit.event.server.PluginEnableEvent;
 
 /**
@@ -64,8 +67,10 @@ import org.bukkit.event.server.PluginEnableEvent;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 public class iConomy extends JavaPlugin {
+    public static Banks Banks = null;
+    public static Accounts Accounts = null;
+
     private static Server Server = null;
-    private static Bank Bank = null;
     private static Database Database = null;
     private static Transactions Transactions = null;
     private static PermissionHandler Permissions = null;
@@ -99,12 +104,11 @@ public class iConomy extends JavaPlugin {
         FileManager file = new FileManager(getDataFolder().getPath(), "VERSION", false);
 
         // Default Files
-        extractDefaultFile("iConomy.yml");
-        extractDefaultFile("Messages.yml");
+        extract("Config.yml");
+        extract("Template.yml");
 
-        // Configuration
         try {
-            Constants.load(new Configuration(new File(getDataFolder(), "iConomy.yml")));
+            Constants.load(new Configuration(new File(getDataFolder(), "Config.yml")));
         } catch (Exception e) {
             Server.getPluginManager().disablePlugin(this);
             System.out.println("[iConomy] Failed to retrieve configuration from directory.");
@@ -112,7 +116,7 @@ public class iConomy extends JavaPlugin {
             return;
         }
 
-        if(Misc.is(Constants.Database_Type, new String[] { "sqlite", "h2", "h2sql", "h2db" })) {
+        if(Misc.is(Constants.DatabaseType, new String[] { "sqlite", "h2", "h2sql", "h2db" })) {
             if(!(new File("lib" + File.separator, "h2.jar").exists())) {
                 Downloader.install(Constants.H2_Jar_Location, "h2.jar");
             }
@@ -122,43 +126,44 @@ public class iConomy extends JavaPlugin {
             }
         }
 
-        // Load the database
         try {
             Database = new Database();
+            Database.setupAccountTable();
+
+            if(Constants.Banking) {
+                Database.setupBankTable();
+                Database.setupBankRelationTable();
+            }
         } catch (Exception e) {
-            System.out.println("[iConomy] Failed to connect to database: " + e);
+            System.out.println("[iConomy] Database initialization failed: " + e);
             Server.getPluginManager().disablePlugin(this);
             return;
 
         }
 
-        // File Logger
         try {
             Transactions = new Transactions();
-            Transactions.load();
+            Database.setupTransactionTable();
         } catch (Exception e) {
-            System.out.println("[iConomy] Could not load transaction logger: ");
-            e.printStackTrace();
+            System.out.println("[iConomy] Could not load transaction logger: " + e);
         }
 
         // Check version details before the system loads
         update(file, Double.valueOf(pdfFile.getVersion()));
 
-        // Load the bank system
-        try {
-            Bank = new Bank();
-            Bank.load();
-        } catch (Exception e) {
-            System.out.println("[iConomy] Failed to load database: " + e);
-            Server.getPluginManager().disablePlugin(this);
-            return;
-        }
+        // Initialize default systems
+        Accounts = new Accounts();
+        
+        // Initialize the banks
+        if(Constants.Banking)
+            Banks = new Banks();
 
         try {
             if (Constants.Interest) {
+                long time = Constants.InterestSeconds * 1000L;
+
                 Interest_Timer = new Timer();
-                Interest_Timer.scheduleAtFixedRate(new Interest(getDataFolder().getPath()),
-                        Constants.Interest_Interval * 1000L, Constants.Interest_Interval * 1000L);
+                Interest_Timer.scheduleAtFixedRate(new Interest(getDataFolder().getPath()), time, time);
             }
         } catch (Exception e) {
             System.out.println("[iConomy] Failed to start interest system: " + e);
@@ -181,7 +186,7 @@ public class iConomy extends JavaPlugin {
     @Override
     public void onDisable() {
         try {
-            if(Misc.is(Constants.Database_Type, new String[] { "sqlite", "h2", "h2sql", "h2db" })) {
+            if(Misc.is(Constants.DatabaseType, new String[] { "sqlite", "h2", "h2sql", "h2db" })) {
                 Database.connectionPool().dispose();
             }
             
@@ -194,7 +199,8 @@ public class iConomy extends JavaPlugin {
             }
 
             Server = null;
-            Bank = null;
+            Banks = null;
+            Accounts = null;
             Database = null;
             Permissions = null;
             Transactions = null;
@@ -205,19 +211,11 @@ public class iConomy extends JavaPlugin {
 
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
-        try {
-            String[] split = new String[args.length + 1];
-            split[0] = cmd.getName().toLowerCase();
+        String[] split = new String[args.length + 1];
+        split[0] = cmd.getName().toLowerCase();
+        System.arraycopy(args, 0, split, 1, args.length);
 
-            for (int i = 0; i < args.length; i++) {
-                split[i + 1] = args[i];
-            }
-
-            playerListener.onPlayerCommand(sender, split);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
+        playerListener.onPlayerCommand(sender, split);
         return false;
     }
 
@@ -232,14 +230,14 @@ public class iConomy extends JavaPlugin {
                 LinkedList<String> SQL = new LinkedList<String>();
 
                 if(current != version) {
-                    if(current < 4.62) {
-                        MySQL.add("ALTER TABLE " + Constants.SQL_Table + " ADD UNIQUE(username(32));");
-                        GENERIC.add("ALTER TABLE " + Constants.SQL_Table + " ADD UNIQUE(username);");
+                    if(current < 4.64) {
+                        MySQL.add("ALTER TABLE " + Constants.SQLTable + " ADD hidden boolean DEFAULT '0';");
+                        GENERIC.add("ALTER TABLE " + Constants.SQLTable + " ADD HIDDEN BOOLEAN DEFAULT '0';");
                     }
 
-                    if(current < 4.61) {
-                        MySQL.add("ALTER TABLE " + Constants.SQL_Table + " ADD hidden boolean DEFAULT '0';");
-                        GENERIC.add("ALTER TABLE " + Constants.SQL_Table + " ADD HIDDEN BOOLEAN DEFAULT '0';");
+                    if(current < 4.62) {
+                        MySQL.add("ALTER IGNORE TABLE " + Constants.SQLTable + " ADD UNIQUE INDEX(username(32));");
+                        GENERIC.add("ALTER TABLE " + Constants.SQLTable + " ADD UNIQUE(username);");
                     }
 
                     if(!MySQL.isEmpty() && !GENERIC.isEmpty()) {
@@ -248,13 +246,13 @@ public class iConomy extends JavaPlugin {
                         Statement stmt = null;
 
                         try {
-                            conn = iConomy.getDatabase().getConnection();
+                            conn = iConomy.getiCoDatabase().getConnection();
                             stmt = null;
 
-                            System.out.println(" - Updating " + Constants.Database_Type + " Database for latest iConomy");
+                            System.out.println(" - Updating " + Constants.DatabaseType + " Database for latest iConomy");
 
                             int i = 1;
-                            SQL = (Constants.Database_Type.equalsIgnoreCase("mysql")) ? MySQL : GENERIC;
+                            SQL = (Constants.DatabaseType.equalsIgnoreCase("mysql")) ? MySQL : GENERIC;
 
                             for (String Query : SQL) {
                                 stmt = conn.createStatement();
@@ -276,7 +274,7 @@ public class iConomy extends JavaPlugin {
                             if(rs != null)
                                 try { rs.close(); } catch (SQLException ex) { }
 
-                            iConomy.getDatabase().close(conn);
+                            iConomy.getiCoDatabase().close(conn);
                         }
                     }
                 } else {
@@ -288,19 +286,19 @@ public class iConomy extends JavaPlugin {
                 file.delete();
             }
         } else {
-            if (!Constants.Database_Type.equalsIgnoreCase("flatfile")) {
+            if (!Constants.DatabaseType.equalsIgnoreCase("flatfile")) {
                 String[] SQL = {};
 
                 String[] MySQL = {
-                    "DROP TABLE " + Constants.SQL_Table + ";",
-                    "RENAME TABLE ibalances TO " + Constants.SQL_Table + ";",
-                    "ALTER TABLE " + Constants.SQL_Table + " CHANGE  player  username TEXT NOT NULL, CHANGE balance balance DECIMAL(65, 2) NOT NULL;"
+                    "DROP TABLE " + Constants.SQLTable + ";",
+                    "RENAME TABLE ibalances TO " + Constants.SQLTable + ";",
+                    "ALTER TABLE " + Constants.SQLTable + " CHANGE  player  username TEXT NOT NULL, CHANGE balance balance DECIMAL(64, 2) NOT NULL;"
                 };
 
                 String[] SQLite = {
-                    "DROP TABLE " + Constants.SQL_Table + ";",
-                    "CREATE TABLE '" + Constants.SQL_Table + "' ('id' INT ( 10 ) PRIMARY KEY , 'username' TEXT , 'balance' DECIMAL ( 65 , 2 ));",
-                    "INSERT INTO " + Constants.SQL_Table + "(id, username, balance) SELECT id, player, balance FROM ibalances;",
+                    "DROP TABLE " + Constants.SQLTable + ";",
+                    "CREATE TABLE '" + Constants.SQLTable + "' ('id' INT ( 10 ) PRIMARY KEY , 'username' TEXT , 'balance' DECIMAL ( 64 , 2 ));",
+                    "INSERT INTO " + Constants.SQLTable + "(id, username, balance) SELECT id, player, balance FROM ibalances;",
                     "DROP TABLE ibalances;"
                 };
 
@@ -309,16 +307,16 @@ public class iConomy extends JavaPlugin {
                 PreparedStatement ps = null;
 
                 try {
-                    conn = iConomy.getDatabase().getConnection();
+                    conn = iConomy.getiCoDatabase().getConnection();
                     DatabaseMetaData dbm = conn.getMetaData();
                     rs = dbm.getTables(null, null, "ibalances", null);
                     ps = null;
 
                     if (rs.next()) {
-                        System.out.println(" - Updating " + Constants.Database_Type + " Database for latest iConomy");
+                        System.out.println(" - Updating " + Constants.DatabaseType + " Database for latest iConomy");
 
                         int i = 1;
-                        SQL = (Constants.Database_Type.equalsIgnoreCase("mysql")) ? MySQL : SQLite;
+                        SQL = (Constants.DatabaseType.equalsIgnoreCase("mysql")) ? MySQL : SQLite;
 
                         for (String Query : SQL) {
                             ps = conn.prepareStatement(Query);
@@ -342,7 +340,7 @@ public class iConomy extends JavaPlugin {
                         try { rs.close(); } catch (SQLException ex) { }
 
                     if(conn != null)
-                        iConomy.getDatabase().close(conn);
+                        iConomy.getiCoDatabase().close(conn);
                 }
             }
 
@@ -351,7 +349,7 @@ public class iConomy extends JavaPlugin {
         }
     }
 
-    private void extractDefaultFile(String name) {
+    private void extract(String name) {
         File actual = new File(getDataFolder(), name);
         if (!actual.exists()) {
             InputStream input = this.getClass().getResourceAsStream("/default/" + name);
@@ -387,20 +385,85 @@ public class iConomy extends JavaPlugin {
     }
 
     /**
+     * Formats the holding balance in a human readable form with the currency attached:<br /><br />
+     * 20000.53 = 20,000.53 Coin<br />
+     * 20000.00 = 20,000 Coin
+     *
+     * @param account The name of the account you wish to be formatted
+     * @return String
+     */
+    public static String format(String account) {
+        return getAccount(account).getHoldings().toString();
+    }
+
+    /**
+     * Formats the balance in a human readable form with the currency attached:<br /><br />
+     * 20000.53 = 20,000.53 Coin<br />
+     * 20000.00 = 20,000 Coin
+     *
+     * @param account The name of the account you wish to be formatted
+     * @return String
+     */
+    public static String format(String bank, String account) {
+        return (new Bank(bank)).getAccount(account).getHoldings().toString();
+    }
+
+    /**
+     * Formats the money in a human readable form with the currency attached:<br /><br />
+     * 20000.53 = 20,000.53 Coin<br />
+     * 20000.00 = 20,000 Coin
+     *
+     * @param amount double
+     * @return String
+     */
+    public static String format(double amount) {
+        DecimalFormat formatter = new DecimalFormat("#,##0.00");
+        String formatted = formatter.format(amount);
+
+        if (formatted.endsWith(".")) {
+            formatted = formatted.substring(0, formatted.length() - 1);
+        }
+
+        return Misc.formatted(formatted, Constants.Major, Constants.Minor);
+    }
+
+    /**
+     * Grab an account, if it doesn't exist, create it.
+     *
+     * @param name
+     * @return Account or null
+     */
+    public static Account getAccount(String name) {
+        return Accounts.get(name);
+    }
+
+    public static boolean hasAccount(String name) {
+        return Accounts.exists(name);
+    }
+
+    /**
      * Grab the bank to modify and access bank accounts.
      *
      * @return Bank
      */
-    public static Bank getBank() {
-        return Bank;
+    public static Bank getBank(String name) {
+        return Banks.get(name);
+    }
+    
+    /**
+     * Grab the bank to modify and access bank accounts.
+     *
+     * @return Bank
+     */
+    public static Bank getBank(int id) {
+        return Banks.get(id);
     }
 
     /**
      * Grabs Database controller.
-     *
      * @return iDatabase
      */
-    public static Database getDatabase() {
+    public static Database getiCoDatabase() {
         return Database;
     }
 
@@ -416,10 +479,21 @@ public class iConomy extends JavaPlugin {
         return Transactions;
     }
 
+    /**
+     * Get the PermissionHandler
+     * @return PermissionHandler or Null depending on Plugin state.
+     */
     public static PermissionHandler getPermissions() {
         return Permissions;
     }
 
+    /**
+     * Check and see if the sender has the permission as designated by node.
+     *
+     * @param sender
+     * @param node
+     * @return boolean
+     */
     public static boolean hasPermissions(CommandSender sender, String node) {
         if(sender instanceof Player) {
             Player player = (Player)sender;
@@ -433,10 +507,10 @@ public class iConomy extends JavaPlugin {
         return true;
     }
 
-    public static void setPermissions(PermissionHandler ph) {
-        Permissions = ph;
-    }
-
+    /**
+     * Grab the server so we can do various activities if needed.
+     * @return Server
+     */
     public static Server getBukkitServer() {
         return Server;
     }

@@ -1,9 +1,10 @@
-package com.nijiko.coelho.iConomy.util;
+package com.iConomy.util;
 
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import com.nijiko.coelho.iConomy.iConomy;
+import com.iConomy.iConomy;
+import org.bukkit.ChatColor;
 
 /**
  * Copyright (C) 2011  Nijikokun <nijikokun@gmail.com>
@@ -63,15 +64,16 @@ public class Messaging {
     public static String parse(String original) {
         original = colorize(original);
         return original.replaceAll("(&([a-z0-9]))", "\u00A7$2").replace("&&", "&");
+
     }
 
     /**
-     * Converts color codes into the simoleon code. Sort of a HTML format color code tag.
+     * Converts color codes into the simoleon code. Sort of a HTML format color code tag and `[code]
      * <p>
      * Color codes allowed: black, navy, green, teal, red, purple, gold, silver, gray, blue, lime, aqua, rose, pink, yellow, white.</p>
      * Example:
      * <blockquote<pre>
-     * Messaging.colorize("Hello &lt;green>world!"); // returns: Hello �2world!
+     * Messaging.colorize("Hello &lt;green>world!"); // returns: Hello $world!
      * </pre></blockquote>
      *
      * @param original Original string to be parsed against group of color names.
@@ -79,6 +81,22 @@ public class Messaging {
      * @return <code>String</code> - The parsed string after conversion.
      */
     public static String colorize(String original) {
+        original = original.replace("`r", ChatColor.RED.toString());
+        original = original.replace("`R", ChatColor.DARK_RED.toString());
+        original = original.replace("`y", ChatColor.YELLOW.toString());
+        original = original.replace("`Y", ChatColor.GOLD.toString());
+        original = original.replace("`g", ChatColor.GREEN.toString());
+        original = original.replace("`G", ChatColor.DARK_GREEN.toString());
+        original = original.replace("`a", ChatColor.AQUA.toString());
+        original = original.replace("`A", ChatColor.DARK_AQUA.toString());
+        original = original.replace("`b", ChatColor.BLUE.toString());
+        original = original.replace("`B", ChatColor.DARK_BLUE.toString());
+        original = original.replace("`p", ChatColor.LIGHT_PURPLE.toString());
+        original = original.replace("`P", ChatColor.DARK_PURPLE.toString());
+        original = original.replace("`k", ChatColor.BLACK.toString());
+        original = original.replace("`s", ChatColor.GRAY.toString());
+        original = original.replace("`S", ChatColor.DARK_GRAY.toString());
+        original = original.replace("`w", ChatColor.WHITE.toString());
         return original.replace("<black>", "\u00A70").replace("<navy>", "\u00A71").replace("<green>", "\u00A72").replace("<teal>", "\u00A73").replace("<red>", "\u00A74").replace("<purple>", "\u00A75").replace("<gold>", "\u00A76").replace("<silver>", "\u00A77").replace("<gray>", "\u00A78").replace("<blue>", "\u00A79").replace("<lime>", "\u00A7a").replace("<aqua>", "\u00A7b").replace("<rose>", "\u00A7c").replace("<pink>", "\u00A7d").replace("<yellow>", "\u00A7e").replace("<white>", "\u00A7f");
     }
 

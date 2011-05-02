@@ -1,4 +1,4 @@
-package com.nijiko.coelho.iConomy.events;
+package com.iConomy.events;
 
 import org.bukkit.event.Event;
 

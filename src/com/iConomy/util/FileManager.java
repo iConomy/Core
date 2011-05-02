@@ -1,4 +1,4 @@
-package com.nijiko.coelho.iConomy.util;
+package com.iConomy.util;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
