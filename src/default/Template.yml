@@ -25,9 +25,9 @@
 #     &4 `R red       &d `p pink
 #     &5 `P purple    &e `y yellow
 #     &6 `Y gold
-#     &7 `g silver
-#     &8 `G gray
-#     &8 `b blue
+#     &7 `s silver
+#     &8 `S gray
+#     &9 `b blue
 #
 #     For black would be: <black> or `k or &0
 #     Example using Inequality: <green>Hi I'm green! <white>Now White!?
