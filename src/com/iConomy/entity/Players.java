@@ -1615,9 +1615,12 @@ public class Players extends PlayerListener {
 
                         if(Constants.Banking) {
                             bankHoldings = iConomy.Banks.values();
-                            bankAccounts = bankHoldings.size();
-                            totalHoldings.addAll(bankHoldings);
-                            totalAccounts += bankAccounts;
+                            bankAccounts = (bankHoldings != null) ? bankHoldings.size() : 0;
+                            
+                            if(bankHoldings != null) {
+                                totalHoldings.addAll(bankHoldings);
+                                totalAccounts += bankAccounts;
+                            }
                         }
 
                         for (Object o : totalHoldings.toArray()) {
