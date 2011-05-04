@@ -107,7 +107,7 @@ public class Database {
                         "major VARCHAR(255)," +
                         "minor VARCHAR(255)," +
                         "initial DECIMAL(64,2)," +
-                        "fee DECIMAL(64,2)"+
+                        "fee DECIMAL(64,2),"+
                         "PRIMARY KEY (`id`)" +
                     ")"
                 );

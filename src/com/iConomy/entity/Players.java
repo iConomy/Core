@@ -311,7 +311,7 @@ public class Players extends PlayerListener {
 
         if(bank != null) {
             double fee = bank.getFee();
-            if(fee < account.getHoldings().balance()) {
+            if(fee > account.getHoldings().balance()) {
                 Messaging.send(sender, Template.color("error.bank.account.funds"));
                 return;
             }
