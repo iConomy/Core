@@ -98,7 +98,7 @@ public class Database {
             rs = dbm.getTables(null, null, Constants.SQLTable + "_Banks", null);
 
             if (!rs.next()) {
-                System.out.println("[iConomy] Creating table: " + Constants.SQLTable);
+                System.out.println("[iConomy] Creating table: " + Constants.SQLTable + "_Banks");
 
                 ps = conn.prepareStatement(
                     "CREATE TABLE " + Constants.SQLTable + "_Banks(" +
@@ -157,7 +157,7 @@ public class Database {
             rs = dbm.getTables(null, null, Constants.SQLTable + "_BankRelations", null);
 
             if (!rs.next()) {
-                System.out.println("[iConomy] Creating table: " + Constants.SQLTable);
+                System.out.println("[iConomy] Creating table: " + Constants.SQLTable + "_BankRelations");
 
                 ps = conn.prepareStatement(
                     "CREATE TABLE " + Constants.SQLTable + "_BankRelations(" +
