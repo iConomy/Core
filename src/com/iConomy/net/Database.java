@@ -95,7 +95,7 @@ public class Database {
             } catch(SQLException E) { }
         } else {
             DatabaseMetaData dbm = conn.getMetaData();
-            rs = dbm.getTables(null, null, Constants.SQLTable, null);
+            rs = dbm.getTables(null, null, Constants.SQLTable + "_Banks", null);
 
             if (!rs.next()) {
                 System.out.println("[iConomy] Creating table: " + Constants.SQLTable);
@@ -104,10 +104,10 @@ public class Database {
                     "CREATE TABLE " + Constants.SQLTable + "_Banks(" +
                         "`id` INT(10) NOT NULL AUTO_INCREMENT," +
                         "`name` VARCHAR(32) NOT NULL," +
-                        "major VARCHAR(255)," +
-                        "minor VARCHAR(255)," +
-                        "initial DECIMAL(64,2)," +
-                        "fee DECIMAL(64,2),"+
+                        "`major` VARCHAR(255)," +
+                        "`minor` VARCHAR(255)," +
+                        "`initial` DECIMAL(64,2)," +
+                        "`fee` DECIMAL(64,2),"+
                         "PRIMARY KEY (`id`)" +
                     ")"
                 );
@@ -154,7 +154,7 @@ public class Database {
             } catch(SQLException E) { }
         } else {
             DatabaseMetaData dbm = conn.getMetaData();
-            rs = dbm.getTables(null, null, Constants.SQLTable, null);
+            rs = dbm.getTables(null, null, Constants.SQLTable + "_BankRelations", null);
 
             if (!rs.next()) {
                 System.out.println("[iConomy] Creating table: " + Constants.SQLTable);
@@ -162,11 +162,12 @@ public class Database {
                 ps = conn.prepareStatement(
                     "CREATE TABLE " + Constants.SQLTable + "_BankRelations(" +
                         "`id` INT(10) NOT NULL AUTO_INCREMENT," +
-                        "account_name VARCHAR(32)," +
-                        "bank_id INT(10)," +
-                        "holdings DECIMAL(64,2),"+
-                        "main BOOLEAN DEFAULT '0',"+
-                        "hidden BOOLEAN DEFAULT '0'"+
+                        "`account_name` VARCHAR(32)," +
+                        "`bank_id` INT(10)," +
+                        "`holdings` DECIMAL(64,2),"+
+                        "`main` BOOLEAN DEFAULT '0',"+
+                        "`hidden` BOOLEAN DEFAULT '0',"+
+                        "PRIMARY KEY (`id`)" +
                     ")"
                 );
 
