@@ -190,9 +190,9 @@ public class Holdings {
 
         if(bankId == 0) {
             return Misc.formatted(formatted, Constants.Major, Constants.Minor);
-        } else {
-            Bank bank = new Bank(bankId);
-            return Misc.formatted(formatted, bank.getMajor(), bank.getMinor());
         }
+
+        Bank b = new Bank(this.bankId);
+        return Misc.formatted(formatted, b.getMajor(), b.getMinor());
     }
 }
