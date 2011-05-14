@@ -192,6 +192,7 @@ public class Interest extends TimerTask {
 
                             ps.setDouble(1, balance+amount);
                             ps.setString(2, name);
+                            ps.setInt(3, bankPlayers.get(name));
                             ps.addBatch();
 
                             if(Constants.InterestAnn && Constants.InterestOnline) {
