@@ -210,7 +210,7 @@ public class Accounts {
 
         try {
             conn = iConomy.getiCoDatabase().getConnection();
-            ps = conn.prepareStatement("SELECT username,balance FROM " + Constants.SQLTable + " ORDER BY balance DESC LIMIT ?");
+            ps = conn.prepareStatement("SELECT username,balance FROM " + Constants.SQLTable + " WHERE hidden = 0 ORDER BY balance DESC LIMIT ?");
             ps.setInt(1, amount);
             rs = ps.executeQuery();
 
