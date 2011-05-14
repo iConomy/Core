@@ -280,7 +280,7 @@ public class Players extends PlayerListener {
         }
 
         Messaging.send(sender,
-            Template.color("tag.bank") + Template.parse("bank.set",
+            Template.color("tag.bank") + Template.parse("banks.set",
                 new String[] { "+bank,+name,+n,+b", "+key,+k", "+value,+val,+v" },
                 new Object[] { bank, key, value }
             )
@@ -1645,7 +1645,7 @@ public class Players extends PlayerListener {
                         ));
 
                         if(Constants.Banking) {
-                            Messaging.send(Template.parse("statistics.bank-accounts",
+                            Messaging.send(Template.parse("statistics.bank.accounts",
                                     new String[]{ "+currency,+c", "+amount,+accounts,+a" },
                                     new Object[]{ Constants.Major.get(1), bankAccounts }
                             ));
