@@ -25,17 +25,27 @@ public class Create extends Handler {
     @Override
     public boolean perform(CommandSender sender, LinkedHashMap<String, Argument> arguments) throws InvalidUsage {
         String name = arguments.get("name").getStringValue();
+        String tag = template.color(Template.Node.TAG_MONEY);
 
         if(name.equals("0"))
             throw new InvalidUsage("Missing name parameter: /money create <name>");
 
         if(Accounts.exists(name)) {
             template.set(Template.Node.ERROR_EXISTS);
-            template.add("name", name);
-            Messaging.send(sender, template.parse());
+            Messaging.send(sender, tag + template.parse());
             return false;
         }
 
+        if(!Accounts.create(name)) {
+            template.set(Template.Node.ERROR_CREATE);
+            template.add("name", name);
+            Messaging.send(sender, tag + template.parse());
+            return false;
+        }
+
+        template.set(Template.Node.ACCOUNTS_CREATE);
+        template.add("name", name);
+        Messaging.send(sender, tag + template.parse());
         return false;
     }
 }
