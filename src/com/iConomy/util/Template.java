@@ -38,7 +38,6 @@ public class Template {
         ACCOUNTS_PURGE("accounts.purge"),
         ACCOUNTS_CREATE("accounts.create"),
         ACCOUNTS_REMOVE("accounts.remove"),
-        ACCOUNTS_REMOVETOTAL("accounts.remove.all"),
         ACCOUNTS_STATUS("accounts.status"),
 
         TOP_OPENING("top.opening"),

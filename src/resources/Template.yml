@@ -75,7 +75,6 @@ accounts:
     purge: "<rose>All inactive accounts were purged."
     create: "<green>Created account with the name <white>+name<green>."
     remove: "<green>Deleted account: <white>+name<green>."
-    remove-total: "<green>Fully deleted: <white>+name<green>."
     status: "<green>Account status is now <white>+status<green>."
 
 error:
