@@ -15,7 +15,7 @@ import org.bukkit.command.CommandSender;
 public class Remove extends Handler {
 
     public Remove(iConomy plugin) {
-        super(plugin);
+        super(plugin, plugin.Template);
     }
 
     @Override

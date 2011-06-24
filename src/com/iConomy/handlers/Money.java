@@ -20,7 +20,7 @@ public class Money extends Handler {
     private Accounts Accounts = new Accounts();
 
     public Money(iConomy plugin) {
-        super(plugin);
+        super(plugin, plugin.Template);
     }
 
     @Override

@@ -15,7 +15,7 @@ import org.bukkit.command.CommandSender;
 public class Set extends Handler {
 
     public Set(iConomy plugin) {
-        super(plugin);
+        super(plugin, plugin.Template);
     }
 
     @Override

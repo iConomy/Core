@@ -7,23 +7,34 @@ import com.iConomy.command.Parser.Argument;
 import com.iConomy.command.exceptions.InvalidUsage;
 
 import com.iConomy.iConomy;
+import com.iConomy.system.Accounts;
 
 import com.iConomy.util.Messaging;
+import com.iConomy.util.Template;
 
 import org.bukkit.command.CommandSender;
 
 public class Create extends Handler {
 
+    private Accounts Accounts = new Accounts();
+
     public Create(iConomy plugin) {
-        super(plugin);
+        super(plugin, plugin.Template);
     }
 
     @Override
     public boolean perform(CommandSender sender, LinkedHashMap<String, Argument> arguments) throws InvalidUsage {
-        if(isConsole(sender))
-            Messaging.send(sender, "`rCannot check money on non-living organism.");
+        String name = arguments.get("name").getStringValue();
 
-        System.out.println();
+        if(name.equals("0"))
+            throw new InvalidUsage("Missing name parameter: /money create <name>");
+
+        if(Accounts.exists(name)) {
+            template.set(Template.Node.ERROR_EXISTS);
+            template.add("name", name);
+            Messaging.send(sender, template.parse());
+            return false;
+        }
 
         return false;
     }

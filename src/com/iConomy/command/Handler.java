@@ -6,6 +6,7 @@ import java.util.List;
 import com.iConomy.iConomy;
 import com.iConomy.command.Parser.Argument;
 import com.iConomy.command.exceptions.InvalidUsage;
+import com.iConomy.util.Template;
 
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -13,9 +14,11 @@ import org.bukkit.entity.Player;
 public abstract class Handler {
 
     protected final iConomy plugin;
+    protected final Template template;
 
-    public Handler(iConomy plugin) {
+    public Handler(iConomy plugin, Template template) {
         this.plugin = plugin;
+        this.template = template;
     }
 
     public abstract boolean perform(CommandSender sender, LinkedHashMap<String, Argument> arguments) throws InvalidUsage;

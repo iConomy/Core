@@ -15,7 +15,7 @@ import org.bukkit.command.CommandSender;
 public class Take extends Handler {
 
     public Take(iConomy plugin) {
-        super(plugin);
+        super(plugin, plugin.Template);
     }
 
     @Override
