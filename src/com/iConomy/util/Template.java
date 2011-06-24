@@ -49,6 +49,7 @@ public class Template {
         ERROR_EXISTS("error.exists"),
         ERROR_ACCOUNT("error.account"),
         ERROR_FUNDS("error.funds"),
+        ERROR_CREATE("error.create"),
         ;
 
         private String key;
