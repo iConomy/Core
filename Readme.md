@@ -7,7 +7,7 @@
 
 # Commands
     @done Finish money command with optional #name parameter. (Thur, June 23rd)
-    @todo Finish #set command -- sub command of /money
+    @done Finish #set command -- sub command of /money (Fri, June 24th)
     @todo Finish #give command -- sub command of /money
     @todo Finish #take command -- sub command of /money
     @done Finish #create command -- sub command of /money (Fri, June 24th)
