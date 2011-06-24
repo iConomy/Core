@@ -82,5 +82,6 @@ error:
     online: "<rose>Sorry, nobody else is online."
     exists: "<rose>Account already exists."
     create: "<rose>Could not create account with the name <white>+name<rose>."
+    remove: "<rose>Could not remove account with the name <white>+name<rose>."
     account: "<rose>Account <white>+name<rose> does not exist."
     funds: "<rose>Sorry, you do not have enough funds to do that."
