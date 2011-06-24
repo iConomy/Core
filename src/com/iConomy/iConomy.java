@@ -71,12 +71,12 @@ public class iConomy extends JavaPlugin {
             Template = new Template(directory.getPath(), "Template.yml");
 
             // Setup Commands
-            Commands.add("/money +name", new money(this));
-            Commands.add("/money -create +name", new create(this));
-            Commands.add("/money -remove +name", new remove(this));
-            Commands.add("/money -give +name +amount:empty", new give(this));
-            Commands.add("/money -take +name +amount:empty", new take(this));
-            Commands.add("/money -set +name +amount:empty", new set(this));
+            Commands.add("/money +name", new Money(this));
+            Commands.add("/money -create +name", new Create(this));
+            Commands.add("/money -remove +name", new Remove(this));
+            Commands.add("/money -give +name +amount:empty", new Give(this));
+            Commands.add("/money -take +name +amount:empty", new Take(this));
+            Commands.add("/money -set +name +amount:empty", new Set(this));
 
             // Setup Database.
             try {
@@ -88,7 +88,7 @@ public class iConomy extends JavaPlugin {
                 );
 
                 // Check to see if it's a binary database, if so, check the database existance
-                // If it doesn't exist, create one.
+                // If it doesn't exist, Create one.
                 if(Database.getDatabase() == null)
                     if(!Database.tableExists(Constants.Nodes.DatabaseTable.toString())) {
                         System.out.println("Testing...");

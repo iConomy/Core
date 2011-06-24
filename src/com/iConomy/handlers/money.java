@@ -15,11 +15,11 @@ import com.iConomy.util.Messaging;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-public class money extends Handler {
+public class Money extends Handler {
 
     private Accounts Accounts = new Accounts();
 
-    public money(iConomy plugin) {
+    public Money(iConomy plugin) {
         super(plugin);
     }
 

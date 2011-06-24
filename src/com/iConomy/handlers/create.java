@@ -12,9 +12,9 @@ import com.iConomy.util.Messaging;
 
 import org.bukkit.command.CommandSender;
 
-public class create extends Handler {
+public class Create extends Handler {
 
-    public create(iConomy plugin) {
+    public Create(iConomy plugin) {
         super(plugin);
     }
 
