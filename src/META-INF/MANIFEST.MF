@@ -1,2 +1,0 @@
-Manifest-Version: 1.0
-Class-Path: ../lib/mysql.jar ../lib/mysql-connector-java-bin.jar ../lib/mysql-connector-java-5.1.14-bin.jar ../lib/mysql-connector-java-5.1.15-bin.jar ../lib/h2.jar ../lib/h2-jdbc.jar ../lib/h2-sql.jar ../lib/h2sql.jar ../mysql.jar ../mysql-connector-java-bin.jar ../mysql-connector-java-5.1.14-bin.jar ../mysql-connector-java-5.1.15-bin.jar ../h2.jar ../h2-jdbc.jar ../h2sql.jar ../h2jdbc.jar
