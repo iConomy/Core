@@ -7,12 +7,16 @@ import com.iConomy.command.Parser.Argument;
 import com.iConomy.command.exceptions.InvalidUsage;
 
 import com.iConomy.iConomy;
+import com.iConomy.system.Account;
+import com.iConomy.system.Accounts;
 
 import com.iConomy.util.Messaging;
+import com.iConomy.util.Template;
 
 import org.bukkit.command.CommandSender;
 
 public class Set extends Handler {
+    private Accounts Accounts = new Accounts();
 
     public Set(iConomy plugin) {
         super(plugin, plugin.Template);
@@ -20,11 +24,41 @@ public class Set extends Handler {
 
     @Override
     public boolean perform(CommandSender sender, LinkedHashMap<String, Argument> arguments) throws InvalidUsage {
-        if(isConsole(sender))
-            Messaging.send(sender, "`rCannot check money on non-living organism.");
+        String name = arguments.get("name").getStringValue();
+        String tag = template.color(Template.Node.TAG_MONEY);
+        Double amount;
 
-        System.out.println();
+        if(name.equals("0"))
+            throw new InvalidUsage("Missing name parameter: /money set <name> <amount>");
 
+        if(arguments.get("amount").getStringValue().equals("empty"))
+            throw new InvalidUsage("Missing amount parameter: /money set <name> <amount>");
+
+        try {
+            amount = arguments.get("amount").getDoubleValue();
+        } catch(NumberFormatException e) {
+            throw new InvalidUsage("Invalid amount parameter, must be double.");
+        }
+
+        if(Double.isInfinite(amount) || Double.isNaN(amount))
+            throw new InvalidUsage("Invalid amount parameter, must be double.");
+
+        if(!Accounts.exists(name)) {
+            template.set(Template.Node.ERROR_ACCOUNT);
+            template.add("name", name);
+
+            Messaging.send(sender, tag + template.parse());
+            return false;
+        }
+
+        Account account = new Account(name);
+        account.getHoldings().setBalance(amount);
+
+        template.set(Template.Node.PLAYER_SET);
+        template.add("name", name);
+        template.add("balance", account.getHoldings().toString());
+
+        Messaging.send(sender, tag + template.parse());
         return false;
     }
 }
