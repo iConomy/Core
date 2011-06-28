@@ -2,11 +2,19 @@ package com.iConomy.util;
 
 import com.iConomy.Constants;
 import com.iConomy.iConomy;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Common {
 
@@ -142,5 +150,35 @@ public class Common {
                 }
             }
         }
+    }
+
+    public static String resourceToString(String name) {
+        InputStream input = iConomy.class.getResourceAsStream("/resources/" + name);
+        Writer writer = new StringWriter();
+        char[] buffer = new char[1024];
+
+        if(input != null) {
+            try {
+                int n;
+                Reader reader = new BufferedReader(new InputStreamReader(input));
+                while ((n = reader.read(buffer)) != -1)
+                    writer.write(buffer, 0, n);
+            } catch (IOException e) {
+                try {
+                    input.close();
+                } catch (IOException ex) { }
+                return null;
+            } finally {
+                try {
+                    input.close();
+                } catch (IOException e) { }
+            }
+        } else {
+            return null;
+        }
+
+        String text = writer.toString().trim();
+        text = text.replace("\r\n", " ").replace("\n", " ");
+        return text.trim();
     }
 }
