@@ -17,6 +17,10 @@ import com.iConomy.system.Holdings;
 import com.iConomy.util.Common;
 import com.iConomy.util.Messaging;
 import com.iConomy.util.Template;
+import java.sql.Connection;
+import java.sql.SQLException;
+import org.apache.commons.dbutils.DbUtils;
+import org.apache.commons.dbutils.QueryRunner;
 
 import org.bukkit.Server;
 import org.bukkit.command.Command;
@@ -91,7 +95,23 @@ public class iConomy extends JavaPlugin {
                 // If it doesn't exist, Create one.
                 if(Database.getDatabase() == null)
                     if(!Database.tableExists(Constants.Nodes.DatabaseTable.toString())) {
-                        System.out.println("Testing...");
+                        String SQL = Common.resourceToString("SQL/create-Table-" + Database.getType().toString().toLowerCase() + ".sql");
+                        SQL = String.format(SQL, Constants.Nodes.DatabaseTable.getValue());
+
+                        try {
+                            QueryRunner run = new QueryRunner();
+                            Connection c = iConomy.Database.getConnection();
+
+                            try{
+                                run.update(c, SQL);
+                            } catch (SQLException ex) {
+                                System.out.println("[iConomy] Error creating database: " + ex);
+                            } finally {
+                                DbUtils.close(c);
+                            }
+                        } catch (SQLException ex) {
+                            System.out.println("[iConomy] Database Error: " + ex);
+                        }
                     }
 
             } catch (MissingDriver ex) {
