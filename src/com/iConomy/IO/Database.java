@@ -14,6 +14,7 @@ import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 
 public class Database {
+    public static enum Type { MiniDB, MySQL, SQLite, Postgre, H2DB };
     private String type;
     private String driver;
     private String url;
@@ -39,6 +40,9 @@ public class Database {
         
         if(Common.matches(type, "sqlite", "sqlite2", "sqlite3", "sqlitedb"))
             driver = "org.sqlite.JDBC";
+
+        if(driver == null)
+            return;
 
         if(!DbUtils.loadDriver(driver))
             throw new MissingDriver("Please make sure the " + type + " driver library jar exists.");
@@ -78,6 +82,25 @@ public class Database {
         }
 
         return exists;
+    }
+
+    public Type getType() {
+        if(Common.matches(type, "flatfile", "ff", "mini", "minidb", "flat"))
+            return Type.MiniDB;
+
+        if(Common.matches(type, "mysql", "mysqldb"))
+            return Type.MySQL;
+
+        if(Common.matches(type, "h2", "h2db", "h2sql"))
+            return Type.H2DB;
+
+        if(Common.matches(type, "postgresql", "postgre", "postgredb"))
+            return Type.Postgre;
+
+        if(Common.matches(type, "sqlite", "sqlite2", "sqlite3", "sqlitedb"))
+            return Type.SQLite;
+
+        return Type.MiniDB;
     }
 
     public Mini getDatabase() {
