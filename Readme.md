@@ -16,7 +16,9 @@
 # Database
     @done Integrate MiniDB as flatfile (Tues, June 21st)
     @done Database table creation & checks on startup.
-    @todo Test SQL Based database systems.
+    @in-progress Test SQL Based database systems.
+
+# Single Database Tests
         @done Test MySQL
         @todo Test SQLite
         @todo Test h2
