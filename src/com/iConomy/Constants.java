@@ -35,7 +35,11 @@ public class Constants {
         MultiWorld("System.Default.Account.MultiWorld", false),
         Balance("System.Default.Account.Holdings", 30.0),
 
-        Log("System.Logging.Enabled", false),
+        AllowMinor("System.Formatting.Minor", false),
+        isSplit("System.Formatting.Seperate", false),
+        isSingle("System.Formatting.Single", false),
+
+        Logging("System.Logging.Enabled", false),
 
         Interest("System.Interest.Enabled", false),
         InterestOnline("System.Interest.Online", false),
