@@ -115,9 +115,9 @@ System:
     #  - the port that the database is listening on
     #  - defaults: 3306 for mysql, postgre is either 5740 or 5432
     ##
-    # [MySQL Default] mysql:\\localhost:3306\iConomy
+    # [MySQL Default] mysql://localhost:3306/iConomy
     # [Postgre Default] postgresql://localhost:5740/iConomy
-    URL: 'mysql:\\localhost:3306\iConomy'
+    URL: 'mysql://localhost:3306/iConomy'
 
     # Login details for binary databases
     Username: 'root'
