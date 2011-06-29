@@ -95,7 +95,7 @@ public class iConomy extends JavaPlugin {
                 // If it doesn't exist, Create one.
                 if(Database.getDatabase() == null)
                     if(!Database.tableExists(Constants.Nodes.DatabaseTable.toString())) {
-                        String SQL = Common.resourceToString("SQL/create-Table-" + Database.getType().toString().toLowerCase() + ".sql");
+                        String SQL = Common.resourceToString("SQL/Core/Create-Table-" + Database.getType().toString().toLowerCase() + ".sql");
                         SQL = String.format(SQL, Constants.Nodes.DatabaseTable.getValue());
 
                         try {
