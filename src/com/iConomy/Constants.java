@@ -53,7 +53,9 @@ public class Constants {
         DatabaseTable("System.Database.Table", "iConomy"),
         DatabaseUrl("System.Database.URL", "mysql:\\\\localhost:3306\\iConomy"),
         DatabaseUsername("System.Database.Username", "root"),
-        DatabasePassword("System.Database.Password", "");
+        DatabasePassword("System.Database.Password", ""),
+        DatabaseMajorItem("System.Database.MajorItem", 0),
+        DatabaseMinorItem("System.Database.MinorItem", 0);
 
         String node;
         Object value;
