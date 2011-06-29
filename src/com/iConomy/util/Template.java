@@ -6,67 +6,6 @@ import java.util.LinkedHashMap;
 import org.bukkit.util.config.Configuration;
 
 public class Template {
-    public static enum Node {
-        TAG_MONEY("tag.money"),
-
-        PERSONAL_BALANCE("personal.balance"),
-        PERSONAL_RESET("personal.reset"),
-        PERSONAL_RANK("personal.rank"),
-        PERSONAL_SET("personal.set"),
-        PERSONAL_DEBIT("personal.debit"),
-        PERSONAL_CREDIT("personal.credit"),
-
-        PLAYER_BALANCE("player.balance"),
-        PLAYER_RANK("player.rank"),
-        PLAYER_RESET("player.reset"),
-        PLAYER_SET("player.set"),
-        PLAYER_CREDIT("player.credit"),
-        PLAYER_DEBIT("player.debit"),
-
-        PAYMENT_SELF("payment.self"),
-        PAYMENT_TO("payment.to"),
-        PAYMENT_FROM("payment.from"),
-
-        STATISTICS_OPENING("statistics.opening"),
-        STATISTICS_TOTAL("statistics.total"),
-        STATISTICS_AVERAGE("statistics.average"),
-        STATISTICS_ACCOUNTS("statistics.accounts"),
-
-        INTEREST_ANNOUNCEMENT("interest.announcement"),
-
-        ACCOUNTS_EMPTY("accounts.empty"),
-        ACCOUNTS_PURGE("accounts.purge"),
-        ACCOUNTS_CREATE("accounts.create"),
-        ACCOUNTS_REMOVE("accounts.remove"),
-        ACCOUNTS_STATUS("accounts.status"),
-
-        TOP_OPENING("top.opening"),
-        TOP_EMPTY("top.empty"),
-        TOP_LINE("top.line"),
-
-        ERROR_ONLINE("error.online"),
-        ERROR_EXISTS("error.exists"),
-        ERROR_ACCOUNT("error.account"),
-        ERROR_FUNDS("error.funds"),
-        ERROR_CREATE("error.create"),
-        ;
-
-        private String key;
-
-        Node(String key) {
-            this.key = key;
-        }
-
-        String getKey() {
-            return this.key;
-        }
-
-        @Override
-        public String toString() {
-            return this.key;
-        }
-    }
-
     private Configuration tpl = null;
     private LinkedHashMap<String, Object> arguments;
     private String currentKey;
@@ -163,5 +102,66 @@ public class Template {
             return Messaging.argument(this.raw(this.currentKey), this.arguments);
 
         return null;
+    }
+
+    public static enum Node {
+        TAG_MONEY("tag.money"),
+
+        PERSONAL_BALANCE("personal.balance"),
+        PERSONAL_RESET("personal.reset"),
+        PERSONAL_RANK("personal.rank"),
+        PERSONAL_SET("personal.set"),
+        PERSONAL_DEBIT("personal.debit"),
+        PERSONAL_CREDIT("personal.credit"),
+
+        PLAYER_BALANCE("player.balance"),
+        PLAYER_RANK("player.rank"),
+        PLAYER_RESET("player.reset"),
+        PLAYER_SET("player.set"),
+        PLAYER_CREDIT("player.credit"),
+        PLAYER_DEBIT("player.debit"),
+
+        PAYMENT_SELF("payment.self"),
+        PAYMENT_TO("payment.to"),
+        PAYMENT_FROM("payment.from"),
+
+        STATISTICS_OPENING("statistics.opening"),
+        STATISTICS_TOTAL("statistics.total"),
+        STATISTICS_AVERAGE("statistics.average"),
+        STATISTICS_ACCOUNTS("statistics.accounts"),
+
+        INTEREST_ANNOUNCEMENT("interest.announcement"),
+
+        ACCOUNTS_EMPTY("accounts.empty"),
+        ACCOUNTS_PURGE("accounts.purge"),
+        ACCOUNTS_CREATE("accounts.create"),
+        ACCOUNTS_REMOVE("accounts.remove"),
+        ACCOUNTS_STATUS("accounts.status"),
+
+        TOP_OPENING("top.opening"),
+        TOP_EMPTY("top.empty"),
+        TOP_LINE("top.line"),
+
+        ERROR_ONLINE("error.online"),
+        ERROR_EXISTS("error.exists"),
+        ERROR_ACCOUNT("error.account"),
+        ERROR_FUNDS("error.funds"),
+        ERROR_CREATE("error.create"),
+        ;
+
+        private String key;
+
+        Node(String key) {
+            this.key = key;
+        }
+
+        String getKey() {
+            return this.key;
+        }
+
+        @Override
+        public String toString() {
+            return this.key;
+        }
     }
 }
