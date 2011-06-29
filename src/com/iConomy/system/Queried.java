@@ -9,6 +9,10 @@ import com.mini.Mini;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 
 import org.apache.commons.dbutils.DbUtils;
 import org.apache.commons.dbutils.QueryRunner;
@@ -27,6 +31,19 @@ class Queried {
         }
     };
 
+    static ResultSetHandler<List<String>> returnList = new ResultSetHandler<List<String>>() {
+        private List<String> accounts;
+        public List<String> handle(ResultSet rs) throws SQLException {
+            accounts = new ArrayList<String>();
+
+            while(rs.next())
+                accounts.add(rs.getString("username"));
+
+            return accounts;
+        }
+    };
+
+
     static ResultSetHandler<Boolean> returnBoolean = new ResultSetHandler<Boolean>() {
         public Boolean handle(ResultSet rs) throws SQLException {
             return rs.next();
@@ -43,9 +60,7 @@ class Queried {
     };
 
     static boolean useSQL() {
-        String type = Constants.Nodes.DatabaseType.toString();
-
-        if(Common.matches(type, "mini", "minidb", "flatfile", "file", "ff")) {
+        if(iConomy.Database.getType().toString().equalsIgnoreCase("minidb")) {
             if(database == null)
                 database = iConomy.Database.getDatabase();
 
@@ -53,6 +68,31 @@ class Queried {
         }
 
         return true;
+    }
+
+    static List<String> accountList() {
+        if(!useSQL())
+            return new ArrayList<String>(database.getIndices().keySet());
+
+        List<String> accounts = new ArrayList<String>();
+
+        try {
+            QueryRunner run = new QueryRunner();
+            Connection c = iConomy.Database.getConnection();
+
+            try{
+                String t = Constants.Nodes.DatabaseTable.toString();
+                accounts = run.query(c, "SELECT username FROM " + t, returnList);
+            } catch (SQLException ex) {
+                System.out.println("[iConomy] Error issueing SQL query: " + ex);
+            } finally {
+                DbUtils.close(c);
+            }
+        } catch (SQLException ex) {
+            System.out.println("[iConomy] Database Error: " + ex);
+        }
+
+        return accounts;
     }
 
     static boolean createAccount(String name, Double balance, Integer status) {
@@ -201,6 +241,39 @@ class Queried {
                 int update = run.update(c, "UPDATE " + t + " SET balance=? WHERE username=?", balance, name);
             } catch (SQLException ex) {
                 System.out.println("[iConomy] Error issueing SQL query: " + ex);
+            } finally {
+                DbUtils.close(c);
+            }
+        } catch (SQLException ex) {
+            System.out.println("[iConomy] Database Error: " + ex);
+        }
+    }
+
+    static void doInterest(String query, LinkedHashMap<String, HashMap<String, Object>> queries) {
+        Object[][] parameters = new Object[queries.size()][2];
+        int i = 0;
+
+        for(String name: queries.keySet()) {
+            parameters[i][0] = queries.get(name).get("balance");
+            parameters[i][1] = name;
+
+            // Do Logging & Messaging here.
+            /* if(amount < 0.0)
+                iConomy.getTransactions().insert("[System Interest]", name, 0.0, original, 0.0, 0.0, amount);
+            else {
+                iConomy.getTransactions().insert("[System Interest]", name, 0.0, original, 0.0, amount, 0.0);
+            } */
+            i++;
+        }
+
+        try {
+            QueryRunner run = new QueryRunner();
+            Connection c = iConomy.Database.getConnection();
+
+            try{
+                run.batch(c, query, parameters);
+            } catch (SQLException ex) {
+                System.out.println("[iConomy] Error with batching: " + ex);
             } finally {
                 DbUtils.close(c);
             }
