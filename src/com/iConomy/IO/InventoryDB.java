@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.logging.Level;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
@@ -29,11 +30,11 @@ public class InventoryDB {
     
     public List<String> getAllPlayers() {
         ArrayList<String> result = new ArrayList<String>();
-        for (String file : dataDir.list()) {
-            if (file.endsWith(".dat")) {
+
+        for (String file : dataDir.list())
+            if (file.endsWith(".dat"))
                 result.add(file.substring(0, file.length() - 4));
-            }
-        }
+
         return result;
     }
     
@@ -48,10 +49,9 @@ public class InventoryDB {
             iConomy.Server.getPlayer(name).getInventory().setContents(stacks);
             iConomy.Server.getPlayer(name).updateInventory();
         } else {
-            if (!dataExists(name)) {
+            if (!dataExists(name))
                 return;
-            }
-            
+        
             ItemStack[] stacks = readInventory(name);
             if (stacks != null) {
                 setBalance(stacks, balance);
@@ -65,6 +65,7 @@ public class InventoryDB {
             return getBalance(iConomy.Server.getPlayer(name).getInventory().getContents());
         } else {
             ItemStack[] stacks = readInventory(name);
+
             if (stacks != null) {
                 return getBalance(stacks);
             } else {
@@ -80,8 +81,8 @@ public class InventoryDB {
             in.close();
             
             ListTag inventory = (ListTag) tag.getValue().get("Inventory");
-
             ItemStack[] stacks = new ItemStack[40];
+
             for (int i = 0; i < inventory.getValue().size(); ++i) {
                 CompoundTag item = (CompoundTag) inventory.getValue().get(i);
                 byte count = ((ByteTag) item.getValue().get("Count")).getValue();
@@ -91,9 +92,10 @@ public class InventoryDB {
                 
                 stacks[slot] = new ItemStack(id, count, damage);
             }
+
             return stacks;
         } catch (IOException ex) {
-            iConomy.Server.getLogger().warning("[iCo/InvDB] error reading inventory " + name + ": " + ex.getMessage());
+            iConomy.Server.getLogger().log(Level.WARNING, "[iCo/InvDB] error reading inventory {0}: {1}", new Object[]{ name, ex.getMessage() });
             return null;
         }
     }
@@ -133,7 +135,7 @@ public class InventoryDB {
             out.writeTag(tag);
             out.close();
         } catch (IOException ex) {
-            iConomy.Server.getLogger().warning("[iCo/InvDB] error writing inventory " + name + ": " + ex.getMessage());
+            iConomy.Server.getLogger().log(Level.WARNING, "[iCo/InvDB] error writing inventory {0}: {1}", new Object[]{ name, ex.getMessage() });
         }
     }
 
@@ -144,11 +146,10 @@ public class InventoryDB {
         // Remove all existing items
         for (int i = 0; i < contents.length; ++i) {
             ItemStack item = contents[i];
-            if (item != null) {
-                if (item.getTypeId() == major || item.getTypeId() == minor) {
+
+            if (item != null) 
+                if (item.getTypeId() == major || item.getTypeId() == minor)
                     contents[i] = null;
-                }
-            }
         }
         
         // Re-add balance to inventory
@@ -156,16 +157,18 @@ public class InventoryDB {
             if (contents[i] == null) {
                 if (balance >= 1) {
                     int add = (int) balance;
-                    if (add > Material.getMaterial(major).getMaxStackSize()) {
+
+                    if (add > Material.getMaterial(major).getMaxStackSize())
                         add = Material.getMaterial(major).getMaxStackSize();
-                    }
+
                     contents[i] = new ItemStack(major, add);
                     balance -= add;
                 } else if (balance > 0) {
                     int add = (int) ((balance - (int) balance) * 100);
-                    if (add > Material.getMaterial(minor).getMaxStackSize()) {
+
+                    if (add > Material.getMaterial(minor).getMaxStackSize())
                         add = Material.getMaterial(minor).getMaxStackSize();
-                    }
+
                     contents[i] = new ItemStack(minor, add);
                     balance = 0;
                     break;
@@ -175,7 +178,7 @@ public class InventoryDB {
         
         // Make sure nothing is left.
         if (balance > 0) {
-            throw new RuntimeException("Unable to set balance, inventory is overfull");
+            throw new RuntimeException("[iConomy] Unable to set balance, inventory is overfull");
         }
     }
     
@@ -184,15 +187,12 @@ public class InventoryDB {
         int major = Constants.Nodes.DatabaseMajorItem.getInteger();
         int minor = Constants.Nodes.DatabaseMinorItem.getInteger();
         
-        for (ItemStack item : contents) {
-            if (item != null) {
-                if (item.getTypeId() == major) {
+        for (ItemStack item : contents)
+            if (item != null)
+                if (item.getTypeId() == major)
                     balance += item.getAmount();
-                } else if (item.getTypeId() == minor) {
+                else if (item.getTypeId() == minor)
                     balance += 0.01 * item.getAmount();
-                }
-            }
-        }
         
         return balance;
     }
