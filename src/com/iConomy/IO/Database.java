@@ -14,7 +14,7 @@ import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 
 public class Database {
-    public static enum Type { MiniDB, MySQL, SQLite, Postgre, H2DB };
+    public static enum Type { MiniDB, InventoryDB, MySQL, SQLite, Postgre, H2DB };
     private String type;
     private String driver;
     private String url;
@@ -27,6 +27,9 @@ public class Database {
         this.password = password;
         
         if(Common.matches(type, "flatfile", "ff", "mini", "minidb", "flat"))
+            return;
+        
+        if(Common.matches(type, "item", "items", "inventory", "inventorydb"))
             return;
         
         if(Common.matches(type, "mysql", "mysqldb"))
@@ -87,6 +90,9 @@ public class Database {
     public Type getType() {
         if(Common.matches(type, "flatfile", "ff", "mini", "minidb", "flat"))
             return Type.MiniDB;
+        
+        if(Common.matches(type, "item", "items", "inventory", "inventorydb"))
+            return Type.InventoryDB;
 
         if(Common.matches(type, "mysql", "mysqldb"))
             return Type.MySQL;
@@ -108,5 +114,12 @@ public class Database {
             return null;
 
         return new Mini(iConomy.directory.getPath(), "accounts.mini");
+    }
+    
+    public InventoryDB getInventoryDatabase() {
+        if(!Common.matches(type, "item", "items", "inventory", "inventorydb"))
+            return null;
+        
+        return new InventoryDB();
     }
 }
