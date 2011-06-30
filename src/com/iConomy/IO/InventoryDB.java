@@ -177,9 +177,8 @@ public class InventoryDB {
         }
         
         // Make sure nothing is left.
-        if (balance > 0) {
+        if (balance > 0)
             throw new RuntimeException("[iConomy] Unable to set balance, inventory is overfull");
-        }
     }
     
     private double getBalance(ItemStack[] contents) {
