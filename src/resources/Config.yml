@@ -86,6 +86,9 @@ System:
     # Flatfile, FF, mini, minidb
     #  - These all equate to miniDB
     ##
+    # item, items, inventory, inventoryDB
+    #  - These all equate to InventoryDB, which uses inventory for storage
+    ##
     # mysql, mysqldb
     #  - These will attempt to connect to MySQL
     ##
@@ -95,6 +98,13 @@ System:
     # postgre, postgreSQL, postgreDB
     #  - These will attempt to connect to PostgreSQL
     Type: 'minidb'
+    
+    # These are for InventoryDB only.
+    # MajorItem is the item or block ID of the major currency
+    # MinorItem is the item or block ID of the minor currency
+    # e.g. MajorItem: 266, MinorItem: 265 for Gold/Iron
+    MajorItem: 266
+    MinorItem: 265
 
     # This controls the database name, by default it is iConomy
     Table: 'iConomy'

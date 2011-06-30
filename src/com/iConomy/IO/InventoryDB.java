@@ -11,27 +11,20 @@ import com.iConomy.util.nbt.ShortTag;
 import com.iConomy.util.nbt.Tag;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.Server;
 import org.bukkit.inventory.ItemStack;
 
 public class InventoryDB {
     
-    private Server server;
     private File dataDir;
     
     public InventoryDB() {
-        server = Bukkit.getServer();
-        dataDir = new File(server.getWorlds().get(0).getName(), "players");
+        dataDir = new File(iConomy.Server.getWorlds().get(0).getName(), "players");
     }
     
     public List<String> getAllPlayers() {
@@ -49,11 +42,11 @@ public class InventoryDB {
     }
     
     public void setBalance(String name, double balance) {
-        if (server.getPlayer(name) != null) {
-            ItemStack[] stacks = server.getPlayer(name).getInventory().getContents();
+        if (iConomy.Server.getPlayer(name) != null && !iConomy.Server.getPlayer(name).isOnline()) {
+            ItemStack[] stacks = iConomy.Server.getPlayer(name).getInventory().getContents().clone();
             setBalance(stacks, balance);
-            server.getPlayer(name).getInventory().setContents(stacks);
-            server.getPlayer(name).updateInventory();
+            iConomy.Server.getPlayer(name).getInventory().setContents(stacks);
+            iConomy.Server.getPlayer(name).updateInventory();
         } else {
             if (!dataExists(name)) {
                 return;
@@ -68,8 +61,8 @@ public class InventoryDB {
     }
     
     public double getBalance(String name) {
-        if (server.getPlayer(name) != null) {
-            return getBalance(server.getPlayer(name).getInventory().getContents());
+        if (iConomy.Server.getPlayer(name) != null && !iConomy.Server.getPlayer(name).isOnline()) {
+            return getBalance(iConomy.Server.getPlayer(name).getInventory().getContents());
         } else {
             ItemStack[] stacks = readInventory(name);
             if (stacks != null) {
@@ -96,10 +89,11 @@ public class InventoryDB {
                 short damage = ((ShortTag) item.getValue().get("Damage")).getValue();
                 short id = ((ShortTag) item.getValue().get("id")).getValue();
                 
-                stacks[slot] = new ItemStack(id, damage, count);
+                stacks[slot] = new ItemStack(id, count, damage);
             }
             return stacks;
         } catch (IOException ex) {
+            iConomy.Server.getLogger().warning("[iCo/InvDB] error reading inventory " + name + ": " + ex.getMessage());
             return null;
         }
     }
@@ -110,8 +104,7 @@ public class InventoryDB {
             CompoundTag tag = (CompoundTag) in.readTag();
             in.close();
             
-            ListTag inventory = (ListTag) tag.getValue().get("Inventory");
-            inventory.getValue().clear();
+            ArrayList tagList = new ArrayList<Tag>();
 
             for (int i = 0; i < stacks.length; ++i) {
                 if (stacks[i] == null) continue;
@@ -127,12 +120,20 @@ public class InventoryDB {
                 tagMap.put("Damage", damage);
                 tagMap.put("id", id);
                 
-                inventory.getValue().add(new CompoundTag("", tagMap));
+                tagList.add(new CompoundTag("", tagMap));
             }
+            
+            ListTag inventory = new ListTag("Inventory", CompoundTag.class, tagList);
+            
+            HashMap<String, Tag> tagCompound = new HashMap<String, Tag>(tag.getValue());
+            tagCompound.put("Inventory", inventory);
+            tag = new CompoundTag("Player", tagCompound);
             
             NBTOutputStream out = new NBTOutputStream(new FileOutputStream(new File(dataDir, name + ".dat")));
             out.writeTag(tag);
+            out.close();
         } catch (IOException ex) {
+            iConomy.Server.getLogger().warning("[iCo/InvDB] error writing inventory " + name + ": " + ex.getMessage());
         }
     }
 
@@ -170,6 +171,11 @@ public class InventoryDB {
                     break;
                 }
             }
+        }
+        
+        // Make sure nothing is left.
+        if (balance > 0) {
+            throw new RuntimeException("Unable to set balance, inventory is overfull");
         }
     }
     
