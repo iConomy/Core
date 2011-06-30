@@ -4,8 +4,8 @@ import com.iConomy.Constants;
 import com.iConomy.IO.InventoryDB;
 import com.iConomy.iConomy;
 import com.iConomy.util.Common;
-import com.mini.Arguments;
-import com.mini.Mini;
+import com.iConomy.IO.mini.Arguments;
+import com.iConomy.IO.mini.Mini;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -15,10 +15,10 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import org.apache.commons.dbutils.DbUtils;
-import org.apache.commons.dbutils.QueryRunner;
+import com.iConomy.util.org.apache.commons.dbutils.DbUtils;
+import com.iConomy.util.org.apache.commons.dbutils.QueryRunner;
 
-import org.apache.commons.dbutils.ResultSetHandler;
+import com.iConomy.util.org.apache.commons.dbutils.ResultSetHandler;
 
 class Queried {
     static Mini database;

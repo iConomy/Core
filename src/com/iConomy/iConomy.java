@@ -19,8 +19,8 @@ import com.iConomy.util.Messaging;
 import com.iConomy.util.Template;
 import java.sql.Connection;
 import java.sql.SQLException;
-import org.apache.commons.dbutils.DbUtils;
-import org.apache.commons.dbutils.QueryRunner;
+import com.iConomy.util.org.apache.commons.dbutils.DbUtils;
+import com.iConomy.util.org.apache.commons.dbutils.QueryRunner;
 
 import org.bukkit.Server;
 import org.bukkit.command.Command;
