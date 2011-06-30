@@ -1,6 +1,7 @@
 package com.iConomy.system;
 
 import com.iConomy.Constants;
+import com.iConomy.IO.InventoryDB;
 import com.iConomy.iConomy;
 import com.iConomy.util.Common;
 import com.mini.Arguments;
@@ -21,6 +22,7 @@ import org.apache.commons.dbutils.ResultSetHandler;
 
 class Queried {
     static Mini database;
+    static InventoryDB inventory;
 
     static ResultSetHandler<String> returnName = new ResultSetHandler<String>() {
         public String handle(ResultSet rs) throws SQLException {
@@ -59,20 +61,34 @@ class Queried {
         }
     };
 
-    static boolean useSQL() {
+    static boolean useMiniDB() {
         if(iConomy.Database.getType().toString().equalsIgnoreCase("minidb")) {
             if(database == null)
                 database = iConomy.Database.getDatabase();
 
-            return false;
+            return true;
         }
 
-        return true;
+        return false;
+    }
+    
+    static boolean useInventoryDB() {
+        if(iConomy.Database.getType().toString().equalsIgnoreCase("inventorydb")) {
+            if(inventory == null)
+                inventory = iConomy.Database.getInventoryDatabase();
+
+            return true;
+        }
+        
+        return false;
     }
 
     static List<String> accountList() {
-        if(!useSQL())
+        if(useMiniDB())
             return new ArrayList<String>(database.getIndices().keySet());
+        
+        if (useInventoryDB())
+            return new ArrayList<String>(inventory.getAllPlayers());
 
         List<String> accounts = new ArrayList<String>();
 
@@ -98,7 +114,7 @@ class Queried {
     static boolean createAccount(String name, Double balance, Integer status) {
         Boolean created = false;
 
-        if(!useSQL())
+        if(useMiniDB())
             if(!hasAccount(name)) {
                 Arguments Row = new Arguments(name);
                 Row.setValue("balance", balance);
@@ -110,6 +126,14 @@ class Queried {
             } else {
                 database.setArgument(name, "balance", balance);
                 database.update();
+                return true;
+            }
+        
+        if (useInventoryDB())
+            if (!hasAccount(name)) {
+                return false;
+            } else {
+                inventory.setBalance(name, balance);
                 return true;
             }
 
@@ -138,10 +162,14 @@ class Queried {
     static boolean removeAccount(String name) {
         Boolean removed = false;
         
-        if(!useSQL()) {
+        if(useMiniDB()) {
             database.removeIndex(name);
             database.update();
             return true;
+        }
+        
+        if (useInventoryDB()) {
+            return false;
         }
 
         try {
@@ -169,8 +197,12 @@ class Queried {
     static boolean hasAccount(String name) {
         Boolean exists = false;
 
-        if (!useSQL()) {
+        if (useMiniDB()) {
             return database.hasIndex(name);
+        }
+        
+        if (useInventoryDB()) {
+            return inventory.dataExists(name);
         }
 
         try {
@@ -198,8 +230,12 @@ class Queried {
         if(!hasAccount(name))
             return balance;
 
-        if(!useSQL())
+        if(useMiniDB())
             return database.getArguments(name).getDouble("balance");
+        
+        if(useInventoryDB()) {
+            return inventory.getBalance(name);
+        }
 
         try {
             QueryRunner run = new QueryRunner();
@@ -226,9 +262,14 @@ class Queried {
             return;
         }
 
-        if(!useSQL()) {
+        if(useMiniDB()) {
             database.setArgument(name, "balance", balance);
             database.update();
+            return;
+        }
+        
+        if (useInventoryDB()) {
+            inventory.setBalance(name, balance);
             return;
         }
 
@@ -283,12 +324,17 @@ class Queried {
     }
     
     static void purgeDatabase() {
-        if(!useSQL()) {
+        if(useMiniDB()) {
             for(String index: database.getIndices().keySet())
                 if(database.getArguments(index).getDouble("balance") == Constants.Nodes.Balance.getDouble())
                     database.removeIndex(index);
             
             database.update();
+        }
+        
+        if (useInventoryDB()) {
+            // There's nothing to purge.
+            return;
         }
         
         try {
@@ -309,11 +355,16 @@ class Queried {
     }
 
     static void emptyDatabase() {
-        if(!useSQL()) {
+        if(useMiniDB()) {
             for(String index: database.getIndices().keySet())
                 database.removeIndex(index);
 
             database.update();
+        }
+        
+        if (useInventoryDB()) {
+            // TODO: clear all inventories of those items?
+            return;
         }
 
         try {
