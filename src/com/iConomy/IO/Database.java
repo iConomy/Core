@@ -4,14 +4,15 @@ import com.iConomy.Constants;
 import com.iConomy.IO.exceptions.MissingDriver;
 import com.iConomy.iConomy;
 import com.iConomy.util.Common;
-import com.mini.Mini;
+import com.iConomy.IO.mini.Mini;
+import com.iConomy.util.org.apache.commons.dbutils.DbUtils;
+import com.iConomy.util.org.apache.commons.dbutils.QueryRunner;
+import com.iConomy.util.org.apache.commons.dbutils.ResultSetHandler;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import org.apache.commons.dbutils.DbUtils;
-import org.apache.commons.dbutils.QueryRunner;
-import org.apache.commons.dbutils.ResultSetHandler;
 
 public class Database {
     public static enum Type { MiniDB, InventoryDB, MySQL, SQLite, Postgre, H2DB };
@@ -91,7 +92,7 @@ public class Database {
         if(Common.matches(type, "flatfile", "ff", "mini", "minidb", "flat"))
             return Type.MiniDB;
         
-        if(Common.matches(type, "item", "items", "inventory", "inventorydb"))
+        if(Common.matches(type, "itemdb", "item", "items", "inv", "inventory", "invdb", "inventorydb"))
             return Type.InventoryDB;
 
         if(Common.matches(type, "mysql", "mysqldb"))
@@ -115,9 +116,16 @@ public class Database {
 
         return new Mini(iConomy.directory.getPath(), "accounts.mini");
     }
+
+    public Mini getTransactionDatabase() {
+        if(!Common.matches(type, "itemdb", "item", "items", "inventory", "invdb", "inventorydb", "flatfile", "ff", "mini", "minidb", "flat"))
+            return null;
+
+        return new Mini(iConomy.directory.getPath(), "transactions.mini");
+    }
     
     public InventoryDB getInventoryDatabase() {
-        if(!Common.matches(type, "item", "items", "inventory", "inventorydb"))
+        if(!Common.matches(type, "itemdb", "item", "items", "inventory", "invdb", "inventorydb"))
             return null;
         
         return new InventoryDB();
