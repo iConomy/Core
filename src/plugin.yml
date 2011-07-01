@@ -1,9 +1,9 @@
 name: iConomy
-main: com.iConomy.iConomy
-version: 0.1
-author: Nijikokun
+main: com.iCo6.iConomy
+version: 6.0
+authors: [Nijikokun,SpaceManiac]
 commands:
     money:
-      aliases: [iConomy]
+      aliases: [iConomy,iCo]
       description: Check / Distrobute currency.
       usage:
