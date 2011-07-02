@@ -27,10 +27,7 @@ public class Database {
         this.username = username;
         this.password = password;
         
-        if(Common.matches(type, "flatfile", "ff", "mini", "minidb", "flat"))
-            return;
-        
-        if(Common.matches(type, "item", "items", "inventory", "inventorydb"))
+        if(Common.matches(type, "flatfile", "ff", "mini", "minidb", "flat", "itemdb", "item", "items", "inv", "inventory", "invdb", "inventorydb"))
             return;
         
         if(Common.matches(type, "mysql", "mysqldb"))
@@ -129,7 +126,7 @@ public class Database {
     }
     
     public InventoryDB getInventoryDatabase() {
-        if(!Common.matches(type, "itemdb", "item", "items", "inventory", "invdb", "inventorydb"))
+        if(!Common.matches(type,"itemdb", "item", "items", "inv", "inventory", "invdb", "inventorydb"))
             return null;
         
         return new InventoryDB();
