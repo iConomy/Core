@@ -56,7 +56,7 @@ public class Take extends Handler {
 
         template.set(Template.Node.PLAYER_DEBIT);
         template.add("name", name);
-        template.add("balance", account.getHoldings().toString());
+        template.add("balance", iConomy.format(amount));
 
         Messaging.send(sender, tag + template.parse());
         return false;

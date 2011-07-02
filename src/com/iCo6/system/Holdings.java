@@ -33,7 +33,7 @@ public class Holdings {
             Template template = iConomy.Template;
             template.set(Template.Node.PLAYER_BALANCE);
             template.add("name", name);
-            template.add("balance", getBalance());
+            template.add("balance", toString());
 
             Messaging.send(to, tag + template.parse());
         }
@@ -46,7 +46,7 @@ public class Holdings {
 
         Template template = iConomy.Template;
         template.set(Template.Node.PERSONAL_BALANCE);
-        template.add("balance", getBalance());
+        template.add("balance", toString());
 
         Messaging.send(player, tag + template.parse());
     }

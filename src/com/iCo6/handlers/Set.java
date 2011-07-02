@@ -56,7 +56,7 @@ public class Set extends Handler {
 
         template.set(Template.Node.PLAYER_SET);
         template.add("name", name);
-        template.add("balance", account.getHoldings().toString());
+        template.add("amount", account.getHoldings().toString());
 
         Messaging.send(sender, tag + template.parse());
         return false;
