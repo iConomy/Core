@@ -129,36 +129,33 @@ public class Common {
     public static void extract(String... names) {
         for(String name: names) {
             File actual = new File(iConomy.directory, name);
-            if (!actual.exists()) {
-                InputStream input = iConomy.class.getResourceAsStream("/resources/" + name);
-                if (input != null) {
-                    FileOutputStream output = null;
 
-                    try {
-                        output = new FileOutputStream(actual);
-                        byte[] buf = new byte[8192];
-                        int length = 0;
+            if(actual.exists())
+                continue;
 
-                        while ((length = input.read(buf)) > 0) {
-                            output.write(buf, 0, length);
-                        }
+            InputStream input = iConomy.class.getResourceAsStream("/resources/" + name);
 
-                        System.out.println("[iConomy] Default setup file written: " + name);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    } finally {
-                        try {
-                            if (input != null) {
-                                input.close();
-                            }
-                        } catch (Exception e) { }
-                        try {
-                            if (output != null) {
-                                output.close();
-                            }
-                        } catch (Exception e) { }
-                    }
-                }
+            if(input == null)
+                continue;
+
+            FileOutputStream output = null;
+
+            try {
+                output = new FileOutputStream(actual);
+                byte[] buf = new byte[8192];
+                int length = 0;
+
+                while ((length = input.read(buf)) > 0)
+                    output.write(buf, 0, length);
+
+                System.out.println("[iConomy] Default setup file written: " + name);
+            } catch (Exception e) {
+            } finally {
+                try { if (input != null) input.close();
+                } catch (Exception e) { }
+
+                try { if (output != null) output.close();
+                } catch (Exception e) { }
             }
         }
     }
