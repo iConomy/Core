@@ -119,7 +119,7 @@ public class iConomy extends JavaPlugin {
 
                 // Check to see if it's a binary database, if so, check the database existance
                 // If it doesn't exist, Create one.
-                if(Database.getDatabase() == null)
+                if(Database.getDatabase() == null && Database.getInventoryDatabase() == null)
                     if(!Database.tableExists(Constants.Nodes.DatabaseTable.toString())) {
                         System.out.println("should create table..");
                         String SQL = Common.resourceToString("SQL/Core/Create-Table-" + Database.getType().toString().toLowerCase() + ".sql");
