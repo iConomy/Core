@@ -57,7 +57,7 @@ public class Give extends Handler {
 
         template.set(Template.Node.PLAYER_CREDIT);
         template.add("name", name);
-        template.add("balance", iConomy.format(amount));
+        template.add("amount", iConomy.format(amount));
 
         Messaging.send(sender, tag + template.parse());
         return false;
