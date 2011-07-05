@@ -1,11 +1,11 @@
 package com.iCo6;
 
-import com.iCo6.Constants.Drivers;
 import java.io.File;
 import java.util.Locale;
 
 import com.nijikokun.bukkit.Permissions.Permissions;
 
+import com.iCo6.Constants.Drivers;
 import com.iCo6.command.Handler;
 import com.iCo6.command.Parser;
 import com.iCo6.command.exceptions.InvalidUsage;
@@ -19,13 +19,12 @@ import com.iCo6.system.Holdings;
 import com.iCo6.util.Common;
 import com.iCo6.util.Messaging;
 import com.iCo6.util.Template;
-
-import java.sql.Connection;
-import java.sql.SQLException;
-
 import com.iCo6.util.org.apache.commons.dbutils.DbUtils;
 import com.iCo6.util.org.apache.commons.dbutils.QueryRunner;
 import com.iCo6.util.wget;
+
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.text.DecimalFormat;
 
 import org.bukkit.Server;
@@ -38,6 +37,26 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.config.Configuration;
 
+/**
+ * iConomy by Team iCo
+ *
+ * @copyright Copyright AniGaiku LLC (C) 2010-2011
+ * @author Nijikokun <nijikokun@gmail.com>
+ * @author SpaceManiac
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 public class iConomy extends JavaPlugin {
     public PluginDescriptionFile info;
     public PluginManager manager;
