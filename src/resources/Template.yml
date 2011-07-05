@@ -48,6 +48,7 @@ personal:
     set: "<green>Your balance has been changed to <white>+amount"
     debit: "<rose>Your account had <white>+amount<rose> debited."
     credit: "<white>+amount<green> was credited into your account."
+    status: "<green>Account status is currently <white>+status<green>."
 
 player:
     set: "<green>+name's balance has been changed to <white>+amount"
@@ -55,6 +56,7 @@ player:
     reset: "<white>+name's <rose>account has been reset."
     credit: "<white>+name's <green>account had <white>+amount<green> credited."
     debit: "<white>+name's <rose>account had <white>+amount<rose> debited."
+    status: "<white>+name's <green>account status is <white>+status<green>."
 
 payment:
     self: "<rose>Sorry, you cannot send money to yourself."

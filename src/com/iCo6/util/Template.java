@@ -113,6 +113,7 @@ public class Template {
         PERSONAL_SET("personal.set"),
         PERSONAL_DEBIT("personal.debit"),
         PERSONAL_CREDIT("personal.credit"),
+        PERSONAL_STATUS("personal.status"),
 
         PLAYER_BALANCE("player.balance"),
         PLAYER_RANK("player.rank"),
@@ -120,6 +121,7 @@ public class Template {
         PLAYER_SET("player.set"),
         PLAYER_CREDIT("player.credit"),
         PLAYER_DEBIT("player.debit"),
+        PLAYER_STATUS("player.status"),
 
         PAYMENT_SELF("payment.self"),
         PAYMENT_TO("payment.to"),
