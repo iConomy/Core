@@ -143,7 +143,7 @@ class Queried {
 
             try{
                 String t = Constants.Nodes.DatabaseTable.toString();
-                Integer amount = run.update(c, "INSERT INTO " + t + "(username, balance, status) values (?, ?, ?)", name, balance, status);
+                Integer amount = run.update(c, "INSERT INTO " + t + "(username, balance, status) values (?, ?, ?)", name.toLowerCase(), balance, status);
 
                 if(amount > 0)
                     created = true;
@@ -178,7 +178,7 @@ class Queried {
 
             try{
                 String t = Constants.Nodes.DatabaseTable.toString();
-                Integer amount = run.update(c, "DELETE FROM " + t + " WHERE username=?", name);
+                Integer amount = run.update(c, "DELETE FROM " + t + " WHERE username=?", name.toLowerCase());
 
                 if(amount > 0)
                     removed = true;
@@ -211,7 +211,7 @@ class Queried {
 
             try {
                 String t = Constants.Nodes.DatabaseTable.toString();
-                exists = run.query(c, "SELECT id FROM " + t + " WHERE username=?", returnBoolean, name);
+                exists = run.query(c, "SELECT id FROM " + t + " WHERE username=?", returnBoolean, name.toLowerCase());
             } catch (SQLException ex) {
                 System.out.println("[iConomy] Error issueing SQL query: " + ex);
             } finally {
@@ -243,7 +243,7 @@ class Queried {
 
             try{
                 String t = Constants.Nodes.DatabaseTable.toString();
-                balance = run.query(c, "SELECT balance FROM " + t + " WHERE username=?", returnBalance, name);
+                balance = run.query(c, "SELECT balance FROM " + t + " WHERE username=?", returnBalance, name.toLowerCase());
             } catch (SQLException ex) {
                 System.out.println("[iConomy] Error issueing SQL query: " + ex);
             } finally {
@@ -279,7 +279,7 @@ class Queried {
 
             try{
                 String t = Constants.Nodes.DatabaseTable.toString();
-                int update = run.update(c, "UPDATE " + t + " SET balance=? WHERE username=?", balance, name);
+                int update = run.update(c, "UPDATE " + t + " SET balance=? WHERE username=?", balance, name.toLowerCase());
             } catch (SQLException ex) {
                 System.out.println("[iConomy] Error issueing SQL query: " + ex);
             } finally {
