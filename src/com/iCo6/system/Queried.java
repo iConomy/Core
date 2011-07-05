@@ -426,4 +426,35 @@ class Queried {
 
         return status;
     }
+
+    static void setStatus(String name, int status) {
+        if(!hasAccount(name)) {
+            return;
+        }
+
+        if(useMiniDB()) {
+            database.setArgument(name, "status", status);
+            database.update();
+            return;
+        }
+
+        if (useInventoryDB())
+            return;
+
+        try {
+            QueryRunner run = new QueryRunner();
+            Connection c = iConomy.Database.getConnection();
+
+            try{
+                String t = Constants.Nodes.DatabaseTable.toString();
+                int update = run.update(c, "UPDATE " + t + " SET status=? WHERE username=?", status, name.toLowerCase());
+            } catch (SQLException ex) {
+                System.out.println("[iConomy] Error issueing SQL query: " + ex);
+            } finally {
+                DbUtils.close(c);
+            }
+        } catch (SQLException ex) {
+            System.out.println("[iConomy] Database Error: " + ex);
+        }
+    }
 }

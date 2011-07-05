@@ -42,6 +42,10 @@ public class Account {
         return Queried.getStatus(this.name);
     }
 
+    public void setStatus(int status) {
+        Queried.setStatus(this.name, status);
+    }
+
     public boolean remove() {
         return Queried.removeAccount(this.name);
     }
