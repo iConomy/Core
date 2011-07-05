@@ -11,6 +11,7 @@ import com.iCo6.system.Account;
 import com.iCo6.system.Accounts;
 
 import com.iCo6.util.Messaging;
+import com.iCo6.util.Template;
 
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -26,6 +27,7 @@ public class Money extends Handler {
     @Override
     public boolean perform(CommandSender sender, LinkedHashMap<String, Argument> arguments) throws InvalidUsage {
         String name = arguments.get("name").getStringValue();
+        String tag = template.color(Template.Node.TAG_MONEY);
 
         if(name.equals("0")) {
             if(isConsole(sender)) {
@@ -45,7 +47,10 @@ public class Money extends Handler {
         }
 
         if(!Accounts.exists(name)) {
-            Messaging.send(sender, "`rAccount for " + name + " does not exist!");
+            template.set(Template.Node.ERROR_ACCOUNT);
+            template.add("name", name);
+
+            Messaging.send(sender, tag + template.parse());
             return false;
         }
 
