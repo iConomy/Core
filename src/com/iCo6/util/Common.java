@@ -52,6 +52,10 @@ public class Common {
     }
 
     public static String formatted(String amount, List<String> maj, List<String> min) {
+        if(Constants.Nodes.isSingle.getBoolean())
+            if(amount.contains("."))
+                amount = amount.split("\\.")[0];
+
         String formatted = "";
         String famount = amount.replace(",", "");
 
