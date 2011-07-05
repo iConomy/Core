@@ -102,11 +102,33 @@ public class iConomy extends JavaPlugin {
 
             // Setup Commands
             Commands.add("/money +name", new Money(this));
-            Commands.add("/money -create +name", new Create(this));
-            Commands.add("/money -remove +name", new Remove(this));
-            Commands.add("/money -give +name +amount:empty", new Give(this));
-            Commands.add("/money -take +name +amount:empty", new Take(this));
-            Commands.add("/money -set +name +amount:empty", new Set(this));
+            Commands.setPermission("money", "iConomy.holdings");
+            Commands.setPermission("money+", "iConomy.holdings.others");
+
+            Commands.add("/money -h|?|help", new Help(this));
+            Commands.setPermission("help", "iConomy.help");
+
+            Commands.add("/money -p|pay +name +amount:empty", new Payment(this));
+            Commands.setPermission("pay", "iConomy.payment");
+
+            Commands.add("/money -c|create +name", new Create(this));
+            Commands.setPermission("create", "iConomy.accounts.create");
+
+            Commands.add("/money -r|remove +name", new Remove(this));
+            Commands.setPermission("remove", "iConomy.accounts.remove");
+
+            Commands.add("/money -g|give +name +amount:empty", new Give(this));
+            Commands.setPermission("give", "iConomy.accounts.give");
+
+            Commands.add("/money -t|take +name +amount:empty", new Take(this));
+            Commands.setPermission("take", "iConomy.accounts.take");
+
+            Commands.add("/money -s|set +name +amount:empty", new Set(this));
+            Commands.setPermission("set", "iConomy.accounts.set");
+
+            Commands.add("/money -u|status +name +status:empty", new Status(this));
+            Commands.setPermission("status", "iConomy.accounts.status");
+            Commands.setPermission("status+", "iConomy.accounts.status.set");
 
             // Setup Database.
             try {
