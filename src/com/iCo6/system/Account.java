@@ -38,6 +38,10 @@ public class Account {
         return new Holdings(this.name);
     }
 
+    public Integer getStatus() {
+        return Queried.getStatus(this.name);
+    }
+
     public boolean remove() {
         return Queried.removeAccount(this.name);
     }

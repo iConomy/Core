@@ -17,7 +17,6 @@ import java.util.List;
 
 import com.iCo6.util.org.apache.commons.dbutils.DbUtils;
 import com.iCo6.util.org.apache.commons.dbutils.QueryRunner;
-
 import com.iCo6.util.org.apache.commons.dbutils.ResultSetHandler;
 
 class Queried {
@@ -56,6 +55,15 @@ class Queried {
         public Double handle(ResultSet rs) throws SQLException {
             if(rs.next())
                 return rs.getDouble("balance");
+
+            return null;
+        }
+    };
+
+    static ResultSetHandler<Integer> returnStatus = new ResultSetHandler<Integer>() {
+        public Integer handle(ResultSet rs) throws SQLException {
+            if(rs.next())
+                return rs.getInt("status");
 
             return null;
         }
@@ -333,7 +341,7 @@ class Queried {
         }
         
         if (useInventoryDB()) {
-            // There's nothing to purge.
+            // TODO: purge online accounts only?
             return;
         }
         
@@ -364,6 +372,7 @@ class Queried {
         
         if (useInventoryDB()) {
             // TODO: clear all inventories of those items?
+            // Unknown for now.
             return;
         }
 
@@ -382,5 +391,39 @@ class Queried {
         } catch (SQLException ex) {
             System.out.println("[iConomy] Database Error: " + ex);
         }
+    }
+
+    static Integer getStatus(String name) {
+        int status = 0;
+
+        if(!hasAccount(name)) {
+            return -1;
+        }
+
+        if(useMiniDB()) {
+            return database.getArguments(name).getInteger("status");
+        }
+
+        if (useInventoryDB()) {
+            return (inventory.dataExists(name)) ? 1 : 0;
+        }
+
+        try {
+            QueryRunner run = new QueryRunner();
+            Connection c = iConomy.Database.getConnection();
+
+            try{
+                String t = Constants.Nodes.DatabaseTable.toString();
+                status = run.query(c, "SELECT status FROM " + t + " WHERE username=?", returnStatus, name.toLowerCase());
+            } catch (SQLException ex) {
+                System.out.println("[iConomy] Error issueing SQL query: " + ex);
+            } finally {
+                DbUtils.close(c);
+            }
+        } catch (SQLException ex) {
+            System.out.println("[iConomy] Database Error: " + ex);
+        }
+
+        return status;
     }
 }
