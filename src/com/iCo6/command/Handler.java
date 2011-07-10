@@ -24,11 +24,25 @@ public abstract class Handler {
     public abstract boolean perform(CommandSender sender, LinkedHashMap<String, Argument> arguments) throws InvalidUsage;
 
     protected static boolean isConsole(CommandSender sender) {
-        if (!(sender instanceof Player)) {
-            return true;
-        } else {
-            return false;
+        return !(sender instanceof Player);
+    }
+
+
+    protected boolean hasPermissions(CommandSender sender, String command) {
+        if(sender instanceof Player) {
+            Player player = (Player)sender;
+
+            if(plugin.Commands.hasPermission(command)) {
+                String node = plugin.Commands.getPermission(command);
+
+                if(plugin.Permissions != null)
+                    return plugin.Permissions.Security.permission(player, node);
+                else
+                    return player.isOp();
+            }
         }
+
+        return true;
     }
 
     protected static Player getPlayer(CommandSender sender, String[] args, int index) {
@@ -42,11 +56,10 @@ public abstract class Handler {
                 return players.get(0);
             }
         } else {
-            if (isConsole(sender)) {
+            if (isConsole(sender))
                 return null;
-            } else {
+            else
                 return (Player)sender;
-            }
         }
     }
 }
