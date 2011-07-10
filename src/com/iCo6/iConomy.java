@@ -123,31 +123,50 @@ public class iConomy extends JavaPlugin {
             Commands.add("/money +name", new Money(this));
             Commands.setPermission("money", "iConomy.holdings");
             Commands.setPermission("money+", "iConomy.holdings.others");
+            Commands.setHelp("money", new String[] { "", "Check your balance." });
+            Commands.setHelp("money+", new String[] { " [name]", "Check others balance." });
 
-            Commands.add("/money -h|?|help", new Help(this));
+            Commands.add("/money -h|?|help +command", new Help(this));
             Commands.setPermission("help", "iConomy.help");
+            Commands.setHelp("help", new String[] { " (command)", "For Help & Information." });
 
             Commands.add("/money -p|pay +name +amount:empty", new Payment(this));
             Commands.setPermission("pay", "iConomy.payment");
+            Commands.setHelp("pay", new String[] { " [name] [amount]", "Send money to others." });
 
             Commands.add("/money -c|create +name", new Create(this));
             Commands.setPermission("create", "iConomy.accounts.create");
+            Commands.setHelp("create", new String[] { " [name]", "Create an account." });
 
             Commands.add("/money -r|remove +name", new Remove(this));
             Commands.setPermission("remove", "iConomy.accounts.remove");
+            Commands.setHelp("remove", new String[] { " [name]", "Remove an account." });
 
             Commands.add("/money -g|give +name +amount:empty", new Give(this));
             Commands.setPermission("give", "iConomy.accounts.give");
+            Commands.setHelp("give", new String[] { " [name] [amount]", "Give money." });
 
             Commands.add("/money -t|take +name +amount:empty", new Take(this));
             Commands.setPermission("take", "iConomy.accounts.take");
+            Commands.setHelp("take", new String[] { " [name] [amount]", "Take money." });
 
             Commands.add("/money -s|set +name +amount:empty", new Set(this));
             Commands.setPermission("set", "iConomy.accounts.set");
+            Commands.setHelp("set", new String[] { " [name] [amount]", "Set account balance." });
 
             Commands.add("/money -u|status +name +status:empty", new Status(this));
             Commands.setPermission("status", "iConomy.accounts.status");
             Commands.setPermission("status+", "iConomy.accounts.status.set");
+            Commands.setHelp("status", new String[] { " [name] (status)", "Check/Set account status." });
+
+            Commands.add("/money -x|purge", new Purge(this));
+            Commands.setPermission("purge", "iConomy.accounts.purge");
+            Commands.setHelp("purge", new String[] { "", "Purge all accounts with initial holdings." });
+
+            Commands.add("/money -e|empty", new Empty(this));
+            Commands.setPermission("empty", "iConomy.accounts.empty");
+            Commands.setHelp("empty", new String[] { "", "Empty database of accounts." });
+
 
             // Setup Database.
             try {
@@ -192,7 +211,7 @@ public class iConomy extends JavaPlugin {
         final long duration = endTime - startTime;
 
         // Finish
-        System.out.println("[" + info.getName() + "] Enabled (" + Common.readableProfile(duration) + ")");
+        System.out.println("[" + info.getName() + " - " + Constants.Nodes.CodeName.toString() + "] Enabled (" + Common.readableProfile(duration) + ")");
     }
 
     public void onDisable() {
