@@ -13,9 +13,8 @@ import com.iCo6.handlers.*;
 import com.iCo6.IO.Database;
 import com.iCo6.IO.Database.Type;
 import com.iCo6.IO.exceptions.MissingDriver;
-import com.iCo6.system.Account;
+import com.iCo6.listeners.players;
 import com.iCo6.system.Accounts;
-import com.iCo6.system.Holdings;
 import com.iCo6.util.Common;
 import com.iCo6.util.Messaging;
 import com.iCo6.util.Template;
@@ -23,6 +22,7 @@ import com.iCo6.util.org.apache.commons.dbutils.DbUtils;
 import com.iCo6.util.org.apache.commons.dbutils.QueryRunner;
 import com.iCo6.util.wget;
 
+import java.awt.Event;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
@@ -32,6 +32,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event.Priority;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -204,6 +205,8 @@ public class iConomy extends JavaPlugin {
             } catch (MissingDriver ex) {
                 System.out.println(ex.getMessage());
             }
+
+            getServer().getPluginManager().registerEvent(org.bukkit.event.Event.Type.PLAYER_JOIN, new players(), Priority.Normal, this);
         } finally {
           endTime = System.nanoTime();
         }
