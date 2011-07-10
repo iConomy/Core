@@ -24,6 +24,9 @@ public class Status extends Handler {
 
     @Override
     public boolean perform(CommandSender sender, LinkedHashMap<String, Argument> arguments) throws InvalidUsage {
+        if(!hasPermissions(sender, "status"))
+            throw new InvalidUsage("You do not have permission to do that.");
+
         String name = arguments.get("name").getStringValue();
         String tag = template.color(Template.Node.TAG_MONEY);
         boolean self = false;
@@ -58,6 +61,9 @@ public class Status extends Handler {
             Messaging.send(sender, tag + template.parse());
             return false;
         }
+
+        if(!hasPermissions(sender, "status+"))
+            throw new InvalidUsage("You do not have permission to do that.");
 
         int status = arguments.get("status").getIntegerValue();
         account.setStatus(status);

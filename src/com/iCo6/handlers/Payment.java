@@ -28,6 +28,9 @@ public class Payment extends Handler {
 
     @Override
     public boolean perform(CommandSender sender, LinkedHashMap<String, Argument> arguments) throws InvalidUsage {
+        if(!hasPermissions(sender, "pay"))
+            return false;
+
         if(isConsole(sender)) {
             Messaging.send(sender, "`rCannot remove money from a non-living organism.");
             return false;

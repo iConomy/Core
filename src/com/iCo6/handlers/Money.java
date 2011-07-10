@@ -26,6 +26,9 @@ public class Money extends Handler {
 
     @Override
     public boolean perform(CommandSender sender, LinkedHashMap<String, Argument> arguments) throws InvalidUsage {
+        if(!hasPermissions(sender, "money"))
+            throw new InvalidUsage("You do not have permission to do that.");
+
         String name = arguments.get("name").getStringValue();
         String tag = template.color(Template.Node.TAG_MONEY);
 
@@ -45,6 +48,9 @@ public class Money extends Handler {
             
             return false;
         }
+
+        if(!hasPermissions(sender, "money+"))
+            throw new InvalidUsage("You do not have permission to do that.");
 
         if(!Accounts.exists(name)) {
             template.set(Template.Node.ERROR_ACCOUNT);
