@@ -62,8 +62,8 @@ public class iConomy extends JavaPlugin {
     public PluginManager manager;
 
     private static Accounts Accounts = new Accounts();
-    private Parser Commands = new Parser();
-    private Permissions Permissions;
+    public Parser Commands = new Parser();
+    public Permissions Permissions;
 
     public static boolean TerminalSupport = false;
     public static File directory;
@@ -185,16 +185,6 @@ public class iConomy extends JavaPlugin {
             } catch (MissingDriver ex) {
                 System.out.println(ex.getMessage());
             }
-
-            // Test account creation / existance.
-            String name = "Nijikokun";
-
-            System.out.println(name + " exists? " + Accounts.exists(name));
-
-            Account Nijikokun = Accounts.get(name);
-            Holdings holdings = Nijikokun.getHoldings();
-
-            System.out.println("Balance: " + holdings.getBalance());
         } finally {
           endTime = System.nanoTime();
         }
