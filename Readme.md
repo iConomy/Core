@@ -24,11 +24,11 @@
     @done Database table creation & checks on startup. (Mon, June 27th)
     @todo Creation of Interest & Transactions
     @in-progress Test SQL Based database systems.
-    @in-progress Implement Item based database.
+    @done Implement Item based database.
 
 # Single Database Tests
-    @in-progress Test MiniDB
-    @in-progress Test MySQL
+    @done Test MiniDB
+    @done Test MySQL
     @in-progress Test SQLite
     @in-progress Test H2DB
     @todo Test PostgreSQL
