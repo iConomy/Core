@@ -35,6 +35,8 @@ public class Constants {
     }
 
     public static enum Nodes {
+        CodeName("", "Celty"),
+
         Minor("System.Default.Currency.Minor", new ArrayList<String>()),
         Major("System.Default.Currency.Major", new ArrayList<String>()),
 
@@ -113,7 +115,8 @@ public class Constants {
         config.load();
 
         for(Nodes n: Nodes.values())
-            if(config.getProperty(n.getNode()) != null)
-                n.setValue(config.getProperty(n.getNode()));
+            if(!n.getNode().isEmpty())
+                if(config.getProperty(n.getNode()) != null)
+                    n.setValue(config.getProperty(n.getNode()));
     }
 }
