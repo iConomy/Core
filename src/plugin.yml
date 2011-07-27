@@ -6,4 +6,5 @@ commands:
     money:
       aliases: [iConomy,iCo]
       description: Check / Distrobute currency.
+      permission: iconomy.access
       usage:
