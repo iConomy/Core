@@ -82,7 +82,10 @@ public class iConomy extends JavaPlugin {
 
             // Server & Terminal Support
             Server = getServer();
-            TerminalSupport = ((CraftServer)getServer()).getReader().getTerminal().isANSISupported();
+
+            if(getServer().getServerName().equalsIgnoreCase("craftbukkit")) {
+                TerminalSupport = ((CraftServer)getServer()).getReader().getTerminal().isANSISupported();
+            }
 
             // Get general plugin information
             info = getDescription();
@@ -281,7 +284,12 @@ public class iConomy extends JavaPlugin {
                 if(this.Permissions != null)
                     return Permissions.Security.permission(player, node);
                 else {
-                    return player.isOp();
+                    // Fallback for older versions.
+                    try {
+                        return player.hasPermission(node);
+                    } catch(Exception e) {
+                        return player.isOp();
+                    }
                 }
             }
         }

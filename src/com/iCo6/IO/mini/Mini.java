@@ -1,6 +1,7 @@
 package com.iCo6.IO.mini;
 
 import com.iCo6.IO.mini.file.Manager;
+import java.io.File;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -48,6 +49,7 @@ public class Mini {
     private String database;
     private String source;
     private boolean changed = false;
+    private boolean caseSensitive = false;
     private Manager Database;
     private LinkedHashMap<String, Arguments> Indexes;
     private LinkedHashMap<String, Arguments> pushedIndexes;
@@ -61,6 +63,51 @@ public class Mini {
     public Mini(String folder, String database) {
         this.database = database;
         this.folder = folder;
+        this.Database = new Manager(this.folder, this.database, true);
+        this.read();
+    }
+    
+    /**
+     * Initialize a new Minidb, creates if it does not exist, and also states
+     * whether or not the keys are case sensitive.
+     * 
+     * @param folder
+     * @param database
+     * @param caseSensitive
+     */
+    public Mini(String folder, String database, boolean caseSensitive) {
+        this.caseSensitive = caseSensitive;
+        this.database = database;
+        this.folder = folder;
+        this.Database = new Manager(this.folder, this.database, true);
+        this.read();
+    }
+
+    /**
+     * Create a new minidb using a file variable.
+     * Filename is the database name, path is the folder path.
+     *
+     * @param data
+     */
+    public Mini(File data) {
+        this.database = data.getName();
+        this.folder = data.getPath();
+        this.Database = new Manager(this.folder, this.database, true);
+        this.read();
+    }
+
+    /**
+     * Create a new minidb using a file variable.
+     * Filename is the database name, path is the folder path.
+     * Allows to let you set keys case sensitive.
+     *
+     * @param data
+     * @param caseSensitive
+     */
+    public Mini(File data, boolean caseSensitive) {
+        this.caseSensitive = caseSensitive;
+        this.database = data.getName();
+        this.folder = data.getPath();
         this.Database = new Manager(this.folder, this.database, true);
         this.read();
     }
@@ -103,7 +150,7 @@ public class Mini {
 
             if(parsed[0].contains(Dict.ARGUMENT_SPLIT) || parsed[0].isEmpty()) continue;
 
-            Arguments entry = new Arguments(parsed[0].toLowerCase());
+            Arguments entry = new Arguments(parseIndice(parsed[0]));
 
             for(String item: parsed) {
                 if(!item.contains(Dict.ARGUMENT_SPLIT)) continue;
@@ -114,18 +161,18 @@ public class Mini {
                 entry.setValue(key, value);
             }
 
-            this.Indexes.put(parsed[0].toLowerCase(), entry);
+            this.Indexes.put(parseIndice(parsed[0]), entry);
         }
     }
 
     /**
      * Checks to see if the index given exists in the database.
      *
-     * @param key (<code>String</code>) Index value or name
+     * @param index (<code>String</code>) Index value or name
      * @return
      */
-    public boolean hasIndex(String key) {
-        return this.Indexes.containsKey(key.toLowerCase());
+    public boolean hasIndex(Object index) {
+        return this.Indexes.containsKey(parseIndice(index));
     }
 
     /**
@@ -141,11 +188,21 @@ public class Mini {
      * Creates a new index value-map in the current database or updates a pre-existing index
      * with new Arguments.
      *
+     * @param entry Arguments value-mapped entries with Entry index for the initializer.
+     */
+    public void addIndex(Arguments entry) {
+        this.addIndex(entry.getKey(), entry);
+    }
+
+    /**
+     * Creates a new index value-map in the current database or updates a pre-existing index
+     * with new Arguments.
+     *
      * @param index Entry index in database, used to grab value-mapped data later on.
      * @param entry Arguments value-mapped entries with Entry index for the initializer.
      */
-    public void addIndex(String index, Arguments entry) {
-        this.pushedIndexes.put(index.toLowerCase(), entry);
+    public void addIndex(Object index, Arguments entry) {
+        this.pushedIndexes.put(parseIndice(index), entry);
         this.changed = true;
     }
 
@@ -157,7 +214,7 @@ public class Mini {
      * @param updated (<code>String</code>) New index value.
      * @return boolean - true or false depending on the existence of the original index.
      */
-    public boolean alterIndex(String original, String updated) {
+    public boolean alterIndex(Object original, String updated) {
         return this.alterIndex(original, updated, true);
     }
 
@@ -170,10 +227,10 @@ public class Mini {
      * @param update (<code>Boolean</code>) Update database after alter or wait until update()
      * @return boolean - true or false depending on the existence of the original index.
      */
-    public boolean alterIndex(String original, String updated, boolean update) {
+    public boolean alterIndex(Object original, String updated, boolean update) {
         if(!hasIndex(original) || hasIndex(updated)) return false;
 
-        Arguments data = this.Indexes.get(original.toLowerCase());
+        Arguments data = this.Indexes.get(parseIndice(original));
         this.removeIndex(original);
         this.addIndex(updated, data);
 
@@ -187,8 +244,8 @@ public class Mini {
      *
      * @param key (<code>String</code>) Index value or name.
      */
-    public void removeIndex(String key) {
-        this.Database.remove(this.Indexes.get(key.toLowerCase()).toString());
+    public void removeIndex(Object key) {
+        this.Database.remove(this.Indexes.get(parseIndice(key)).toString());
         this.read(false);
     }
 
@@ -198,8 +255,8 @@ public class Mini {
      * @param key Database line Index used when setting the value-map
      * @return Arguments
      */
-    public Arguments getArguments(String key) {
-        return this.Indexes.get(key.toLowerCase());
+    public Arguments getArguments(Object key) {
+        return this.Indexes.get(parseIndice(key));
     }
 
     /**
@@ -209,7 +266,7 @@ public class Mini {
      * @param key (<code>String</code>) Key of the value map
      * @param value (<code>String</code>) Value of the value map
      */
-    public void setArgument(String index, String key, Object value) {
+    public void setArgument(String index, Object key, Object value) {
         this.setArgument(index, key, String.valueOf(value), false);
     }
 
@@ -225,18 +282,18 @@ public class Mini {
      * @param value (<code>String</code>) Value of the value map
      * @param save (<code>Boolean</code>) Update database immediately after alter
      */
-    public void setArgument(String index, String key, String value, boolean save) {
+    public void setArgument(Object index, Object key, String value, boolean save) {
         if(!hasIndex(index)) return;
         this.changed = true;
 
-        Arguments original = this.Indexes.get(index.toLowerCase()).copy();
-        original.setValue(key, value);
+        Arguments original = this.Indexes.get(parseIndice(index)).copy();
+        original.setValue(parseIndice(key), value);
 
-        this.pushedIndexes.put(index.toLowerCase(), original);
+        this.pushedIndexes.put(parseIndice(index), original);
         if(save) this.update();
     }
 
-    public void setArgument(String index, String key, Object value, boolean save) {
+    public void setArgument(Object index, Object key, Object value, boolean save) {
         String formatted = "";
 
         if(value instanceof int[]) {
@@ -275,7 +332,7 @@ public class Mini {
             formatted = String.valueOf(value);
         }
 
-        this.setArgument(index, key, formatted, save);
+        this.setArgument(parseIndice(index), parseIndice(key), formatted, save);
     }
 
     /**
@@ -309,5 +366,12 @@ public class Mini {
 
         this.pushedIndexes.clear();
         this.read();
+    }
+
+    private String parseIndice(Object key) {
+        if(this.caseSensitive)
+            return String.valueOf(key);
+
+        return String.valueOf(key).toLowerCase();
     }
 }

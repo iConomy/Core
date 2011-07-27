@@ -1,6 +1,7 @@
 package com.iCo6.system;
 
 import com.iCo6.Constants;
+import com.iCo6.IO.mini.Arguments;
 import com.iCo6.iConomy;
 import com.iCo6.util.Common;
 import com.iCo6.IO.mini.Mini;
@@ -21,10 +22,19 @@ public class Transactions {
             if(database == null)
                 return;
 
+            Arguments entry = new Arguments(data.time);
+            entry.setValue("where", data.where);
+            entry.setValue("where", data.from);
+            entry.setValue("to", data.to);
+            entry.setValue("fromBalance", data.fromBalance);
+            entry.setValue("toBalance", data.toBalance);
+            entry.setValue("gain", data.gain);
+            entry.setValue("loss", data.loss);
+            entry.setValue("set", data.set);
+            database.addIndex(entry);
+            database.update();
             return;
         }
-
-
     }
 
     public class Transaction {

@@ -1,9 +1,93 @@
 name: iConomy
 main: com.iCo6.iConomy
 version: 6.0
-authors: [Nijikokun,SpaceManiac]
 commands:
     money:
       aliases: [iConomy,iCo]
       description: Check / Distrobute currency.
       usage:
+
+generators: [bukget]
+categories: [ECON]
+description: Simple, easy, and intuitive economy for minecraft.
+maintainer: Nijikokun
+authors: [Nijikokun,SpaceManiac]
+website: http://ico.nexua.org
+thread: http://bit.ly/iConomy
+location: http://mirror.nexua.org/iConomy/6/iConomy.jar
+conflicts: []
+required: []
+optional: [Permissions]
+engine:
+    craftbukkit:
+        min: 0
+        max: 999
+    glowstone:
+        min: 1
+        max: 100
+permissions:
+    iConomy.*:
+        description: Gives access to all commands
+        children:
+            iConomy.help: true
+            iConomy.holdings: true
+            iConomy.holdings.others: true
+            iConomy.payment: true
+            iConomy.accounts.create: true
+            iConomy.accounts.remove: true
+            iConomy.accounts.give: true
+            iConomy.accounts.take: true
+            iConomy.accounts.set: true
+            iConomy.accounts.status: true
+            iConomy.accounts.status.set: true
+            iConomy.accounts.purge: true
+            iConomy.accounts.empty: true
+    iConomy.higher:
+        description: Gives access only to higher level commands
+        children:
+            iConomy.accounts.create: true
+            iConomy.accounts.remove: true
+            iConomy.accounts.give: true
+            iConomy.accounts.take: true
+            iConomy.accounts.set: true
+            iConomy.accounts.status: true
+            iConomy.accounts.status.set: true
+            iConomy.accounts.purge: true
+            iConomy.accounts.empty: true
+    iConomy.plus:
+        description: Gives access to user plus only commands
+        children:
+            iConomy.help: true
+            iConomy.holdings: true
+            iConomy.holdings.others: true
+            iConomy.payment: true
+    iConomy.user:
+        description: Gives access to user only commands
+        children:
+            iConomy.help: true
+            iConomy.holdings: true
+            iConomy.payment: true
+    iConomy.help:
+        description: Allows you to request help information.
+        default: op
+    iConomy.holdings:
+        description: Check your balance.
+        default: op
+    iConomy.holdings.others:
+        description: Check other players balance.
+        default: op
+    iConomy.payment:
+        description: Send money to others.
+        default: op
+    bukget.installed:
+        description: Create an account.
+        default: op
+    bukget.update:
+        description: Remove an account.
+        default: op
+    bukget.update.multi:
+        description: Give money.
+        default: op
+    bukget.update.all:
+        description: Take money.
+        default: op

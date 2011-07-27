@@ -7,19 +7,27 @@ import java.util.List;
 public class Arguments {
     private String key;
     private LinkedHashMap<String, String> values;
+    private boolean caseSensitive;
 
     /**
      * Create a new value-mapped database entry.
      *
      * @param key Current line Entry Key
      */
-    public Arguments(String key) {
-        this.key = key.toLowerCase();
+    public Arguments(Object key) {
+        this.key = parseKey(key);
         this.values = new LinkedHashMap<String, String>();
+        this.caseSensitive = false;
+    }
+
+    public Arguments(Object key, boolean caseSensitive) {
+        this.key = parseKey(key);
+        this.values = new LinkedHashMap<String, String>();
+        this.caseSensitive = caseSensitive;
     }
 
     public String getKey() {
-        return this.key;
+        return parseKey(this.key);
     }
 
     private String encode(String data) {
@@ -30,16 +38,16 @@ public class Arguments {
         return data.replace(Dict.SPACE_SPLIT, " ").trim();
     }
 
-    public boolean hasKey(String key) {
-        return this.values.containsKey(key);
+    public boolean hasKey(Object key) {
+        return this.values.containsKey(parseKey(key));
     }
 
     public void setValue(String key, Object value) {
-        this.values.put(this.encode(key.toLowerCase()), this.encode(String.valueOf(value)));
+        this.values.put(this.encode(parseKey(key)), this.encode(String.valueOf(value)));
     }
 
     public String getValue(String key) {
-        return this.decode(this.values.get(key.toLowerCase()));
+        return this.decode(this.values.get(parseKey(key)));
     }
 
     public Integer getInteger(String key) throws NumberFormatException {
@@ -81,6 +89,13 @@ public class Arguments {
                 values[i] = values[i].trim();
 
         return values;
+    }
+
+    private String parseKey(Object key) {
+        if(this.caseSensitive)
+            return String.valueOf(key);
+
+        return String.valueOf(key).toLowerCase();
     }
 
     private List trim(List values) {
