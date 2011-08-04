@@ -5,6 +5,7 @@ commands:
     money:
       aliases: [iConomy,iCo]
       description: Check / Distrobute currency.
+      permission: iConomy.help
       usage:
 
 generators: [bukget]
