@@ -312,8 +312,7 @@ class Queried {
                 Player gainer = iConomy.Server.getPlayer(name);
 
                 if(gainer != null) {
-                    for(int i=0; i < balance; i++)
-                        gainer.setExperience(i);
+                    gainer.setTotalExperience((int)balance);
 
                     return;
                 }
