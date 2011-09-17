@@ -1,7 +1,7 @@
 # General Data
 name: iConomy
 main: com.iCo6.iConomy
-version: 6.0.3b
+version: 6.0.4b
 commands:
     money:
       aliases: [iConomy, iCo]
