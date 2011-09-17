@@ -50,7 +50,6 @@ public class Accounts {
         Queried.purgeDatabase();
     }
 
-
     public void empty() {
         Queried.emptyDatabase();
     }
