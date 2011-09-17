@@ -1,6 +1,7 @@
 package com.iCo6;
 
 import java.io.File;
+import java.sql.ResultSet;
 import java.util.Locale;
 
 import com.nijikokun.bukkit.Permissions.Permissions;
@@ -14,18 +15,24 @@ import com.iCo6.IO.Database;
 import com.iCo6.IO.Database.Type;
 import com.iCo6.IO.exceptions.MissingDriver;
 import com.iCo6.listeners.players;
+import com.iCo6.system.Account;
 import com.iCo6.system.Accounts;
 import com.iCo6.util.Common;
 import com.iCo6.util.Messaging;
 import com.iCo6.util.Template;
+import com.iCo6.util.Thrun;
 import com.iCo6.util.org.apache.commons.dbutils.DbUtils;
 import com.iCo6.util.org.apache.commons.dbutils.QueryRunner;
+import com.iCo6.util.org.apache.commons.dbutils.ResultSetHandler;
 import com.iCo6.util.wget;
 
 import java.awt.Event;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.bukkit.Server;
 import org.bukkit.command.Command;
@@ -37,6 +44,7 @@ import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.config.Configuration;
+import org.h2.jdbcx.JdbcConnectionPool;
 
 /**
  * iConomy by Team iCo
@@ -71,6 +79,8 @@ public class iConomy extends JavaPlugin {
     public static Database Database;
     public static Server Server;
     public static Template Template;
+
+    private JdbcConnectionPool h2pool;
 
     public void onEnable() {
         final long startTime = System.nanoTime();
@@ -183,7 +193,7 @@ public class iConomy extends JavaPlugin {
 
                 // Check to see if it's a binary database, if so, check the database existance
                 // If it doesn't exist, Create one.
-                if(Database.getDatabase() == null && Database.getInventoryDatabase() == null)
+                if(Database.getDatabase() == null && Database.getInventoryDatabase() == null) {
                     if(!Database.tableExists(Constants.Nodes.DatabaseTable.toString())) {
                         String SQL = Common.resourceToString("SQL/Core/Create-Table-" + Database.getType().toString().toLowerCase() + ".sql");
                         SQL = String.format(SQL, Constants.Nodes.DatabaseTable.getValue());
@@ -203,7 +213,9 @@ public class iConomy extends JavaPlugin {
                             System.out.println("[iConomy] Database Error: " + ex);
                         }
                     }
-
+                } else {
+                    this.onConversion();
+                }
             } catch (MissingDriver ex) {
                 System.out.println(ex.getMessage());
             }
@@ -247,6 +259,91 @@ public class iConomy extends JavaPlugin {
 
         // Output finished & time.
         System.out.println("[" + name + "] Disabled. (" + Common.readableProfile(duration) + ")");
+    }
+
+    public boolean onConversion() {
+        if(!Constants.Nodes.Convert.getBoolean())
+            return false;
+
+        Thrun.init(new Runnable() {
+            public void run() {
+                String from = Constants.Nodes.ConvertFrom.toString();
+                String table = Constants.Nodes.ConvertTable.toString();
+                String username = Constants.Nodes.ConvertUsername.toString();
+                String password = Constants.Nodes.ConvertPassword.toString();
+                String url = Constants.Nodes.ConvertURL.toString();
+
+                if(!Common.matches(from, "h2", "h2db", "h2sql", "mysql", "mysqldb"))
+                    return;
+
+                String driver = "", dsn = "";
+
+                if(Common.matches(from, "sqlite", "h2", "h2sql", "h2db")) {
+                    driver = "org.h2.Driver";
+                    dsn = "jdbc:h2:" + directory + File.separator + "-" + File.separator + table + ";AUTO_RECONNECT=TRUE";
+                    username = "sa";
+                    password = "sa";
+                } else if (Common.matches(from, "mysql", "mysqldb")) {
+                    driver = "com.mysql.jdbc.Driver";
+                    dsn = url + "/" + table;
+                }
+
+                if(!DbUtils.loadDriver(driver)) {
+                    System.out.println("Please make sure the " + from + " driver library jar exists.");
+
+                    return;
+                }
+
+                Connection old = null;
+
+                try {
+                    old = (username.isEmpty() && password.isEmpty()) ? DriverManager.getConnection(url) : DriverManager.getConnection(url, username, password);
+                } catch (SQLException ex) {
+                    System.out.println(ex);
+
+                    return;
+                }
+
+                QueryRunner run = new QueryRunner();
+
+                try {
+                    try{
+                        run.query(old, "SELECT * FROM " + table, new ResultSetHandler(){
+                            public Object handle(ResultSet rs) throws SQLException {
+                                Account current = null;
+                                Boolean next = rs.next();
+
+                                if(next)
+                                    if(iConomy.Accounts.exists(rs.getString("username")))
+                                        current = iConomy.Accounts.get(rs.getString("username"));
+                                    else
+                                        iConomy.Accounts.create(rs.getString("username"), rs.getDouble("balance"));
+
+                                if(current != null)
+                                    current.getHoldings().setBalance(rs.getDouble("balance"));
+
+                                if(next)
+                                    if(iConomy.Accounts.exists(rs.getString("username")))
+                                        if(rs.getBoolean("hidden"))
+                                            iConomy.Accounts.get(rs.getString("username")).setStatus(1);
+
+                                return true;
+                            }
+                        });
+                    } catch (SQLException ex) {
+                        System.out.println("[iConomy] Error issueing SQL query: " + ex);
+                    } finally {
+                        DbUtils.close(old);
+                    }
+                } catch (SQLException ex) {
+                    System.out.println("[iConomy] Database Error: " + ex);
+                }
+
+                System.out.println("[iConomy] Conversion complete. Please update your configuration, change convert to false!");
+            }
+        });
+
+        return false;
     }
 
     @Override
