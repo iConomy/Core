@@ -29,20 +29,7 @@ public abstract class Handler {
 
 
     protected boolean hasPermissions(CommandSender sender, String command) {
-        if(sender instanceof Player) {
-            Player player = (Player)sender;
-
-            if(plugin.Commands.hasPermission(command)) {
-                String node = plugin.Commands.getPermission(command);
-
-                if(plugin.Permissions != null)
-                    return plugin.Permissions.Security.permission(player, node);
-                else
-                    return player.isOp();
-            }
-        }
-
-        return true;
+        return plugin.hasPermissions(sender, command);
     }
 
     protected static Player getPlayer(CommandSender sender, String[] args, int index) {
