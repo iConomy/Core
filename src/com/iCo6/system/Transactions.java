@@ -16,7 +16,7 @@ public class Transactions {
         if (!Constants.Nodes.Logging.getBoolean())
             return;
 
-        if (Common.matches(iConomy.Database.getType().toString(), "inventorydb", "minidb")) {
+        if (Common.matches(iConomy.Database.getType().toString(), "inventorydb", "minidb", "orbdb")) {
             Mini database = iConomy.Database.getTransactionDatabase();
 
             if(database == null)
@@ -33,6 +33,7 @@ public class Transactions {
             entry.setValue("set", data.set);
             database.addIndex(entry);
             database.update();
+
             return;
         }
     }
