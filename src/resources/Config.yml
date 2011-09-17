@@ -89,6 +89,9 @@ System:
     # item, items, inventory, inventoryDB
     #  - These all equate to InventoryDB, which uses inventory for storage
     ##
+    # xp, exp, orb, xpdb, expdb, orbdb
+    #  - These all equate to ExperienceDB, which relies on Experience for balance.
+    ##
     # mysql, mysqldb
     #  - These will attempt to connect to MySQL
     ##
@@ -133,3 +136,27 @@ System:
     # Login details for binary databases
     Username: 'root'
     Password: ''
+
+    # Conversion allows you to convert your old 5.x to the new 6.x
+    # All is currently unused.
+    # URL is for MySQL only, H2DB doesn't use it.
+    Conversion:
+      # Set to True, After converting, change this back to false!
+      Enabled: false
+
+      # Database Type, H2DB or MySQL
+      Type: 'H2DB'
+
+      # Database Table
+      Table: 'iConomy'
+
+      # Database URL without table at the end.
+      URL: 'mysql://localhost:3306'
+
+      # Username / Password
+      # H2DB does not use this. MySQL Only.
+      Username: 'root'
+      Password: ''
+
+      # Unused ATM.
+      All: true

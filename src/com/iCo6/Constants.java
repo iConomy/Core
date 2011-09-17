@@ -63,7 +63,15 @@ public class Constants {
         DatabaseUsername("System.Database.Username", "root"),
         DatabasePassword("System.Database.Password", ""),
         DatabaseMajorItem("System.Database.MajorItem", 266),
-        DatabaseMinorItem("System.Database.MinorItem", 265);
+        DatabaseMinorItem("System.Database.MinorItem", 265),
+
+        Convert("System.Database.Conversion.Enabled", false),
+        ConvertFrom("System.Database.Conversion.Type", "H2DB"),
+        ConvertTable("System.Database.Conversion.Table", "iConomy"),
+        ConvertURL("System.Database.Conversion.URL", "mysql:\\\\localhost:3306\\iConomy"),
+        ConvertUsername("System.Database.Conversion.Username", "root"),
+        ConvertPassword("System.Database.Conversion.Password", ""),
+        ConvertAll("System.Database.Conversion.All", true);
 
         String node;
         Object value;
