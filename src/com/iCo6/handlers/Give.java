@@ -33,19 +33,19 @@ public class Give extends Handler {
         Double amount;
 
         if(name.equals("0"))
-            throw new InvalidUsage("Missing name parameter: /money give <name> <amount>");
+            throw new InvalidUsage("Missing <white>name<rose>: /money give <name> <amount>");
 
         if(arguments.get("amount").getStringValue().equals("empty"))
-            throw new InvalidUsage("Missing amount parameter: /money give <name> <amount>");
+            throw new InvalidUsage("Missing <white>amount<rose>: /money give <name> <amount>");
 
         try {
             amount = arguments.get("amount").getDoubleValue();
         } catch(NumberFormatException e) {
-            throw new InvalidUsage("Invalid amount parameter, must be double.");
+            throw new InvalidUsage("Invalid <white>amount<rose>, must be double.");
         }
 
         if(Double.isInfinite(amount) || Double.isNaN(amount))
-            throw new InvalidUsage("Invalid amount parameter, must be double.");
+            throw new InvalidUsage("Invalid <white>amount<rose>, must be double.");
 
         if(!Accounts.exists(name)) {
             template.set(Template.Node.ERROR_ACCOUNT);

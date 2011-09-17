@@ -31,7 +31,7 @@ public class Create extends Handler {
         String tag = template.color(Template.Node.TAG_MONEY);
 
         if(name.equals("0"))
-            throw new InvalidUsage("Missing name parameter: /money create <name>");
+            throw new InvalidUsage("Missing <white>name<rose>: /money create <name>");
 
         if(Accounts.exists(name)) {
             template.set(Template.Node.ERROR_EXISTS);

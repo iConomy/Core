@@ -42,22 +42,22 @@ public class Payment extends Handler {
         Double amount;
 
         if(name.equals("0"))
-            throw new InvalidUsage("Missing name parameter: /money pay <name> <amount>");
+            throw new InvalidUsage("Missing <white>name<rose>: /money pay <name> <amount>");
 
         if(arguments.get("amount").getStringValue().equals("empty"))
-            throw new InvalidUsage("Missing amount parameter: /money pay <name> <amount>");
+            throw new InvalidUsage("Missing <white>amount<rose>: /money pay <name> <amount>");
 
         try {
             amount = arguments.get("amount").getDoubleValue();
         } catch(NumberFormatException e) {
-            throw new InvalidUsage("Invalid amount parameter, must be double.");
+            throw new InvalidUsage("Invalid <white>amount<rose>, must be double.");
         }
 
         if(Double.isInfinite(amount) || Double.isNaN(amount))
-            throw new InvalidUsage("Invalid amount parameter, must be double.");
+            throw new InvalidUsage("Invalid <white>amount<rose>, must be double.");
 
         if(amount < 0.1)
-            throw new InvalidUsage("Invalid amount parameter, cannot be less than 0.1");
+            throw new InvalidUsage("Invalid <white>amount<rose>, cannot be less than 0.1");
 
         if(Common.matches(from.getName(), name)) {
             template.set(Template.Node.PAYMENT_SELF);

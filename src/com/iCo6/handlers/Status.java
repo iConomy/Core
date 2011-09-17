@@ -36,7 +36,7 @@ public class Status extends Handler {
                 self = true;
 
         if(name.equals("0"))
-            throw new InvalidUsage("Missing name parameter: /money status <name> (new status)");
+            throw new InvalidUsage("Missing <white>name<rose>: /money status <name> (new status)");
 
         if(!Accounts.exists(name)) {
             template.set(Template.Node.ERROR_ACCOUNT);
@@ -58,19 +58,21 @@ public class Status extends Handler {
                 template.add("name", name);
             }
 
+            template.add("status", current);
             Messaging.send(sender, tag + template.parse());
-            return false;
+
+        } else {
+            if(!hasPermissions(sender, "status+"))
+                throw new InvalidUsage("You do not have permission to do that.");
+
+            int status = arguments.get("status").getIntegerValue();
+            account.setStatus(status);
+
+            template.set(Template.Node.ACCOUNTS_STATUS);
+            template.add("status", status);
+            Messaging.send(sender, tag + template.parse());
         }
 
-        if(!hasPermissions(sender, "status+"))
-            throw new InvalidUsage("You do not have permission to do that.");
-
-        int status = arguments.get("status").getIntegerValue();
-        account.setStatus(status);
-
-        template.set(Template.Node.ACCOUNTS_STATUS);
-        template.add("status", status);
-        Messaging.send(sender, tag + template.parse());
         return false;
     }
 }
