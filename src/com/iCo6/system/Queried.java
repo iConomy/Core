@@ -3,9 +3,13 @@ package com.iCo6.system;
 import com.iCo6.Constants;
 import com.iCo6.IO.InventoryDB;
 import com.iCo6.iConomy;
-import com.iCo6.util.Common;
 import com.iCo6.IO.mini.Arguments;
 import com.iCo6.IO.mini.Mini;
+import com.iCo6.util.Thrun;
+
+import com.iCo6.util.org.apache.commons.dbutils.DbUtils;
+import com.iCo6.util.org.apache.commons.dbutils.QueryRunner;
+import com.iCo6.util.org.apache.commons.dbutils.ResultSetHandler;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -15,9 +19,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import com.iCo6.util.org.apache.commons.dbutils.DbUtils;
-import com.iCo6.util.org.apache.commons.dbutils.QueryRunner;
-import com.iCo6.util.org.apache.commons.dbutils.ResultSetHandler;
+import org.bukkit.entity.Player;
 
 class Queried {
     static Mini database;
@@ -69,6 +71,17 @@ class Queried {
         }
     };
 
+    static boolean useOrbDB() {
+        if(iConomy.Database.getType().toString().equalsIgnoreCase("orbdb")) {
+            if(database == null)
+                database = iConomy.Database.getDatabase();
+
+            return true;
+        }
+
+        return false;
+    }
+
     static boolean useMiniDB() {
         if(iConomy.Database.getType().toString().equalsIgnoreCase("minidb")) {
             if(database == null)
@@ -85,6 +98,9 @@ class Queried {
             if(inventory == null)
                 inventory = iConomy.Database.getInventoryDatabase();
 
+            if(database == null)
+                database = iConomy.Database.getDatabase();
+
             return true;
         }
         
@@ -92,13 +108,20 @@ class Queried {
     }
 
     static List<String> accountList() {
-        if(useMiniDB())
-            return new ArrayList<String>(database.getIndices().keySet());
-        
-        if (useInventoryDB())
-            return new ArrayList<String>(inventory.getAllPlayers());
-
         List<String> accounts = new ArrayList<String>();
+
+        if(useMiniDB() || useInventoryDB() || useOrbDB()) {
+            if (useInventoryDB())
+                accounts.addAll(inventory.getAllPlayers());
+
+            if (useOrbDB())
+                for(Player p: iConomy.Server.getOnlinePlayers())
+                    accounts.add(p.getName());
+
+            accounts.addAll(database.getIndices().keySet());
+
+            return accounts;
+        }
 
         try {
             QueryRunner run = new QueryRunner();
@@ -122,28 +145,27 @@ class Queried {
     static boolean createAccount(String name, Double balance, Integer status) {
         Boolean created = false;
 
-        if(useMiniDB())
-            if(!hasAccount(name)) {
-                Arguments Row = new Arguments(name);
-                Row.setValue("balance", balance);
-                Row.setValue("status", status);
-
-                database.addIndex(Row.getKey(), Row);
-                database.update();
-                return true;
-            } else {
-                database.setArgument(name, "balance", balance);
-                database.update();
-                return true;
-            }
-        
-        if (useInventoryDB())
-            if (!hasAccount(name)) {
+        if(useMiniDB() || useInventoryDB() || useOrbDB()) {
+            if(hasAccount(name))
                 return false;
-            } else {
-                inventory.setBalance(name, balance);
-                return true;
-            }
+
+            if(useOrbDB())
+                if(iConomy.Server.getPlayer(name) != null)
+                    return false;
+
+            if(useInventoryDB())
+                if(inventory.dataExists(name))
+                    return false;
+
+            Arguments Row = new Arguments(name);
+            Row.setValue("balance", balance);
+            Row.setValue("status", status);
+
+            database.addIndex(Row.getKey(), Row);
+            database.update();
+
+            return true;
+        }
 
         try {
             QueryRunner run = new QueryRunner();
@@ -169,14 +191,15 @@ class Queried {
 
     static boolean removeAccount(String name) {
         Boolean removed = false;
-        
-        if(useMiniDB()) {
-            database.removeIndex(name);
-            database.update();
-            return true;
-        }
-        
-        if (useInventoryDB()) {
+
+        if(useMiniDB() || useInventoryDB() || useOrbDB()) {
+            if(database.hasIndex(name)) {
+                database.removeIndex(name);
+                database.update();
+
+                return true;
+            }
+
             return false;
         }
 
@@ -205,12 +228,14 @@ class Queried {
     static boolean hasAccount(String name) {
         Boolean exists = false;
 
-        if (useMiniDB()) {
+        if(useMiniDB() || useInventoryDB() || useOrbDB()) {
+            if(useInventoryDB())
+                return inventory.dataExists(name);
+
+            if(useOrbDB())
+                return (iConomy.Server.getPlayer(name) != null);
+
             return database.hasIndex(name);
-        }
-        
-        if (useInventoryDB()) {
-            return inventory.dataExists(name);
         }
 
         try {
@@ -238,11 +263,19 @@ class Queried {
         if(!hasAccount(name))
             return balance;
 
-        if(useMiniDB())
-            return database.getArguments(name).getDouble("balance");
-        
-        if(useInventoryDB()) {
-            return inventory.getBalance(name);
+        if(useMiniDB() || useInventoryDB() || useOrbDB()) {
+            if(useInventoryDB())
+                if(inventory.dataExists(name))
+                    return inventory.getBalance(name);
+
+            if(useOrbDB())
+                if(iConomy.Server.getPlayer(name) != null)
+                    return iConomy.Server.getPlayer(name).getTotalExperience();
+
+            if(database.hasIndex(name))
+                return database.getArguments(name).getDouble("balance");
+
+            return balance;
         }
 
         try {
@@ -266,18 +299,31 @@ class Queried {
 
     static void setBalance(String name, double balance) {
         if(!hasAccount(name)) {
-            createAccount(name, balance, 0);
-            return;
+            createAccount(name, balance, 0); return;
         }
 
-        if(useMiniDB()) {
-            database.setArgument(name, "balance", balance);
-            database.update();
-            return;
-        }
-        
-        if (useInventoryDB()) {
-            inventory.setBalance(name, balance);
+        if(useMiniDB() || useInventoryDB() || useOrbDB()) {
+            if(useInventoryDB())
+                if(inventory.dataExists(name)) {
+                    inventory.setBalance(name, balance); return;
+                }
+
+            if (useOrbDB()) {
+                Player gainer = iConomy.Server.getPlayer(name);
+
+                if(gainer != null) {
+                    for(int i=0; i < balance; i++)
+                        gainer.setExperience(i);
+
+                    return;
+                }
+            }
+
+            if(database.hasIndex(name)) {
+                database.setArgument(name, "balance", balance);
+                database.update();
+            }
+
             return;
         }
 
@@ -298,115 +344,165 @@ class Queried {
         }
     }
 
-    static void doInterest(String query, LinkedHashMap<String, HashMap<String, Object>> queries) {
-        Object[][] parameters = new Object[queries.size()][2];
+    static void doInterest(final String query, LinkedHashMap<String, HashMap<String, Object>> queries) {
+        final Object[][] parameters = new Object[queries.size()][2];
+
         int i = 0;
-
         for(String name: queries.keySet()) {
-            parameters[i][0] = queries.get(name).get("balance");
-            parameters[i][1] = name;
+            double balance = (Double) queries.get(name).get("balance");
 
-            // Do Logging & Messaging here.
-            /* if(amount < 0.0)
+            // We are using a query for MySQL
+            if(!useInventoryDB() && !useMiniDB() && !useOrbDB()) {
+                parameters[i][0] = balance;
+                parameters[i][1] = name;
+
+                i++;
+            } else if(useMiniDB()) {
+                if(!hasAccount(name))
+                    continue;
+
+                database.setArgument(name, "balance", balance);
+                database.update();
+            } else if(useInventoryDB()) {
+                if(inventory.dataExists(name))
+                    inventory.setBalance(name, balance);
+                else if(database.hasIndex(name)) {
+                    database.setArgument(name, "balance", balance);
+                    database.update();
+                }
+            } else if(useOrbDB()) {
+                if(!hasAccount(name))
+                    continue;
+
+
+            }
+
+            /*
+            if(amount < 0.0)
                 iConomy.getTransactions().insert("[System Interest]", name, 0.0, original, 0.0, 0.0, amount);
             else {
                 iConomy.getTransactions().insert("[System Interest]", name, 0.0, original, 0.0, amount, 0.0);
             } */
-            i++;
         }
 
-        try {
-            QueryRunner run = new QueryRunner();
-            Connection c = iConomy.Database.getConnection();
+        if(!useInventoryDB() && !useMiniDB() && !useOrbDB())
+            Thrun.init(new Runnable() {
+                public void run() {
+                    try {
+                        QueryRunner run = new QueryRunner();
+                        Connection c = iConomy.Database.getConnection();
 
-            try{
-                run.batch(c, query, parameters);
-            } catch (SQLException ex) {
-                System.out.println("[iConomy] Error with batching: " + ex);
-            } finally {
-                DbUtils.close(c);
-            }
-        } catch (SQLException ex) {
-            System.out.println("[iConomy] Database Error: " + ex);
-        }
+                        try{
+                            run.batch(c, query, parameters);
+                        } catch (SQLException ex) {
+                            System.out.println("[iConomy] Error with batching: " + ex);
+                        } finally {
+                            DbUtils.close(c);
+                        }
+                    } catch (SQLException ex) {
+                        System.out.println("[iConomy] Database Error: " + ex);
+                    }
+                }
+            });
     }
     
     static void purgeDatabase() {
-        if(useMiniDB()) {
+        if(useMiniDB() || useInventoryDB() || useOrbDB()) {
             for(String index: database.getIndices().keySet())
                 if(database.getArguments(index).getDouble("balance") == Constants.Nodes.Balance.getDouble())
                     database.removeIndex(index);
             
             database.update();
-        }
-        
-        if (useInventoryDB()) {
-            // TODO: purge online accounts only?
+
+
+            if (useInventoryDB())
+                for(Player p: iConomy.Server.getOnlinePlayers())
+                    if(inventory.dataExists(p.getName()) && inventory.getBalance(p.getName()) == Constants.Nodes.Balance.getDouble())
+                        inventory.setBalance(p.getName(), 0);
+
+            if (useOrbDB())
+                for(Player p: iConomy.Server.getOnlinePlayers())
+                    if(p.getExperience() == Constants.Nodes.Balance.getDouble())
+                        p.setExperience(0);
+
             return;
         }
-        
-        try {
-            QueryRunner run = new QueryRunner();
-            Connection c = iConomy.Database.getConnection();
 
-            try {
-                String t = Constants.Nodes.DatabaseTable.toString();
-                Integer amount = run.update(c, "DELETE FROM " + t + " WHERE balance=?", Constants.Nodes.Balance.getDouble());
-            } catch (SQLException ex) {
-                System.out.println("[iConomy] Error issueing SQL query: " + ex);
-            } finally {
-                DbUtils.close(c);
+        Thrun.init(new Runnable() {
+            public void run() {
+                try {
+                    QueryRunner run = new QueryRunner();
+                    Connection c = iConomy.Database.getConnection();
+
+                    try {
+                        String t = Constants.Nodes.DatabaseTable.toString();
+                        Integer amount = run.update(c, "DELETE FROM " + t + " WHERE balance=?", Constants.Nodes.Balance.getDouble());
+                    } catch (SQLException ex) {
+                        System.out.println("[iConomy] Error issueing SQL query: " + ex);
+                    } finally {
+                        DbUtils.close(c);
+                    }
+                } catch (SQLException ex) {
+                    System.out.println("[iConomy] Database Error: " + ex);
+                }
             }
-        } catch (SQLException ex) {
-            System.out.println("[iConomy] Database Error: " + ex);
-        }
+        });
     }
 
     static void emptyDatabase() {
-        if(useMiniDB()) {
+        if(useMiniDB() || useInventoryDB() || useOrbDB()) {
             for(String index: database.getIndices().keySet())
                 database.removeIndex(index);
 
             database.update();
-        }
-        
-        if (useInventoryDB()) {
-            // TODO: clear all inventories of those items?
-            // Unknown for now.
+
+            if (useInventoryDB())
+                for(Player p: iConomy.Server.getOnlinePlayers())
+                    if(inventory.dataExists(p.getName()))
+                        inventory.setBalance(p.getName(), 0);
+
+            if (useOrbDB())
+                for(Player p: iConomy.Server.getOnlinePlayers())
+                    p.setExperience(0);
+
             return;
         }
 
-        try {
-            QueryRunner run = new QueryRunner();
-            Connection c = iConomy.Database.getConnection();
+        Thrun.init(new Runnable() {
+            public void run() {
+                try {
+                    QueryRunner run = new QueryRunner();
+                    Connection c = iConomy.Database.getConnection();
 
-            try {
-                String t = Constants.Nodes.DatabaseTable.toString();
-                Integer amount = run.update(c, "TRUNCATE TABLE " + t);
-            } catch (SQLException ex) {
-                System.out.println("[iConomy] Error issueing SQL query: " + ex);
-            } finally {
-                DbUtils.close(c);
+                    try {
+                        String t = Constants.Nodes.DatabaseTable.toString();
+                        Integer amount = run.update(c, "TRUNCATE TABLE " + t);
+                    } catch (SQLException ex) {
+                        System.out.println("[iConomy] Error issueing SQL query: " + ex);
+                    } finally {
+                        DbUtils.close(c);
+                    }
+                } catch (SQLException ex) {
+                    System.out.println("[iConomy] Database Error: " + ex);
+                }
             }
-        } catch (SQLException ex) {
-            System.out.println("[iConomy] Database Error: " + ex);
-        }
+        });
     }
 
     static Integer getStatus(String name) {
         int status = 0;
 
-        if(!hasAccount(name)) {
+        if(!hasAccount(name))
             return -1;
-        }
 
-        if(useMiniDB()) {
+        if(useMiniDB()) 
             return database.getArguments(name).getInteger("status");
-        }
 
-        if (useInventoryDB()) {
-            return (inventory.dataExists(name)) ? 1 : 0;
-        }
+        if (useInventoryDB()) 
+            return (inventory.dataExists(name)) ? 1 : (database.hasIndex(name)) ? database.getArguments(name).getInteger("status") : 0;
+
+        if (useOrbDB())
+            return (iConomy.Server.getPlayer(name) != null) ? 1 : (database.hasIndex(name)) ? database.getArguments(name).getInteger("status") : 0;
 
         try {
             QueryRunner run = new QueryRunner();
@@ -428,18 +524,24 @@ class Queried {
     }
 
     static void setStatus(String name, int status) {
-        if(!hasAccount(name)) {
+        if(!hasAccount(name))
             return;
-        }
 
         if(useMiniDB()) {
             database.setArgument(name, "status", status);
             database.update();
+
             return;
         }
 
-        if (useInventoryDB())
+        if (useInventoryDB() || useOrbDB()) {
+            if(database.hasIndex(name)) {
+                database.setArgument(name, "status", status);
+                database.update();
+            }
+
             return;
+        }
 
         try {
             QueryRunner run = new QueryRunner();

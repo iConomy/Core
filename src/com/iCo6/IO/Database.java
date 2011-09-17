@@ -15,7 +15,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class Database {
-    public static enum Type { MiniDB, InventoryDB, MySQL, SQLite, Postgre, H2DB };
+    public static enum Type { OrbDB, MiniDB, InventoryDB, MySQL, SQLite, Postgre, H2DB };
     private String type;
     private String driver;
     private String url;
@@ -27,7 +27,13 @@ public class Database {
         this.username = username;
         this.password = password;
         
-        if(Common.matches(type, "flatfile", "ff", "mini", "minidb", "flat", "itemdb", "item", "items", "inv", "inventory", "invdb", "inventorydb"))
+        if(Common.matches(
+                type,
+                "itemdb", "item", "items", "inventory", "invdb", "inventorydb",
+                "flatfile", "ff", "mini", "minidb", "flat",
+                "orbdb", "orb", "exp", "xp", "xpdb", "expdb"
+            )
+        )
             return;
         
         if(Common.matches(type, "mysql", "mysqldb"))
@@ -96,6 +102,9 @@ public class Database {
         if(Common.matches(type, "itemdb", "item", "items", "inv", "inventory", "invdb", "inventorydb"))
             return Type.InventoryDB;
 
+        if(Common.matches(type, "orbdb", "orb", "exp", "xp", "xpdb", "expdb"))
+            return Type.OrbDB;
+
         if(Common.matches(type, "mysql", "mysqldb"))
             return Type.MySQL;
 
@@ -112,21 +121,37 @@ public class Database {
     }
 
     public Mini getDatabase() {
-        if(!Common.matches(type, "flatfile", "ff", "mini", "minidb", "flat"))
+        if(!Common.matches(
+                type,
+                "itemdb", "item", "items", "inventory", "invdb", "inventorydb",
+                "flatfile", "ff", "mini", "minidb", "flat",
+                "orbdb", "orb", "exp", "xp", "xpdb", "expdb"
+            )
+        )
             return null;
 
         return new Mini(iConomy.directory.getPath(), "accounts.mini");
     }
 
     public Mini getTransactionDatabase() {
-        if(!Common.matches(type, "itemdb", "item", "items", "inventory", "invdb", "inventorydb", "flatfile", "ff", "mini", "minidb", "flat"))
+        if(!Common.matches(
+                type,
+                "itemdb", "item", "items", "inventory", "invdb", "inventorydb",
+                "flatfile", "ff", "mini", "minidb", "flat",
+                "orbdb", "orb", "exp", "xp", "xpdb", "expdb"
+            )
+        )
             return null;
 
         return new Mini(iConomy.directory.getPath(), "transactions.mini");
     }
     
     public InventoryDB getInventoryDatabase() {
-        if(!Common.matches(type,"itemdb", "item", "items", "inv", "inventory", "invdb", "inventorydb"))
+        if(!Common.matches(
+                type,
+                "itemdb", "item", "items", "inv", "inventory", "invdb", "inventorydb"
+            )
+        )
             return null;
         
         return new InventoryDB();
