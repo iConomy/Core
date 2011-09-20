@@ -1,7 +1,7 @@
 # General Data
 name: iConomy
 main: com.iCo6.iConomy
-version: 6.0.4b
+version: 6.0.5b
 commands:
     money:
       aliases: [iConomy, iCo]
@@ -17,7 +17,7 @@ maintainer: Nijikokun
 authors: [Nijikokun, SpaceManiac]
 website: http://ico.nexua.org
 thread: http://bit.ly/iConomy
-location: http://mirror.nexua.org/iConomy/6/iConomy.jar
+location: "http://mirror.nexua.org/iConomy/Latest Build/iConomy.jar"
 conflicts: []
 required: []
 optional: [Permissions]

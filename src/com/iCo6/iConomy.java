@@ -375,13 +375,13 @@ public class iConomy extends JavaPlugin {
     public boolean hasPermissions(CommandSender sender, String command) {
         if(sender instanceof Player) {
             Player player = (Player)sender;
+
             if(Commands.hasPermission(command)) {
                 String node = Commands.getPermission(command);
 
                 if(this.Permissions != null)
                     return Permissions.Security.permission(player, node);
                 else {
-                    // Fallback for older versions.
                     try {
                         return player.hasPermission(node);
                     } catch(Exception e) {
