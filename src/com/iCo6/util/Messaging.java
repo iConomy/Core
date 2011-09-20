@@ -57,6 +57,9 @@ public class Messaging {
      * @return <code>String</code> - The parsed string after converting arguments to variables (points)
      */
     public static String argument(String original, Object[] arguments, Object[] points) {
+        if(arguments.length < 1)
+            return original;
+
         for (int i = 0; i < arguments.length; i++) {
             if (String.valueOf(arguments[i]).contains(",")) {
                 for (String arg : String.valueOf(arguments[i]).split(",")) {

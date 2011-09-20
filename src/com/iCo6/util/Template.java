@@ -75,7 +75,7 @@ public class Template {
     }
 
     public String parse() {
-        if(this.currentKey != null && !this.arguments.isEmpty())
+        if(this.currentKey != null)
             return Messaging.parse(Messaging.colorize(Messaging.argument(this.raw(this.currentKey), this.arguments)));
 
         return null;
