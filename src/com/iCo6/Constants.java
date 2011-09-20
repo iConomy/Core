@@ -94,10 +94,16 @@ public class Constants {
         }
 
         public Integer getInteger() {
+            if(value instanceof Double)
+                return ((Double) value).intValue();
+
             return (Integer) value;
         }
 
         public Double getDouble() {
+            if(value instanceof Integer)
+                return (double) ((Integer) value).intValue();
+
             return (Double) value;
         }
 
