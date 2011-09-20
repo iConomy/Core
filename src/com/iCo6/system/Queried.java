@@ -230,10 +230,12 @@ class Queried {
 
         if(useMiniDB() || useInventoryDB() || useOrbDB()) {
             if(useInventoryDB())
-                return inventory.dataExists(name);
+                if (inventory.dataExists(name))
+                    return true;
 
             if(useOrbDB())
-                return (iConomy.Server.getPlayer(name) != null);
+                if (iConomy.Server.getPlayer(name) != null)
+                    return true;
 
             return database.hasIndex(name);
         }
@@ -311,11 +313,25 @@ class Queried {
             if (useOrbDB()) {
                 Player gainer = iConomy.Server.getPlayer(name);
 
-                if(gainer != null) {
-                    gainer.setTotalExperience((int)balance);
+                if(gainer != null)
+                    if(balance < gainer.getTotalExperience()) {
+                        int amount = (int)(gainer.getTotalExperience() - balance);
+                        for(int i = 0; i < amount; i++) {
+                            if(gainer.getExperience() > 0)
+                                gainer.setExperience(gainer.getExperience() - 1);
+                            else if(gainer.getTotalExperience() > 0)
+                                gainer.setTotalExperience(gainer.getTotalExperience() - 1);
+                            else
+                                break;
+                        }
+                    } else {
+                        int amount = (int)(balance - gainer.getTotalExperience());
 
-                    return;
-                }
+                        for(int i = 0; i < amount; i++)
+                            gainer.setExperience(gainer.getExperience() + 1);
+                    }
+
+                return;
             }
 
             if(database.hasIndex(name)) {
