@@ -120,6 +120,19 @@ public class Database {
         return Type.MiniDB;
     }
 
+    public boolean isSQL() {
+        if(!Common.matches(
+                type,
+                "itemdb", "item", "items", "inventory", "invdb", "inventorydb",
+                "flatfile", "ff", "mini", "minidb", "flat",
+                "orbdb", "orb", "exp", "xp", "xpdb", "expdb"
+            )
+        )
+            return true;
+
+        return false;
+    }
+
     public Mini getDatabase() {
         if(!Common.matches(
                 type,
