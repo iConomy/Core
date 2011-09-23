@@ -51,7 +51,7 @@ public class Constants {
 
         Interest("System.Interest.Enabled", false),
         InterestOnline("System.Interest.Online", false),
-        InterestTimer("System.Interest.Interval", 60),
+        InterestTime("System.Interest.Interval", 60),
         InterestPercentage("System.Interest.Amount.Percentage", 0.0),
         InterestCutoff("System.Interest.Amount.Cutoff", 0.0),
         InterestMin("System.Interest.Amount.Maximum", 1.0),
