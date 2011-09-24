@@ -228,6 +228,7 @@ public final class Manager {
     }
 
     public boolean read(String directory, String file) {
+        StringBuilder sb = new StringBuilder();
         this.lines = new LinkedList<String>();
         this.source = "";
         BufferedReader input;
@@ -239,8 +240,10 @@ public final class Manager {
             try {
                 while ((line = input.readLine()) != null) {
                     this.lines.add(line);
-                    this.source += line + '\n';
+                    sb.append(line).append('\n');
                 }
+
+                this.source = sb.toString().trim();
 
                 input.close();
             } catch (IOException ex) {

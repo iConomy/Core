@@ -141,23 +141,28 @@ public class Mini {
         this.Database.read();
 
         this.Indexes = new LinkedHashMap<String, Arguments>();
-        if(pushed) this.pushedIndexes = new LinkedHashMap<String, Arguments>();
+
+        if(pushed)
+            this.pushedIndexes = new LinkedHashMap<String, Arguments>();
 
         for(String line: this.Database.getLines()) {
-            if(line.trim().isEmpty()) continue;
+            if(line.trim().isEmpty())
+                continue;
 
             String[] parsed = trim(line.trim().split(Dict.SPACER));
 
-            if(parsed[0].contains(Dict.ARGUMENT_SPLIT) || parsed[0].isEmpty()) continue;
+            if(parsed[0].contains(Dict.ARGUMENT_SPLIT) || parsed[0].isEmpty())
+                continue;
 
             Arguments entry = new Arguments(parseIndice(parsed[0]));
-
             for(String item: parsed) {
                 if(!item.contains(Dict.ARGUMENT_SPLIT)) continue;
                 String[] map = trim(item.split(Dict.ARGUMENT_SPLIT, 2));
                 String key = map[0], value = map[1];
 
-                if(key == null) continue;
+                if(key == null) 
+                    continue;
+
                 entry.setValue(key, value);
             }
 
@@ -339,7 +344,8 @@ public class Mini {
      * Update pushes the new indices into the file, while removing the old index attributes
      */
     public void update() {
-        if(!this.changed) return;
+        if(!this.changed)
+            return;
 
         LinkedList<String> lines = new LinkedList<String>();
 
