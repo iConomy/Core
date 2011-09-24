@@ -17,6 +17,7 @@ import com.iCo6.IO.exceptions.MissingDriver;
 import com.iCo6.listeners.players;
 import com.iCo6.system.Account;
 import com.iCo6.system.Accounts;
+import com.iCo6.system.Interest;
 import com.iCo6.util.Common;
 import com.iCo6.util.Messaging;
 import com.iCo6.util.Template;
@@ -26,13 +27,11 @@ import com.iCo6.util.org.apache.commons.dbutils.QueryRunner;
 import com.iCo6.util.org.apache.commons.dbutils.ResultSetHandler;
 import com.iCo6.util.wget;
 
-import java.awt.Event;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.Timer;
 
 import org.bukkit.Server;
 import org.bukkit.command.Command;
@@ -40,6 +39,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event.Priority;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -73,12 +73,14 @@ public class iConomy extends JavaPlugin {
     private static Accounts Accounts = new Accounts();
     public Parser Commands = new Parser();
     public Permissions Permissions;
+    private boolean testedPermissions = false;
 
     public static boolean TerminalSupport = false;
     public static File directory;
     public static Database Database;
     public static Server Server;
     public static Template Template;
+    public static Timer Interest;
 
     private JdbcConnectionPool h2pool;
 
@@ -181,7 +183,6 @@ public class iConomy extends JavaPlugin {
             Commands.setPermission("empty", "iConomy.accounts.empty");
             Commands.setHelp("empty", new String[] { "", "Empty database of accounts." });
 
-
             // Setup Database.
             try {
                 Database = new Database(
@@ -193,7 +194,7 @@ public class iConomy extends JavaPlugin {
 
                 // Check to see if it's a binary database, if so, check the database existance
                 // If it doesn't exist, Create one.
-                if(Database.getDatabase() == null && Database.getInventoryDatabase() == null) {
+                if(Database.isSQL()) {
                     if(!Database.tableExists(Constants.Nodes.DatabaseTable.toString())) {
                         String SQL = Common.resourceToString("SQL/Core/Create-Table-" + Database.getType().toString().toLowerCase() + ".sql");
                         SQL = String.format(SQL, Constants.Nodes.DatabaseTable.getValue());
@@ -225,6 +226,18 @@ public class iConomy extends JavaPlugin {
           endTime = System.nanoTime();
         }
 
+        // Setup Interest
+        if(Constants.Nodes.Interest.getBoolean()) {
+            Thrun.init(new Runnable() {
+                public void run() {
+                    long time = Constants.Nodes.InterestTime.getLong() * 1000L;
+
+                    Interest = new Timer();
+                    Interest.scheduleAtFixedRate(new Interest(getDataFolder().getPath()), time, time);
+                }
+            });
+        }
+
         final long duration = endTime - startTime;
 
         // Finish
@@ -249,6 +262,13 @@ public class iConomy extends JavaPlugin {
             Commands = null;
             Database = null;
             Template = null;
+
+            if(Interest != null) {
+                Interest.cancel();
+                Interest.purge();
+                Interest = null;
+            }
+            
             TerminalSupport = false;
         } finally {
           endTime = System.nanoTime();
@@ -280,7 +300,7 @@ public class iConomy extends JavaPlugin {
 
                 if(Common.matches(from, "sqlite", "h2", "h2sql", "h2db")) {
                     driver = "org.h2.Driver";
-                    dsn = "jdbc:h2:" + directory + File.separator + "-" + File.separator + table + ";AUTO_RECONNECT=TRUE";
+                    dsn = "jdbc:h2:" + directory + File.separator + table + ";AUTO_RECONNECT=TRUE";
                     username = "sa";
                     password = "sa";
                 } else if (Common.matches(from, "mysql", "mysqldb")) {
@@ -297,10 +317,11 @@ public class iConomy extends JavaPlugin {
                 Connection old = null;
 
                 try {
-                    old = (username.isEmpty() && password.isEmpty()) ? DriverManager.getConnection(url) : DriverManager.getConnection(url, username, password);
+                    old = (username.isEmpty() && password.isEmpty()) ? 
+                            DriverManager.getConnection(url) :
+                            DriverManager.getConnection(url, username, password);
                 } catch (SQLException ex) {
                     System.out.println(ex);
-
                     return;
                 }
 
@@ -379,9 +400,23 @@ public class iConomy extends JavaPlugin {
             if(Commands.hasPermission(command)) {
                 String node = Commands.getPermission(command);
 
-                if(this.Permissions != null)
+                if(this.Permissions == null)
+                    if(!this.testedPermissions) {
+                        Plugin Perms = Server.getPluginManager().getPlugin("Permissions");
+                        
+                        if (Perms != null) {
+                            if (Perms.isEnabled()) {
+                                Permissions = ((Permissions)Perms);
+                                System.out.println("[iConomy] hooked into Permissions.");
+                            }
+                        }
+
+                        this.testedPermissions = true;
+                    }
+                
+                if(this.Permissions != null) {
                     return Permissions.Security.permission(player, node);
-                else {
+                } else {
                     try {
                         return player.hasPermission(node);
                     } catch(Exception e) {
