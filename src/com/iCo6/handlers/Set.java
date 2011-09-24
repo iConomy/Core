@@ -24,6 +24,9 @@ public class Set extends Handler {
 
     @Override
     public boolean perform(CommandSender sender, LinkedHashMap<String, Argument> arguments) throws InvalidUsage {
+        if(!hasPermissions(sender, "set"))
+            throw new InvalidUsage("You do not have permission to do that.");
+
         String name = arguments.get("name").getStringValue();
         String tag = template.color(Template.Node.TAG_MONEY);
         Double amount;
