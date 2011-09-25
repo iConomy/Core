@@ -39,6 +39,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event.Priority;
+import org.bukkit.permissions.Permission;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
@@ -415,10 +416,17 @@ public class iConomy extends JavaPlugin {
                     }
                 
                 if(this.Permissions != null) {
-                    return Permissions.Security.permission(player, node);
+                    if(Permissions.Security.permission(player, node) || Permissions.Security.permission(player, node.toLowerCase()))
+                        return true;
+
+                    return false;
                 } else {
                     try {
-                        return player.hasPermission(node);
+                        Permission perm = new Permission(node);
+                        if(player.hasPermission(perm) || player.hasPermission(node) || player.hasPermission(node.toLowerCase()))
+                            return true;
+
+                        return false;
                     } catch(Exception e) {
                         return player.isOp();
                     }
