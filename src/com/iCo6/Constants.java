@@ -51,7 +51,7 @@ public class Constants {
 
         Interest("System.Interest.Enabled", false),
         InterestOnline("System.Interest.Online", false),
-        InterestTime("System.Interest.Interval", 60),
+        InterestTime("System.Interest.Interval.Seconds", 60),
         InterestPercentage("System.Interest.Amount.Percentage", 0.0),
         InterestCutoff("System.Interest.Amount.Cutoff", 0.0),
         InterestMin("System.Interest.Amount.Maximum", 1.0),
@@ -108,6 +108,9 @@ public class Constants {
         }
 
         public Long getLong() {
+            if(value instanceof Integer)
+                return ((Integer) value).longValue();
+
             return (Long) value;
         }
 
