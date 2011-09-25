@@ -13,8 +13,6 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class Common {
 
@@ -36,19 +34,24 @@ public class Common {
     }
 
     public static int plural(Double amount) {
-        if(amount > 1 || amount < -1) {
+        if(amount > 1 || amount < -1)
             return 1;
-        } else {
-            return 0;
-        }
+
+        return 0;
     }
 
     public static int plural(Integer amount) {
-        if(amount != 1 || amount != -1) {
+        if(amount != 1 || amount != -1)
             return 1;
-        } else {
-            return 0;
-        }
+
+        return 0;
+    }
+
+    public static int plural(Long amount) {
+        if(amount != 1 || amount != -1)
+            return 1;
+
+        return 0;
     }
 
     public static String formatted(String amount, List<String> maj, List<String> min) {
@@ -72,27 +75,48 @@ public class Common {
             }
 
             if(true) {
-                String major = maj.get(plural(Integer.valueOf(fpieces[0])));
-                String minor = min.get(plural(Integer.valueOf(fpieces[1])));
+                String major = "", minor = "";
 
-                if(pieces[1].startsWith("0") && !pieces[1].equals("0")) pieces[1] = pieces[1].substring(1, pieces[1].length());
-                if(pieces[0].startsWith("0") && !pieces[0].equals("0")) pieces[0] = pieces[0].substring(1, pieces[0].length());
+                try {
+                    major = maj.get(plural(Integer.valueOf(fpieces[0])));
+                    minor = min.get(plural(Integer.valueOf(fpieces[1])));
+                } catch (NumberFormatException E) {
+                    major = maj.get(plural(Long.valueOf(fpieces[0])));
+                    minor = min.get(plural(Long.valueOf(fpieces[1])));
+                }
 
-                if(Integer.valueOf(fpieces[1]) != 0 && Integer.valueOf(fpieces[0]) != 0) {
-                    formatted = pieces[0] + " " + major + ", " + pieces[1] + " " + minor;
-                } else if(Integer.valueOf(fpieces[0]) != 0) {
-                    formatted = pieces[0] + " " + major;
-                } else {
-                    formatted = pieces[1] + " " + minor;
+                if(pieces[1].startsWith("0") && !pieces[1].equals("0")) 
+                    pieces[1] = pieces[1].substring(1, pieces[1].length());
+
+                if(pieces[0].startsWith("0") && !pieces[0].equals("0"))
+                    pieces[0] = pieces[0].substring(1, pieces[0].length());
+
+                try {
+                    if(Integer.valueOf(fpieces[1]) != 0 && Integer.valueOf(fpieces[0]) != 0)
+                        formatted = pieces[0] + " " + major + ", " + pieces[1] + " " + minor;
+                    else if(Integer.valueOf(fpieces[0]) != 0)
+                        formatted = pieces[0] + " " + major;
+                    else
+                        formatted = pieces[1] + " " + minor;
+                } catch(NumberFormatException e) {
+                    if(Long.valueOf(fpieces[1]) != 0 && Long.valueOf(fpieces[0]) != 0)
+                        formatted = pieces[0] + " " + major + ", " + pieces[1] + " " + minor;
+                    else if(Long.valueOf(fpieces[0]) != 0)
+                        formatted = pieces[0] + " " + major;
+                    else
+                        formatted = pieces[1] + " " + minor;
                 }
             } else {
                 String currency = "";
 
-                if(Double.valueOf(famount) < 1 || Double.valueOf(famount) > -1) {
-                    currency = min.get(plural(Integer.valueOf(fpieces[1])));
-                } else {
+                if(Double.valueOf(famount) < 1 || Double.valueOf(famount) > -1)
+                    try {
+                        currency = min.get(plural(Integer.valueOf(fpieces[1])));
+                    } catch (NumberFormatException e) {
+                        currency = min.get(plural(Long.valueOf(fpieces[1])));
+                    }
+                else
                     currency = maj.get(1);
-                }
 
                 formatted = amount + " " + currency;
             }
@@ -110,9 +134,8 @@ public class Common {
         String[] units = new String[] { "B", "KB", "MB", "GB", "TB", "PB" };
         int mod = 1024, i;
 
-        for (i = 0; size > mod; i++) {
+        for (i = 0; size > mod; i++)
             size /= mod;
-        }
 
         return Math.round(size) + " " + units[i];
     }
@@ -123,9 +146,8 @@ public class Common {
         int[] metric = new int[] { 1000, 60, 60, 24, 7, 30, 12 };
         long current = TimeUnit.MILLISECONDS.convert(time, TimeUnit.NANOSECONDS);
 
-        for(i = 0; current > metric[i]; i++) {
+        for(i = 0; current > metric[i]; i++)
             current /= metric[i];
-        }
 
         return current + " " + units[i] + ((current > 1 && i > 1) ? "s" : "");
     }
