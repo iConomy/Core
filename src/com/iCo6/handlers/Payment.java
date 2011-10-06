@@ -95,7 +95,7 @@ public class Payment extends Handler {
 
         if(to != null) {
             template.set(Template.Node.PAYMENT_FROM);
-            template.add("name", name);
+            template.add("name", from.getName());
             template.add("amount", iConomy.format(amount));
 
             Messaging.send(to, tag + template.parse());
