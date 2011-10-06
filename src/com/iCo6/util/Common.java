@@ -62,7 +62,7 @@ public class Common {
         String formatted = "";
         String famount = amount.replace(",", "");
 
-        if(true) {
+        if(Constants.Nodes.AllowMinor.getBoolean()) {
             String[] pieces = null;
             String[] fpieces = null;
 
@@ -74,7 +74,7 @@ public class Common {
                 fpieces = new String[] { amount.replace(",", ""), "0" };
             }
 
-            if(true) {
+            if(Constants.Nodes.isSplit.getBoolean()) {
                 String major = "", minor = "";
 
                 try {
