@@ -267,10 +267,7 @@ class Queried {
 
     static double getBalance(String name) {
         Double balance = Constants.Nodes.Balance.getDouble();
-
-        StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
-        System.out.println(stackTraceElements[0]);
-
+        
         if(!hasAccount(name))
             return balance;
 
@@ -316,9 +313,6 @@ class Queried {
             gain = balance - original;
             loss = original - balance;
         }
-
-        StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
-        System.out.println(Arrays.toString(stackTraceElements));
 
         if(!hasAccount(name)) {
             createAccount(name, balance, 0); 
