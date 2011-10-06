@@ -9,16 +9,27 @@ import com.iCo6.util.nbt.NBTInputStream;
 import com.iCo6.util.nbt.NBTOutputStream;
 import com.iCo6.util.nbt.ShortTag;
 import com.iCo6.util.nbt.Tag;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.logging.Level;
+
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
+/**
+ * Controls inventory for monetary use.
+ *
+ * @author SpaceManiac
+ * @author Nijikokun
+ * @author RasTaIARI
+ */
 public class InventoryDB {
 
     private File dataDir;
@@ -96,7 +107,7 @@ public class InventoryDB {
             }
             return stacks;
         } catch (IOException ex) {
-            iConomy.Server.getLogger().warning("[iCo/InvDB] error reading inventory " + name + ": " + ex.getMessage());
+            iConomy.Server.getLogger().log(Level.WARNING, "[iCo/InvDB] error reading inventory {0}: {1}", new Object[]{name, ex.getMessage()});
             return null;
         }
     }
@@ -136,7 +147,7 @@ public class InventoryDB {
             out.writeTag(tag);
             out.close();
         } catch (IOException ex) {
-            iConomy.Server.getLogger().warning("[iCo/InvDB] error writing inventory " + name + ": " + ex.getMessage());
+            iConomy.Server.getLogger().log(Level.WARNING, "[iCo/InvDB] error writing inventory {0}: {1}", new Object[]{name, ex.getMessage()});
         }
     }
 
@@ -158,17 +169,21 @@ public class InventoryDB {
             if (contents[i] == null) {
                 if (balance >= 1) {
                     int add = (int) balance;
-                    if (add > Material.getMaterial(major).getMaxStackSize()) {
+
+                    if (add > Material.getMaterial(major).getMaxStackSize())
                         add = Material.getMaterial(major).getMaxStackSize();
-                    }
+
                     contents[i] = new ItemStack(major, add);
                     balance -= add;
-                } else if (balance > 0) {
-                    int add = (int) ((balance - (int) balance) * 100);
-                    if (add > Material.getMaterial(minor).getMaxStackSize()) {
+                } else if (balance >= 0.01) {
+                    int add = (int) (roundTwoDecimals(balance) * 100);
+
+                    if (add > Material.getMaterial(minor).getMaxStackSize())
                         add = Material.getMaterial(minor).getMaxStackSize();
-                    }
+
                     contents[i] = new ItemStack(minor, add);
+                    balance -= 0.01 * add;
+                } else {
                     balance = 0;
                     break;
                 }
@@ -196,4 +211,8 @@ public class InventoryDB {
         return balance;
     }
 
+    private double roundTwoDecimals(double d) {
+        DecimalFormat twoDForm = new DecimalFormat("#.##");
+        return Double.valueOf(twoDForm.format(d));
+    }
 }

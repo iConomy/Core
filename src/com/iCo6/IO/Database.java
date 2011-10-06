@@ -14,6 +14,11 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+/**
+ * Controls access and database types
+ * 
+ * @author Nijikokun
+ */
 public class Database {
     public static enum Type { OrbDB, MiniDB, InventoryDB, MySQL, SQLite, Postgre, H2DB };
     private String type;

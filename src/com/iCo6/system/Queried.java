@@ -15,12 +15,18 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 
 import org.bukkit.entity.Player;
 
+/**
+ * Controls all account actions as well as SQL queries.
+ *
+ * @author Nijikokun
+ */
 class Queried {
     static Mini database;
     static InventoryDB inventory;
@@ -262,6 +268,9 @@ class Queried {
     static double getBalance(String name) {
         Double balance = Constants.Nodes.Balance.getDouble();
 
+        StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
+        System.out.println(stackTraceElements[0]);
+
         if(!hasAccount(name))
             return balance;
 
@@ -300,8 +309,50 @@ class Queried {
     }
 
     static void setBalance(String name, double balance) {
+        double original = 0.0, gain = 0.0, loss = 0.0;
+
+        if(Constants.Nodes.Logging.getBoolean()) {
+            original = getBalance(name);
+            gain = balance - original;
+            loss = original - balance;
+        }
+
+        StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
+        System.out.println(Arrays.toString(stackTraceElements));
+
         if(!hasAccount(name)) {
-            createAccount(name, balance, 0); return;
+            createAccount(name, balance, 0); 
+            
+            if(Constants.Nodes.Logging.getBoolean()) {
+                if(gain < 0.0)
+                    gain = 0.0;
+
+                if(loss < 0.0)
+                    loss = 0.0;
+
+                Transactions.insert(
+                    new Transaction(
+                        "setBalance", "System", name
+                    ).
+                    setFromBalance(
+                        original
+                    ).
+                    setToBalance(
+                        balance
+                    ).
+                    setGain(
+                        gain
+                    ).
+                    setLoss(
+                        loss
+                    ).
+                    setSet(
+                        balance
+                    )
+                );
+            }
+
+            return;
         }
 
         if(useMiniDB() || useInventoryDB() || useOrbDB()) {
@@ -339,6 +390,7 @@ class Queried {
                 database.update();
             }
 
+
             return;
         }
 
@@ -365,6 +417,13 @@ class Queried {
         int i = 0;
         for(String name: queries.keySet()) {
             double balance = (Double) queries.get(name).get("balance");
+            double original = 0.0, gain = 0.0, loss = 0.0;
+
+            if(Constants.Nodes.Logging.getBoolean()) {
+                original = getBalance(name);
+                gain = balance - original;
+                loss = original - balance;
+            }
 
             // We are using a query for MySQL
             if(!useInventoryDB() && !useMiniDB() && !useOrbDB()) {
@@ -389,15 +448,40 @@ class Queried {
                 if(!hasAccount(name))
                     continue;
 
+                Player gainer = iConomy.Server.getPlayer(name);
 
+                if(gainer != null)
+                    setBalance(name, balance);
             }
 
-            /*
-            if(amount < 0.0)
-                iConomy.getTransactions().insert("[System Interest]", name, 0.0, original, 0.0, 0.0, amount);
-            else {
-                iConomy.getTransactions().insert("[System Interest]", name, 0.0, original, 0.0, amount, 0.0);
-            } */
+            if(Constants.Nodes.Logging.getBoolean()) {
+                if(gain < 0.0)
+                    gain = 0.0;
+
+                if(loss < 0.0)
+                    loss = 0.0;
+
+                Transactions.insert(
+                    new Transaction(
+                        "Interest", "System", name
+                    ).
+                    setFromBalance(
+                        original
+                    ).
+                    setToBalance(
+                        balance
+                    ).
+                    setGain(
+                        gain
+                    ).
+                    setLoss(
+                        loss
+                    ).
+                    setSet(
+                        balance
+                    )
+                );
+            }
         }
 
         if(!useInventoryDB() && !useMiniDB() && !useOrbDB())
