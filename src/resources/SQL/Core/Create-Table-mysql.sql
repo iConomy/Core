@@ -4,5 +4,5 @@ CREATE TABLE IF NOT EXISTS `%1s` (
   `balance` double(64,2) NOT NULL,
   `status` int(2) NOT NULL DEFAULT '0',
   UNIQUE KEY `username` (`username`),
-  KEY `id` (`id`)
+  PRIMARY KEY `id` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
