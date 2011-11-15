@@ -1,5 +1,6 @@
 package com.iCo6.handlers;
 
+import com.iCo6.Constants;
 import java.util.LinkedHashMap;
 
 import com.iCo6.command.Handler;
@@ -26,8 +27,9 @@ public class Money extends Handler {
 
     @Override
     public boolean perform(CommandSender sender, LinkedHashMap<String, Argument> arguments) throws InvalidUsage {
-        if(!hasPermissions(sender, "money"))
-            throw new InvalidUsage("You do not have permission to do that.");
+        if(Constants.Nodes.useHoldingsPermission.getBoolean())
+            if(!hasPermissions(sender, "money"))
+                throw new InvalidUsage("You do not have permission to do that.");
 
         String name = arguments.get("name").getStringValue();
         String tag = template.color(Template.Node.TAG_MONEY);

@@ -37,6 +37,8 @@ public class Constants {
     public static enum Nodes {
         CodeName("", "Celty"),
 
+        useHoldingsPermission("System.Permissions.Use.Holdings", false),
+
         Minor("System.Default.Currency.Minor", new ArrayList<String>()),
         Major("System.Default.Currency.Major", new ArrayList<String>()),
 

@@ -319,8 +319,8 @@ public class iConomy extends JavaPlugin {
 
                 try {
                     old = (username.isEmpty() && password.isEmpty()) ? 
-                            DriverManager.getConnection(url) :
-                            DriverManager.getConnection(url, username, password);
+                    DriverManager.getConnection(url) :
+                    DriverManager.getConnection(url, username, password);
                 } catch (SQLException ex) {
                     System.out.println(ex);
                     return;
@@ -398,8 +398,16 @@ public class iConomy extends JavaPlugin {
         if(sender instanceof Player) {
             Player player = (Player)sender;
 
+            if(player == null) {
+                System.out.println("[iConomy] Cannot execute command with false player");
+                return false;
+            }
+
             if(Commands.hasPermission(command)) {
                 String node = Commands.getPermission(command);
+
+                if(node == null)
+                    return true;
 
                 if(this.Permissions == null)
                     if(!this.testedPermissions) {
@@ -407,7 +415,7 @@ public class iConomy extends JavaPlugin {
                         
                         if (Perms != null) {
                             if (Perms.isEnabled()) {
-                                Permissions = ((Permissions)Perms);
+                                this.Permissions = ((Permissions)Perms);
                                 System.out.println("[iConomy] hooked into Permissions.");
                             }
                         }

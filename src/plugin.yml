@@ -1,7 +1,7 @@
 # General Data
 name: iConomy
 main: com.iCo6.iConomy
-version: 6.0.7b
+version: 6.0.8b
 
 # Command Data
 commands:

@@ -1,4 +1,4 @@
-# iConomy 6.0
+# iConomy 6.0.8b
 # @author     Nijikokun <nijikokun@gmail.com>
 # @license    GPLv2
 # @copyright  Copyright AniGaiku LLC (C) 2010-2011
@@ -12,17 +12,29 @@
 #           1 week = 1 day * 7 = 604800 seconds
 #   - Database
 #           Do not use remote databases from free sites, please use either a
-#            remote database from a personal hosted VPS or DEDI or a local
-#            database. This will prevent any 'timeout' or 'invalid settings'
-#            or 'cannot connect to database' issues. Thank you :)!
+#           remote database from a personal hosted VPS or DEDI or a local
+#           database. This will prevent any 'timeout' or 'invalid settings'
+#           or 'cannot connect to database' issues. Thank you :)!
 ##
 
 System:
+  Permissions:
+    Use:
+      # Should a user have the 'iConomy.holdings' to use /money
+      # By default this is false, so that people stop complaining that
+      # iConomy doesn't work. Yes, people actually report that.
+      # If you are one of those people, leave this false.
+      Holdings: false
+
   Default:
     Currency:
       # Major is the first segment [Major].Minor
-      Major: [ 'Dollar', 'Dollars' ]                # Major ([Major].Minor) 1.00 Dollar (With Seperate 1 Dollar)
-      Minor: [ 'Coin', 'Coins' ]                    # Minor (Major.[Minor]) 0.23 Coins  (With Seperate 0 Dollars, 23 Coins)
+
+      # Major ([Major].Minor) 1.00 Dollar (With Seperate 1 Dollar)
+      Major: [ 'Dollar', 'Dollars' ]
+
+      # Minor (Major.[Minor]) 0.23 Coins  (With Seperate 0 Dollars, 23 Coins)
+      Minor: [ 'Coin', 'Coins' ]
 
     Account:
       # Default account balance when created
@@ -137,9 +149,14 @@ System:
     Username: 'root'
     Password: ''
 
+    ##############################################################
+    # !!! Conversion is not your database settings !!!
+    ##############################################################
     # Conversion allows you to convert your old 5.x to the new 6.x
     # All is currently unused.
+    ##############################################################
     # URL is for MySQL only, H2DB doesn't use it.
+    ##############################################################
     Conversion:
       # Set to True, After converting, change this back to false!
       Enabled: false
