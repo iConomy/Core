@@ -17,8 +17,8 @@ public class Accounts {
         return new Account(name);
     }
 
-    public List<Double> getValues() {
-        return null; // tbd
+    public List<Account> getTopAccounts(int amount) {
+        return Queried.topAccounts(amount);
     }
 
     public boolean create(String name) {

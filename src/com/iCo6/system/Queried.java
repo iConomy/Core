@@ -16,7 +16,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -27,7 +30,7 @@ import org.bukkit.entity.Player;
  *
  * @author Nijikokun
  */
-class Queried {
+public class Queried {
     static Mini database;
     static InventoryDB inventory;
 
@@ -61,56 +64,49 @@ class Queried {
 
     static ResultSetHandler<Double> returnBalance = new ResultSetHandler<Double>() {
         public Double handle(ResultSet rs) throws SQLException {
-            if(rs.next())
-                return rs.getDouble("balance");
-
+            if(rs.next()) return rs.getDouble("balance");
             return null;
         }
     };
 
     static ResultSetHandler<Integer> returnStatus = new ResultSetHandler<Integer>() {
         public Integer handle(ResultSet rs) throws SQLException {
-            if(rs.next())
-                return rs.getInt("status");
-
+            if(rs.next()) return rs.getInt("status");
             return null;
         }
     };
 
     static boolean useOrbDB() {
-        if(iConomy.Database.getType().toString().equalsIgnoreCase("orbdb")) {
-            if(database == null)
-                database = iConomy.Database.getDatabase();
+        if(!iConomy.Database.getType().toString().equalsIgnoreCase("orbdb"))
+            return false;
 
-            return true;
-        }
+        if(database == null)
+            database = iConomy.Database.getDatabase();
 
-        return false;
+        return true;
     }
 
     static boolean useMiniDB() {
-        if(iConomy.Database.getType().toString().equalsIgnoreCase("minidb")) {
-            if(database == null)
-                database = iConomy.Database.getDatabase();
+        if(!iConomy.Database.getType().toString().equalsIgnoreCase("minidb"))
+            return false;
 
-            return true;
-        }
+        if(database == null)
+            database = iConomy.Database.getDatabase();
 
-        return false;
+        return true;
     }
     
     static boolean useInventoryDB() {
-        if(iConomy.Database.getType().toString().equalsIgnoreCase("inventorydb")) {
-            if(inventory == null)
-                inventory = iConomy.Database.getInventoryDatabase();
+        if(!iConomy.Database.getType().toString().equalsIgnoreCase("inventorydb"))
+            return false;
 
-            if(database == null)
-                database = iConomy.Database.getDatabase();
+        if(inventory == null)
+            inventory = iConomy.Database.getInventoryDatabase();
 
-            return true;
-        }
-        
-        return false;
+        if(database == null)
+            database = iConomy.Database.getDatabase();
+
+        return true;
     }
 
     static List<String> accountList() {
@@ -146,6 +142,60 @@ class Queried {
         }
 
         return accounts;
+    }
+
+    static List<Account> topAccounts(int amount) {
+        Accounts Accounts = new Accounts();
+        List<Account> accounts = new ArrayList<Account>();
+        List<Account> finals = new ArrayList<Account>();
+        List<String> total = new ArrayList<String>();
+
+        if(useMiniDB() || useInventoryDB() || useOrbDB()) {
+            if (useInventoryDB())
+                total.addAll(inventory.getAllPlayers());
+
+            if (useOrbDB())
+                for(Player p: iConomy.Server.getOnlinePlayers())
+                    total.add(p.getName());
+
+            total.addAll(database.getIndices().keySet());
+        } else {
+            try {
+                QueryRunner run = new QueryRunner();
+                Connection c = iConomy.Database.getConnection();
+
+                try{
+                    String t = Constants.Nodes.DatabaseTable.toString();
+                    total = run.query(c, "SELECT username FROM " + t, returnList);
+                } catch (SQLException ex) {
+                    System.out.println("[iConomy] Error issueing SQL query: " + ex);
+                } finally {
+                    DbUtils.close(c);
+                }
+            } catch (SQLException ex) {
+                System.out.println("[iConomy] Database Error: " + ex);
+            }
+        }
+
+        for (Iterator<String> it = total.iterator(); it.hasNext();) {
+            String player = it.next();
+            accounts.add(Accounts.get(player));
+        }
+
+        Collections.sort(accounts, new MoneyComparator());
+
+        if(amount > accounts.size())
+            amount = accounts.size();
+
+        for (int i = 0; i < amount; i++) {
+            if(accounts.get(i).getStatus() == 1) {
+                i--; continue;
+            }
+
+            finals.add(accounts.get(i));
+        }
+
+        return finals;
     }
 
     static boolean createAccount(String name, Double balance, Integer status) {
@@ -318,31 +368,18 @@ class Queried {
             createAccount(name, balance, 0); 
             
             if(Constants.Nodes.Logging.getBoolean()) {
-                if(gain < 0.0)
-                    gain = 0.0;
-
-                if(loss < 0.0)
-                    loss = 0.0;
+                if(gain < 0.0) gain = 0.0;
+                if(loss < 0.0) loss = 0.0;
 
                 Transactions.insert(
                     new Transaction(
                         "setBalance", "System", name
                     ).
-                    setFromBalance(
-                        original
-                    ).
-                    setToBalance(
-                        balance
-                    ).
-                    setGain(
-                        gain
-                    ).
-                    setLoss(
-                        loss
-                    ).
-                    setSet(
-                        balance
-                    )
+                    setFromBalance(original).
+                    setToBalance(balance).
+                    setGain(gain).
+                    setLoss(loss).
+                    setSet(balance)
                 );
             }
 
@@ -362,8 +399,8 @@ class Queried {
                     if(balance < gainer.getTotalExperience()) {
                         int amount = (int)(gainer.getTotalExperience() - balance);
                         for(int i = 0; i < amount; i++) {
-                            if(gainer.getExperience() > 0)
-                                gainer.setExperience(gainer.getExperience() - 1);
+                            if(gainer.getExp() > 0)
+                                gainer.setExp(gainer.getExp() - 1);
                             else if(gainer.getTotalExperience() > 0)
                                 gainer.setTotalExperience(gainer.getTotalExperience() - 1);
                             else
@@ -373,7 +410,7 @@ class Queried {
                         int amount = (int)(balance - gainer.getTotalExperience());
 
                         for(int i = 0; i < amount; i++)
-                            gainer.setExperience(gainer.getExperience() + 1);
+                            gainer.setExp(gainer.getExp() + 1);
                     }
 
                 return;
@@ -449,31 +486,18 @@ class Queried {
             }
 
             if(Constants.Nodes.Logging.getBoolean()) {
-                if(gain < 0.0)
-                    gain = 0.0;
-
-                if(loss < 0.0)
-                    loss = 0.0;
+                if(gain < 0.0) gain = 0.0;
+                if(loss < 0.0) loss = 0.0;
 
                 Transactions.insert(
                     new Transaction(
                         "Interest", "System", name
                     ).
-                    setFromBalance(
-                        original
-                    ).
-                    setToBalance(
-                        balance
-                    ).
-                    setGain(
-                        gain
-                    ).
-                    setLoss(
-                        loss
-                    ).
-                    setSet(
-                        balance
-                    )
+                    setFromBalance(original).
+                    setToBalance(balance).
+                    setGain(gain).
+                    setLoss(loss).
+                    setSet(balance)
                 );
             }
         }
@@ -499,14 +523,13 @@ class Queried {
             });
     }
     
-    static void purgeDatabase() {
+    public static void purgeDatabase() {
         if(useMiniDB() || useInventoryDB() || useOrbDB()) {
             for(String index: database.getIndices().keySet())
                 if(database.getArguments(index).getDouble("balance") == Constants.Nodes.Balance.getDouble())
                     database.removeIndex(index);
             
             database.update();
-
 
             if (useInventoryDB())
                 for(Player p: iConomy.Server.getOnlinePlayers())
@@ -515,8 +538,8 @@ class Queried {
 
             if (useOrbDB())
                 for(Player p: iConomy.Server.getOnlinePlayers())
-                    if(p.getExperience() == Constants.Nodes.Balance.getDouble())
-                        p.setExperience(0);
+                    if(p.getExp() == Constants.Nodes.Balance.getDouble())
+                        p.setExp(0);
 
             return;
         }
@@ -556,7 +579,7 @@ class Queried {
 
             if (useOrbDB())
                 for(Player p: iConomy.Server.getOnlinePlayers())
-                    p.setExperience(0);
+                    p.setExp(0);
 
             return;
         }
@@ -651,5 +674,11 @@ class Queried {
         } catch (SQLException ex) {
             System.out.println("[iConomy] Database Error: " + ex);
         }
+    }
+}
+
+class MoneyComparator implements Comparator<Account> {
+    public int compare(Account a, Account b) {
+        return (int) (b.getHoldings().getBalance() - a.getHoldings().getBalance());
     }
 }
