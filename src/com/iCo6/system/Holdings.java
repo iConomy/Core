@@ -36,18 +36,18 @@ public class Holdings {
             template.add("balance", toString());
 
             Messaging.send(to, tag + template.parse());
+            return;
         }
 
         Player player = iConomy.Server.getPlayer(name);
+        String tag = iConomy.Template.color(Template.Node.TAG_MONEY);
+
         if(iConomy.Server.getPlayer(name) == null)
             return;
-
-        String tag = iConomy.Template.color(Template.Node.TAG_MONEY);
 
         Template template = iConomy.Template;
         template.set(Template.Node.PERSONAL_BALANCE);
         template.add("balance", toString());
-
         Messaging.send(player, tag + template.parse());
     }
 
