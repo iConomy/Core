@@ -61,6 +61,11 @@ System:
   Logging:
     Enabled: false
 
+  # Purges Default Balances at Loading
+  # Good way to keep unused accounts or default accounts wiped out and lower database usage.
+  Purging:
+    Enabled: true
+
   # Controls amount of money gained at a set interval.
   Interest:
     Enabled: false
@@ -115,6 +120,11 @@ System:
     Type: 'minidb'
     
     # These are for InventoryDB only.
+    #
+    # InventoryDB is essentially Physical Money.
+    #   It isn't logged in a database, its based on the users inventory
+    #   and the two items selected below.
+    #
     # MajorItem is the item or block ID of the major currency
     # MinorItem is the item or block ID of the minor currency
     # e.g. MajorItem: 266, MinorItem: 265 for Gold/Iron
