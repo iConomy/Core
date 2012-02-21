@@ -1,21 +1,19 @@
 package com.iCo6.handlers;
 
 import com.iCo6.Constants;
-import java.util.LinkedHashMap;
-
 import com.iCo6.command.Handler;
 import com.iCo6.command.Parser.Argument;
 import com.iCo6.command.exceptions.InvalidUsage;
-
 import com.iCo6.iConomy;
 import com.iCo6.system.Account;
 import com.iCo6.system.Accounts;
-
 import com.iCo6.util.Messaging;
 import com.iCo6.util.Template;
 
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+
+import java.util.LinkedHashMap;
 
 public class Money extends Handler {
 
@@ -47,7 +45,6 @@ public class Money extends Handler {
 
             Account account = new Account(player.getName());
             account.getHoldings().showBalance(null);
-            
             return false;
         }
 
