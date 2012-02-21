@@ -1,9 +1,12 @@
 package com.iCo6;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import org.bukkit.configuration.InvalidConfigurationException;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 
-import org.bukkit.util.config.Configuration;
 
 public class Constants {
     public static enum Drivers {
@@ -50,6 +53,7 @@ public class Constants {
         isSingle("System.Formatting.Single", false),
 
         Logging("System.Logging.Enabled", false),
+        Purging("System.Purging.Enabled", true),
 
         Interest("System.Interest.Enabled", false),
         InterestOnline("System.Interest.Online", false),
@@ -130,12 +134,12 @@ public class Constants {
         }
     }
 
-    public static void load(Configuration config) {
-        config.load();
+    public static void load(File configuration) {
+        FileConfiguration config = YamlConfiguration.loadConfiguration(configuration);
 
         for(Nodes n: Nodes.values())
             if(!n.getNode().isEmpty())
-                if(config.getProperty(n.getNode()) != null)
-                    n.setValue(config.getProperty(n.getNode()));
+                if(config.get(n.getNode()) != null)
+                    n.setValue(config.get(n.getNode()));
     }
 }
