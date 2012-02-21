@@ -2,12 +2,13 @@ package com.iCo6.listeners;
 
 import com.iCo6.system.Accounts;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Listener;
+import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerListener;
 
-public class players extends PlayerListener {
+public class players implements Listener {
 
-    @Override
+    @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         Accounts accounts = new Accounts();
         Player player = event.getPlayer();
