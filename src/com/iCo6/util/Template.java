@@ -1,36 +1,41 @@
 package com.iCo6.util;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.LinkedHashMap;
 
-import org.bukkit.util.config.Configuration;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 
 public class Template {
-    private Configuration tpl = null;
+    private File tplFile = null;
+    private FileConfiguration tpl = null;
     private LinkedHashMap<String, Object> arguments;
     private String currentKey;
 
     public Template(String directory, String filename) {
-        this.tpl = new Configuration(new File(directory, filename));
-        this.tpl.load();
+        this.tplFile = new File(directory, filename);
+        this.tpl = YamlConfiguration.loadConfiguration(tplFile);
         this.arguments = new LinkedHashMap<String, Object>();
     }
 
-    public void upgrade() {
-        LinkedHashMap<String, String> nodes = new LinkedHashMap<String, String>();
-
+    public void update(LinkedHashMap<String, String> nodes) throws IOException {
         if(!nodes.isEmpty()) {
-            System.out.println(" - Upgrading Template.yml");
-            int count = 1;
-
             for(String node : nodes.keySet()) {
-                System.out.println("   Adding node [" + node + "] #" + count + " of " + nodes.size());
-                this.tpl.setProperty(node, nodes.get(node));
-                count++;
+                if(!this.tpl.contains(node)) {
+                    System.out.println(" Updating Template Node [" + node + "] due to missing node.");
+                    this.tpl.set(node, nodes.get(node));
+
+                    continue;
+                } else if (!this.tpl.getString(node).equals(nodes.get(node))) {
+                    System.out.println(" Updating Template Node [" + node + "] due to newer variables.");
+                    this.tpl.set(node, nodes.get(node));
+
+                    continue;
+                }
             }
 
-            this.tpl.save();
-            System.out.println(" + Messages Upgrade Complete.");
+            this.tpl.save(this.tplFile);
         }
     }
 
@@ -46,14 +51,13 @@ public class Template {
         return this.tpl.getString(key, line);
     }
 
-    public void save(String key, String line) {
-        this.tpl.setProperty(key, line);
-        this.tpl.save();
+    public void save(String key, String line) throws IOException {
+        this.tpl.set(key, line);
+        this.tpl.save(this.tplFile);
     }
 
     public Template set(String key) {
         this.currentKey = key;
-
         return this;
     }
 
@@ -68,17 +72,17 @@ public class Template {
     }
 
     public String color() {
-        if(this.currentKey != null)
-            return Messaging.parse(Messaging.colorize(this.raw(this.currentKey)));
+        if(this.currentKey == null)
+            return null;
 
-        return null;
+        return Messaging.parse(Messaging.colorize(this.raw(this.currentKey)));
     }
 
     public String parse() {
-        if(this.currentKey != null)
-            return Messaging.parse(Messaging.colorize(Messaging.argument(this.raw(this.currentKey), this.arguments)));
+        if(this.currentKey == null)
+            return null;
 
-        return null;
+        return Messaging.parse(Messaging.colorize(Messaging.argument(this.raw(this.currentKey), this.arguments)));
     }
 
     public String color(String key) {
@@ -98,10 +102,10 @@ public class Template {
     }
 
     public String parseRaw() {
-        if(this.currentKey != null && !this.arguments.isEmpty())
-            return Messaging.argument(this.raw(this.currentKey), this.arguments);
+        if(this.currentKey == null && this.arguments.isEmpty())
+            return null;
 
-        return null;
+        return Messaging.argument(this.raw(this.currentKey), this.arguments);
     }
 
     public static enum Node {
@@ -141,8 +145,7 @@ public class Template {
         ACCOUNTS_STATUS("accounts.status"),
 
         TOP_OPENING("top.opening"),
-        TOP_EMPTY("top.empty"),
-        TOP_LINE("top.line"),
+        TOP_ITEM("top.item"),
 
         ERROR_ONLINE("error.online"),
         ERROR_EXISTS("error.exists"),

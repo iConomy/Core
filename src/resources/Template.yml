@@ -79,6 +79,10 @@ accounts:
     remove: "<green>Deleted account: <white>+name<green>."
     status: "<green>Account status is now <white>+status<green>."
 
+top:
+    opening: "<green>-----[ <white>Wealthiest Accounts <green>]-----"
+    item: "<gray>+i. <green>+name <gray>- <white>+amount"
+
 error:
     online: "<rose>Sorry, nobody else is online."
     exists: "<rose>Account already exists."
