@@ -7,7 +7,7 @@ import com.iCo6.util.Template;
 import org.bukkit.entity.Player;
 
 public class Account {
-    String name;
+    public String name;
 
     public Account(String name) {
         this.name = name;
