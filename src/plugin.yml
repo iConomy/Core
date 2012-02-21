@@ -1,7 +1,7 @@
 # General Data
 name: iConomy
 main: com.iCo6.iConomy
-version: 6.0.8b
+version: 6.0.9b
 
 # Command Data
 commands:
@@ -38,6 +38,7 @@ permissions:
             iConomy.help: true
             iConomy.holdings: true
             iConomy.holdings.others: true
+            iConomy.top: true
             iConomy.payment: true
             iConomy.accounts.create: true
             iConomy.accounts.remove: true
@@ -66,6 +67,7 @@ permissions:
             iConomy.help: true
             iConomy.holdings: true
             iConomy.holdings.others: true
+            iConomy.top: true
             iConomy.payment: true
     iConomy.user:
         description: Gives access to user only commands
@@ -87,6 +89,10 @@ permissions:
         command: "/money <account-name>"
         examples:
           - "/money Nijikokun"
+    iConomy.top:
+        description: View top-most accounts.
+        default: op
+        command: "/money top"
     iConomy.payment:
         description: Send money to others.
         default: op

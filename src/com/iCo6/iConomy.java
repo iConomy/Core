@@ -1,6 +1,7 @@
 package com.iCo6;
 
 import java.io.File;
+import java.io.IOException;
 import java.sql.ResultSet;
 import java.util.Locale;
 
@@ -18,6 +19,7 @@ import com.iCo6.listeners.players;
 import com.iCo6.system.Account;
 import com.iCo6.system.Accounts;
 import com.iCo6.system.Interest;
+import com.iCo6.system.Queried;
 import com.iCo6.util.Common;
 import com.iCo6.util.Messaging;
 import com.iCo6.util.Template;
@@ -31,26 +33,28 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
+import java.util.LinkedHashMap;
 import java.util.Timer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.bukkit.Server;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event.Priority;
 import org.bukkit.permissions.Permission;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.util.config.Configuration;
+
 import org.h2.jdbcx.JdbcConnectionPool;
 
 /**
  * iConomy by Team iCo
  *
- * @copyright Copyright AniGaiku LLC (C) 2010-2011
+ * @copyright Copyright AniGaiku LLC (C) 2010-2012
  * @author Nijikokun <nijikokun@gmail.com>
  * @author SpaceManiac
  *
@@ -111,10 +115,21 @@ public class iConomy extends JavaPlugin {
             Common.extract("Config.yml", "Template.yml");
 
             // Setup Configuration
-            Constants.load(new Configuration(new File(directory, "Config.yml")));
+            Constants.load(new File(directory, "Config.yml"));
 
             // Setup Template
             Template = new Template(directory.getPath(), "Template.yml");
+
+            // Upgrade Template to 6.0.9b
+            LinkedHashMap<String, String> nodes = new LinkedHashMap<String, String>();
+            nodes.put("top.opening", "<green>-----[ <white>Wealthiest Accounts <green>]-----");
+            nodes.put("top.item", "<gray>+i. <green>+name <gray>- <white>+amount");
+
+            try {
+                Template.update(nodes);
+            } catch (IOException ex) {
+                System.out.println(ex.getMessage());
+            }
             
             // Check Drivers if needed
             Type type = Database.getType(Constants.Nodes.DatabaseType.toString());
@@ -146,6 +161,10 @@ public class iConomy extends JavaPlugin {
             Commands.add("/money -h|?|help +command", new Help(this));
             Commands.setPermission("help", "iConomy.help");
             Commands.setHelp("help", new String[] { " (command)", "For Help & Information." });
+
+            Commands.add("/money -t|top", new Top(this));
+            Commands.setPermission("top", "iConomy.top");
+            Commands.setHelp("top", new String[] { "", "View top economical accounts." });
 
             Commands.add("/money -p|pay +name +amount:empty", new Payment(this));
             Commands.setPermission("pay", "iConomy.payment");
@@ -222,7 +241,7 @@ public class iConomy extends JavaPlugin {
                 System.out.println(ex.getMessage());
             }
 
-            getServer().getPluginManager().registerEvent(org.bukkit.event.Event.Type.PLAYER_JOIN, new players(), Priority.Normal, this);
+            getServer().getPluginManager().registerEvents(new players(), this);
         } finally {
           endTime = System.nanoTime();
         }
@@ -235,6 +254,15 @@ public class iConomy extends JavaPlugin {
 
                     Interest = new Timer();
                     Interest.scheduleAtFixedRate(new Interest(getDataFolder().getPath()), time, time);
+                }
+            });
+        }
+
+        if(Constants.Nodes.Purging.getBoolean()) {
+            Thrun.init(new Runnable() {
+                public void run() {
+                    Queried.purgeDatabase();
+                    System.out.println("[" + info.getName() + " - " + Constants.Nodes.CodeName.toString() + "] Purged accounts with default balance.");
                 }
             });
         }
