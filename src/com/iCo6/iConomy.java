@@ -35,8 +35,6 @@ import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.util.LinkedHashMap;
 import java.util.Timer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.bukkit.Server;
 import org.bukkit.command.Command;

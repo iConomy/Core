@@ -166,7 +166,7 @@ public class Queried {
 
                 try{
                     String t = Constants.Nodes.DatabaseTable.toString();
-                    total = run.query(c, "SELECT username FROM " + t, returnList);
+                    total = run.query(c, "SELECT username FROM " + t + " WHERE status <> 1 ORDER BY balance DESC LIMIT " + amount, returnList);
                 } catch (SQLException ex) {
                     System.out.println("[iConomy] Error issueing SQL query: " + ex);
                 } finally {
@@ -179,20 +179,26 @@ public class Queried {
 
         for (Iterator<String> it = total.iterator(); it.hasNext();) {
             String player = it.next();
-            accounts.add(Accounts.get(player));
-        }
-
-        Collections.sort(accounts, new MoneyComparator());
-
-        if(amount > accounts.size())
-            amount = accounts.size();
-
-        for (int i = 0; i < amount; i++) {
-            if(accounts.get(i).getStatus() == 1) {
-                i--; continue;
+            if(useMiniDB() || useInventoryDB() || useOrbDB()) {
+                accounts.add(Accounts.get(player));
+            } else {
+                finals.add(new Account(player));
             }
+        }
+        
+        if(useMiniDB() || useInventoryDB() || useOrbDB()) {
+            Collections.sort(accounts, new MoneyComparator());
 
-            finals.add(accounts.get(i));
+            if(amount > accounts.size())
+                amount = accounts.size();
+                
+            for (int i = 0; i < amount; i++) {
+                if(accounts.get(i).getStatus() == 1) {
+                    i--; continue;
+                }
+
+                finals.add(accounts.get(i));
+            }
         }
 
         return finals;
