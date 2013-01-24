@@ -1,12 +1,12 @@
 # General Data
 name: iConomy
 main: com.iCo6.iConomy
-version: 6.0.10b
+version: 6.0.11b
 
 # Command Data
 commands:
     money:
-      aliases: [iConomy, iCo]
+      aliases: [iConomy]
       description: Distrobute, Check, Use Currency.
 
 # Generator Data
