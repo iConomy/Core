@@ -150,23 +150,23 @@ public class iConomy extends JavaPlugin {
             }
 
             // Setup Commands
-            Commands.add("/money +name", new Money(this));
-            Commands.setPermission("money", "iConomy.holdings");
-            Commands.setPermission("money+", "iConomy.holdings.others");
-            Commands.setHelp("money", new String[] { "", "Check your balance." });
-            Commands.setHelp("money+", new String[] { " [name]", "Check others balance." });
+            Commands.add("/pénz +name", new Money(this));
+            Commands.setPermission("pénz", "glmc.penz");
+            Commands.setPermission("pénz+", "glmc.penz.masok");
+            Commands.setHelp("pénz", new String[] { "", "Megmutatja a pénzed" });
+            Commands.setHelp("pénz+", new String[] { " [név]", "Mások pénzének megnézése" });
 
-            Commands.add("/money -h|?|help +command", new Help(this));
-            Commands.setPermission("help", "iConomy.help");
-            Commands.setHelp("help", new String[] { " (command)", "For Help & Information." });
+            Commands.add("/pénz -segit|?|segitseg +command", new Help(this));
+            Commands.setPermission("segit", "glmc.penz.segit");
+            Commands.setHelp("segit", new String[] { " (parancs)", "Segítség a TözsdePlugin parancsaról" });
 
-            Commands.add("/money -t|top", new Top(this));
-            Commands.setPermission("top", "iConomy.top");
-            Commands.setHelp("top", new String[] { "", "View top economical accounts." });
+            Commands.add("/pénz -t|top", new Top(this));
+            Commands.setPermission("top", "glmc.penz.top");
+            Commands.setHelp("top", new String[] { "", "Megmutatja kiknek van a legtöbb pénzük" });
 
-            Commands.add("/money -p|pay +name +amount:empty", new Payment(this));
-            Commands.setPermission("pay", "iConomy.payment");
-            Commands.setHelp("pay", new String[] { " [name] [amount]", "Send money to others." });
+            Commands.add("/pénz -k|küld +name +amount:empty", new Payment(this));
+            Commands.setPermission("kuld", "glmc.penz.kuld");
+            Commands.setHelp("kuld", new String[] { " [név] [összeg]", "Pénz küldése másoknak" });
 
             Commands.add("/money -c|create +name", new Create(this));
             Commands.setPermission("create", "iConomy.accounts.create");
@@ -176,13 +176,13 @@ public class iConomy extends JavaPlugin {
             Commands.setPermission("remove", "iConomy.accounts.remove");
             Commands.setHelp("remove", new String[] { " [name]", "Remove an account." });
 
-            Commands.add("/money -g|give +name +amount:empty", new Give(this));
-            Commands.setPermission("give", "iConomy.accounts.give");
-            Commands.setHelp("give", new String[] { " [name] [amount]", "Give money." });
+            Commands.add("/pénz -a|ad +name +amount:empty", new Give(this));
+            Commands.setPermission("ad", "glmc.penz.ad");
+            Commands.setHelp("ad", new String[] { " [név] [összeg]", "pénz adás NEM KÜLDÉS" });
 
-            Commands.add("/money -t|take +name +amount:empty", new Take(this));
-            Commands.setPermission("take", "iConomy.accounts.take");
-            Commands.setHelp("take", new String[] { " [name] [amount]", "Take money." });
+            Commands.add("/pénz -e|elvesz +name +amount:empty", new Take(this));
+            Commands.setPermission("elvesz", "glmc.penz.elvesz");
+            Commands.setHelp("elvesz", new String[] { " [név] [összeg]", "Pénz elvétele" });
 
             Commands.add("/money -s|set +name +amount:empty", new Set(this));
             Commands.setPermission("set", "iConomy.accounts.set");
