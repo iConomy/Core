@@ -113,7 +113,7 @@ public class InventoryDB {
             }
             return stacks;
         } catch (IOException ex) {
-            iConomy.Server.getLogger().log(Level.WARNING, "[iCo/InvDB] error reading inventory {0}: {1}", new Object[]{uuid, ex.getMessage()});
+            iConomy.Server.getLogger().log(Level.WARNING, "[iCo/InvDB] error reading inventory {0}: {1}", new Object[]{uuid.toString(), ex.getMessage()});
             return null;
         }
     }
@@ -149,7 +149,7 @@ public class InventoryDB {
             tagCompound.put("Inventory", inventory);
             tag = new CompoundTag("Player", tagCompound);
 
-            NBTOutputStream out = new NBTOutputStream(new FileOutputStream(new File(dataDir, uuid + ".dat")));
+            NBTOutputStream out = new NBTOutputStream(new FileOutputStream(new File(dataDir, uuid.toString() + ".dat")));
             out.writeTag(tag);
             out.close();
         } catch (IOException ex) {
