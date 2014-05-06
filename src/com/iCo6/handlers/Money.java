@@ -43,7 +43,7 @@ public class Money extends Handler {
             if(player == null)
                 return false;
 
-            Account account = new Account(player.getName());
+            Account account = new Account(player.getName(), player.getUniqueId());
             account.getHoldings().showBalance(null);
             return false;
         }

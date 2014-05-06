@@ -3,7 +3,6 @@ package com.iCo6;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -65,6 +64,9 @@ public class Constants {
 
         DatabaseType("System.Database.Type", "MiniDB"),
         DatabaseTable("System.Database.Table", "iConomy"),
+        DatabaseColumnUsername("System.Database.UsernameColumn", "username"),
+        DatabaseColumnBalance("System.Database.BalanceColumn", "balance"),
+        DatabaseColumnStatus("System.Database.StatusColumn", "status"),
         DatabaseUrl("System.Database.URL", "mysql:\\\\localhost:3306\\iConomy"),
         DatabaseUsername("System.Database.Username", "root"),
         DatabasePassword("System.Database.Password", ""),
@@ -120,7 +122,8 @@ public class Constants {
             return (Long) value;
         }
 
-        public List<String> getStringList() {
+        @SuppressWarnings("unchecked")
+		public List<String> getStringList() {
             return (List<String>) value;
         }
 

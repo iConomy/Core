@@ -73,7 +73,7 @@ public class Payment extends Handler {
             return false;
         }
 
-        Account holder = new Account(from.getName());
+        Account holder = new Account(from.getName(), from.getUniqueId());
         Holdings holdings = holder.getHoldings();
 
         if(holdings.getBalance() < amount) {

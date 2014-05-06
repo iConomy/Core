@@ -1,20 +1,31 @@
 package com.iCo6.system;
 
+import java.util.UUID;
+
 import com.iCo6.iConomy;
 import com.iCo6.util.Messaging;
 import com.iCo6.util.Template;
 
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 public class Account {
     public String name;
+    public UUID uuid;
 
-    public Account(String name) {
+    public Account(String name, UUID uuid) {
         this.name = name;
+        this.uuid = uuid;
     }
 
-    public Account(String name, Boolean create) {
+    public Account(String name, Boolean create, UUID uuid) {
         this.name = name;
+        this.uuid = uuid;
+    }
+    
+    public Account(String name) {
+    	this.name = name;
+    	this.uuid = Bukkit.getOfflinePlayer(name).getUniqueId();
     }
 
     public void showHoldings(boolean console) {
@@ -39,11 +50,15 @@ public class Account {
     }
 
     public Integer getStatus() {
-        return Queried.getStatus(this.name);
+        return Queried.getStatus(this.name, this.uuid);
     }
 
     public void setStatus(int status) {
         Queried.setStatus(this.name, status);
+    }
+    
+    public void updateName(String newName) {
+    	Queried.updateName(this.name, newName);
     }
 
     public boolean remove() {

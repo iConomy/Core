@@ -22,7 +22,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.UUID;
 
+import org.bukkit.Bukkit;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
 /**
@@ -49,7 +52,7 @@ public class Queried {
             accounts = new ArrayList<String>();
 
             while(rs.next())
-                accounts.add(rs.getString("username"));
+                accounts.add(rs.getString(Constants.Nodes.DatabaseColumnUsername.toString()));
 
             return accounts;
         }
@@ -64,14 +67,14 @@ public class Queried {
 
     static ResultSetHandler<Double> returnBalance = new ResultSetHandler<Double>() {
         public Double handle(ResultSet rs) throws SQLException {
-            if(rs.next()) return rs.getDouble("balance");
+            if(rs.next()) return rs.getDouble(Constants.Nodes.DatabaseColumnBalance.toString());
             return null;
         }
     };
 
     static ResultSetHandler<Integer> returnStatus = new ResultSetHandler<Integer>() {
         public Integer handle(ResultSet rs) throws SQLException {
-            if(rs.next()) return rs.getInt("status");
+            if(rs.next()) return rs.getInt(Constants.Nodes.DatabaseColumnStatus.toString());
             return null;
         }
     };
@@ -131,7 +134,8 @@ public class Queried {
 
             try{
                 String t = Constants.Nodes.DatabaseTable.toString();
-                accounts = run.query(c, "SELECT username FROM " + t, returnList);
+                String u = Constants.Nodes.DatabaseColumnUsername.toString();
+                accounts = run.query(c, "SELECT " + u + " FROM " + t, returnList);
             } catch (SQLException ex) {
                 System.out.println("[iConomy] Error issueing SQL query: " + ex);
             } finally {
@@ -166,7 +170,10 @@ public class Queried {
 
                 try{
                     String t = Constants.Nodes.DatabaseTable.toString();
-                    total = run.query(c, "SELECT username FROM " + t + " WHERE status <> 1 ORDER BY balance DESC LIMIT " + amount, returnList);
+                    String u = Constants.Nodes.DatabaseColumnUsername.toString();
+                    String s = Constants.Nodes.DatabaseColumnStatus.toString();
+                    String bal = Constants.Nodes.DatabaseColumnBalance.toString();
+                    total = run.query(c, "SELECT " + u + " FROM " + t + " WHERE " + s + " <> 1 ORDER BY " + bal + " DESC LIMIT " + amount, returnList);
                 } catch (SQLException ex) {
                     System.out.println("[iConomy] Error issueing SQL query: " + ex);
                 } finally {
@@ -216,12 +223,12 @@ public class Queried {
                     return false;
 
             if(useInventoryDB())
-                if(inventory.dataExists(name))
+                if(inventory.dataExists(iConomy.Server.getOfflinePlayer(name).getUniqueId()))
                     return false;
 
             Arguments Row = new Arguments(name);
-            Row.setValue("balance", balance);
-            Row.setValue("status", status);
+            Row.setValue(Constants.Nodes.DatabaseColumnBalance.toString(), balance);
+            Row.setValue(Constants.Nodes.DatabaseColumnStatus.toString(), status);
 
             database.addIndex(Row.getKey(), Row);
             database.update();
@@ -235,7 +242,10 @@ public class Queried {
 
             try{
                 String t = Constants.Nodes.DatabaseTable.toString();
-                Integer amount = run.update(c, "INSERT INTO " + t + "(username, balance, status) values (?, ?, ?)", name.toLowerCase(), balance, status);
+                String u = Constants.Nodes.DatabaseColumnUsername.toString();
+                String s = Constants.Nodes.DatabaseColumnStatus.toString();
+                String bal = Constants.Nodes.DatabaseColumnBalance.toString();
+                Integer amount = run.update(c, "INSERT INTO " + t + "(" + u + ", " + bal + ", " + s + ") values (?, ?, ?)", name.toLowerCase(), balance, status);
 
                 if(amount > 0)
                     created = true;
@@ -271,7 +281,8 @@ public class Queried {
 
             try{
                 String t = Constants.Nodes.DatabaseTable.toString();
-                Integer amount = run.update(c, "DELETE FROM " + t + " WHERE username=?", name.toLowerCase());
+                String u = Constants.Nodes.DatabaseColumnUsername.toString();
+                Integer amount = run.update(c, "DELETE FROM " + t + " WHERE " + u + "=?", name.toLowerCase());
 
                 if(amount > 0)
                     removed = true;
@@ -292,7 +303,7 @@ public class Queried {
 
         if(useMiniDB() || useInventoryDB() || useOrbDB()) {
             if(useInventoryDB())
-                if (inventory.dataExists(name))
+                if (inventory.dataExists(iConomy.Server.getOfflinePlayer(name).getUniqueId()))
                     return true;
 
             if(useOrbDB())
@@ -308,7 +319,8 @@ public class Queried {
 
             try {
                 String t = Constants.Nodes.DatabaseTable.toString();
-                exists = run.query(c, "SELECT id FROM " + t + " WHERE username=?", returnBoolean, name.toLowerCase());
+                String u = Constants.Nodes.DatabaseColumnUsername.toString();
+                exists = run.query(c, "SELECT id FROM " + t + " WHERE " +u+ "=?", returnBoolean, name.toLowerCase());
             } catch (SQLException ex) {
                 System.out.println("[iConomy] Error issueing SQL query: " + ex);
             } finally {
@@ -329,7 +341,7 @@ public class Queried {
 
         if(useMiniDB() || useInventoryDB() || useOrbDB()) {
             if(useInventoryDB())
-                if(inventory.dataExists(name))
+                if(inventory.dataExists(iConomy.Server.getOfflinePlayer(name).getUniqueId()))
                     return inventory.getBalance(name);
 
             if(useOrbDB())
@@ -337,7 +349,7 @@ public class Queried {
                     return iConomy.Server.getPlayer(name).getTotalExperience();
 
             if(database.hasIndex(name))
-                return database.getArguments(name).getDouble("balance");
+                return database.getArguments(name).getDouble(Constants.Nodes.DatabaseColumnBalance.toString());
 
             return balance;
         }
@@ -348,7 +360,9 @@ public class Queried {
 
             try{
                 String t = Constants.Nodes.DatabaseTable.toString();
-                balance = run.query(c, "SELECT balance FROM " + t + " WHERE username=?", returnBalance, name.toLowerCase());
+                String u = Constants.Nodes.DatabaseColumnUsername.toString();
+                String bal = Constants.Nodes.DatabaseColumnBalance.toString();
+                balance = run.query(c, "SELECT "+ bal +" FROM " + t + " WHERE "+ u +"=?", returnBalance, name.toLowerCase());
             } catch (SQLException ex) {
                 System.out.println("[iConomy] Error issueing SQL query: " + ex);
             } finally {
@@ -394,7 +408,7 @@ public class Queried {
 
         if(useMiniDB() || useInventoryDB() || useOrbDB()) {
             if(useInventoryDB())
-                if(inventory.dataExists(name)) {
+                if(inventory.dataExists(iConomy.Server.getOfflinePlayer(name).getUniqueId())) {
                     inventory.setBalance(name, balance); return;
                 }
 
@@ -423,7 +437,7 @@ public class Queried {
             }
 
             if(database.hasIndex(name)) {
-                database.setArgument(name, "balance", balance);
+                database.setArgument(name, Constants.Nodes.DatabaseColumnBalance.toString(), balance);
                 database.update();
             }
 
@@ -437,7 +451,9 @@ public class Queried {
 
             try{
                 String t = Constants.Nodes.DatabaseTable.toString();
-                int update = run.update(c, "UPDATE " + t + " SET balance=? WHERE username=?", balance, name.toLowerCase());
+                String u = Constants.Nodes.DatabaseColumnUsername.toString();
+                String bal = Constants.Nodes.DatabaseColumnBalance.toString();
+                int update = run.update(c, "UPDATE " + t + " SET " + bal + "=? WHERE " + u + "=?", balance, name.toLowerCase());
             } catch (SQLException ex) {
                 System.out.println("[iConomy] Error issueing SQL query: " + ex);
             } finally {
@@ -453,7 +469,8 @@ public class Queried {
 
         int i = 0;
         for(String name: queries.keySet()) {
-            double balance = (Double) queries.get(name).get("balance");
+        	UUID uuid = Bukkit.getOfflinePlayer(name).getUniqueId();
+            double balance = (Double) queries.get(name).get(Constants.Nodes.DatabaseColumnBalance.toString());
             double original = 0.0, gain = 0.0, loss = 0.0;
 
             if(Constants.Nodes.Logging.getBoolean()) {
@@ -472,13 +489,13 @@ public class Queried {
                 if(!hasAccount(name))
                     continue;
 
-                database.setArgument(name, "balance", balance);
+                database.setArgument(name, Constants.Nodes.DatabaseColumnBalance.toString(), balance);
                 database.update();
             } else if(useInventoryDB()) {
-                if(inventory.dataExists(name))
+                if(inventory.dataExists(uuid))
                     inventory.setBalance(name, balance);
                 else if(database.hasIndex(name)) {
-                    database.setArgument(name, "balance", balance);
+                    database.setArgument(name, Constants.Nodes.DatabaseColumnBalance.toString(), balance);
                     database.update();
                 }
             } else if(useOrbDB()) {
@@ -532,14 +549,14 @@ public class Queried {
     public static void purgeDatabase() {
         if(useMiniDB() || useInventoryDB() || useOrbDB()) {
             for(String index: database.getIndices().keySet())
-                if(database.getArguments(index).getDouble("balance") == Constants.Nodes.Balance.getDouble())
+                if(database.getArguments(index).getDouble(Constants.Nodes.DatabaseColumnBalance.toString()) == Constants.Nodes.Balance.getDouble())
                     database.removeIndex(index);
             
             database.update();
 
             if (useInventoryDB())
                 for(Player p: iConomy.Server.getOnlinePlayers())
-                    if(inventory.dataExists(p.getName()) && inventory.getBalance(p.getName()) == Constants.Nodes.Balance.getDouble())
+                    if(inventory.dataExists(p.getUniqueId()) && inventory.getBalance(p.getName()) == Constants.Nodes.Balance.getDouble())
                         inventory.setBalance(p.getName(), 0);
 
             if (useOrbDB())
@@ -558,7 +575,8 @@ public class Queried {
 
                     try {
                         String t = Constants.Nodes.DatabaseTable.toString();
-                        Integer amount = run.update(c, "DELETE FROM " + t + " WHERE balance=?", Constants.Nodes.Balance.getDouble());
+                        String bal = Constants.Nodes.DatabaseColumnBalance.toString();
+                        Integer amount = run.update(c, "DELETE FROM " + t + " WHERE " + bal + "=?", Constants.Nodes.Balance.getDouble());
                     } catch (SQLException ex) {
                         System.out.println("[iConomy] Error issueing SQL query: " + ex);
                     } finally {
@@ -580,7 +598,7 @@ public class Queried {
 
             if (useInventoryDB())
                 for(Player p: iConomy.Server.getOnlinePlayers())
-                    if(inventory.dataExists(p.getName()))
+                    if(inventory.dataExists(p.getUniqueId()))
                         inventory.setBalance(p.getName(), 0);
 
             if (useOrbDB())
@@ -611,20 +629,20 @@ public class Queried {
         });
     }
 
-    static Integer getStatus(String name) {
+    static Integer getStatus(String name, UUID uuid) {
         int status = 0;
 
         if(!hasAccount(name))
             return -1;
 
         if(useMiniDB()) 
-            return database.getArguments(name).getInteger("status");
+            return database.getArguments(name).getInteger(Constants.Nodes.DatabaseColumnStatus.toString());
 
         if (useInventoryDB()) 
-            return (inventory.dataExists(name)) ? 1 : (database.hasIndex(name)) ? database.getArguments(name).getInteger("status") : 0;
+            return (inventory.dataExists(uuid)) ? 1 : (database.hasIndex(name)) ? database.getArguments(name).getInteger(Constants.Nodes.DatabaseColumnStatus.toString()) : 0;
 
         if (useOrbDB())
-            return (iConomy.Server.getPlayer(name) != null) ? 1 : (database.hasIndex(name)) ? database.getArguments(name).getInteger("status") : 0;
+            return (iConomy.Server.getPlayer(name) != null) ? 1 : (database.hasIndex(name)) ? database.getArguments(name).getInteger(Constants.Nodes.DatabaseColumnStatus.toString()) : 0;
 
         try {
             QueryRunner run = new QueryRunner();
@@ -632,7 +650,9 @@ public class Queried {
 
             try{
                 String t = Constants.Nodes.DatabaseTable.toString();
-                status = run.query(c, "SELECT status FROM " + t + " WHERE username=?", returnStatus, name.toLowerCase());
+                String s = Constants.Nodes.DatabaseColumnStatus.toString();
+                String u = Constants.Nodes.DatabaseColumnUsername.toString();
+                status = run.query(c, "SELECT " + s + " FROM " + t + " WHERE " + u + "=?", returnStatus, name.toLowerCase());
             } catch (SQLException ex) {
                 System.out.println("[iConomy] Error issueing SQL query: " + ex);
             } finally {
@@ -650,7 +670,7 @@ public class Queried {
             return;
 
         if(useMiniDB()) {
-            database.setArgument(name, "status", status);
+            database.setArgument(name, Constants.Nodes.DatabaseColumnStatus.toString(), status);
             database.update();
 
             return;
@@ -658,7 +678,7 @@ public class Queried {
 
         if (useInventoryDB() || useOrbDB()) {
             if(database.hasIndex(name)) {
-                database.setArgument(name, "status", status);
+                database.setArgument(name, Constants.Nodes.DatabaseColumnStatus.toString(), status);
                 database.update();
             }
 
@@ -671,7 +691,48 @@ public class Queried {
 
             try{
                 String t = Constants.Nodes.DatabaseTable.toString();
-                int update = run.update(c, "UPDATE " + t + " SET status=? WHERE username=?", status, name.toLowerCase());
+                String s = Constants.Nodes.DatabaseColumnStatus.toString();
+                String u = Constants.Nodes.DatabaseColumnUsername.toString();
+                int update = run.update(c, "UPDATE " + t + " SET " + s + "=? WHERE " + u + "=?", status, name.toLowerCase());
+            } catch (SQLException ex) {
+                System.out.println("[iConomy] Error issueing SQL query: " + ex);
+            } finally {
+                DbUtils.close(c);
+            }
+        } catch (SQLException ex) {
+            System.out.println("[iConomy] Database Error: " + ex);
+        }
+    }
+    
+    static void updateName(String name, String newName) {
+        if(!hasAccount(name))
+            return;
+
+        if(useMiniDB()) {
+            database.setArgument(name, Constants.Nodes.DatabaseColumnUsername.toString(), newName);
+            database.update();
+
+            return;
+        }
+
+        if (useInventoryDB() || useOrbDB()) {
+            if(database.hasIndex(name)) {
+                database.setArgument(name, Constants.Nodes.DatabaseColumnUsername.toString(), newName);
+                database.update();
+            }
+
+            return;
+        }
+
+        try {
+            QueryRunner run = new QueryRunner();
+            Connection c = iConomy.Database.getConnection();
+
+            try{
+                String t = Constants.Nodes.DatabaseTable.toString();
+                String s = Constants.Nodes.DatabaseColumnUsername.toString();
+                String u = Constants.Nodes.DatabaseColumnUsername.toString();
+                run.update(c, "UPDATE " + t + " SET " + s + "=? WHERE " + u + "=?", newName, name.toLowerCase());
             } catch (SQLException ex) {
                 System.out.println("[iConomy] Error issueing SQL query: " + ex);
             } finally {
