@@ -18,8 +18,10 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 import java.util.logging.Level;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
@@ -35,24 +37,27 @@ public class InventoryDB {
     private File dataDir;
 
     public InventoryDB() {
-        dataDir = new File(iConomy.Server.getWorlds().get(0).getName(), "players");
+        dataDir = new File(iConomy.Server.getWorlds().get(0).getName(), "playerdata");
     }
 
     public List<String> getAllPlayers() {
         ArrayList<String> result = new ArrayList<String>();
 
         for (String file : dataDir.list())
-            if (file.endsWith(".dat"))
-                result.add(file.substring(0, file.length() - 4));
+            if (file.endsWith(".dat")) {
+                UUID uuid = UUID.fromString(file.substring(0, file.length() - 4));
+        		result.add(Bukkit.getOfflinePlayer(uuid).getName());
+            }
 
         return result;
     }
 
-    public boolean dataExists(String name) {
-        return new File(dataDir, name + ".dat").exists();
+    public boolean dataExists(UUID uuid) {
+        return new File(dataDir, uuid.toString() + ".dat").exists();
     }
 
     public void setBalance(String name, double balance) {
+    	UUID uuid = iConomy.Server.getOfflinePlayer(name).getUniqueId();
         if (iConomy.Server.getPlayer(name) != null && iConomy.Server.getPlayer(name).isOnline()) {
 
             ItemStack[] stacks = iConomy.Server.getPlayer(name).getInventory().getContents().clone();
@@ -63,13 +68,13 @@ public class InventoryDB {
             return;
         }
 
-        if (!dataExists(name))
+        if (uuid == null || !dataExists(uuid))
             return;
 
-        ItemStack[] stacks = readInventory(name);
+        ItemStack[] stacks = readInventory(uuid);
         if (stacks != null) {
             setBalance(stacks, balance);
-            writeInventory(name, stacks);
+            writeInventory(uuid, stacks);
         }
         
     }
@@ -78,7 +83,8 @@ public class InventoryDB {
         if (iConomy.Server.getPlayer(name) != null && iConomy.Server.getPlayer(name).isOnline()) {
             return getBalance(iConomy.Server.getPlayer(name).getInventory().getContents());
         } else {
-            ItemStack[] stacks = readInventory(name);
+        	UUID uuid = Bukkit.getOfflinePlayer(name).getUniqueId();
+            ItemStack[] stacks = readInventory(uuid);
             if (stacks != null) {
                 return getBalance(stacks);
             } else {
@@ -87,9 +93,9 @@ public class InventoryDB {
         }
     }
 
-    private ItemStack[] readInventory(String name) {
+    private ItemStack[] readInventory(UUID uuid) {
         try {
-            NBTInputStream in = new NBTInputStream(new FileInputStream(new File(dataDir, name + ".dat")));
+            NBTInputStream in = new NBTInputStream(new FileInputStream(new File(dataDir, uuid.toString() + ".dat")));
             CompoundTag tag = (CompoundTag) in.readTag();
             in.close();
 
@@ -107,14 +113,14 @@ public class InventoryDB {
             }
             return stacks;
         } catch (IOException ex) {
-            iConomy.Server.getLogger().log(Level.WARNING, "[iCo/InvDB] error reading inventory {0}: {1}", new Object[]{name, ex.getMessage()});
+            iConomy.Server.getLogger().log(Level.WARNING, "[iCo/InvDB] error reading inventory {0}: {1}", new Object[]{uuid.toString(), ex.getMessage()});
             return null;
         }
     }
 
-    private void writeInventory(String name, ItemStack[] stacks) {
+    private void writeInventory(UUID uuid, ItemStack[] stacks) {
         try {
-            NBTInputStream in = new NBTInputStream(new FileInputStream(new File(dataDir, name + ".dat")));
+            NBTInputStream in = new NBTInputStream(new FileInputStream(new File(dataDir, uuid.toString() + ".dat")));
             CompoundTag tag = (CompoundTag) in.readTag();
             in.close();
 
@@ -143,11 +149,11 @@ public class InventoryDB {
             tagCompound.put("Inventory", inventory);
             tag = new CompoundTag("Player", tagCompound);
 
-            NBTOutputStream out = new NBTOutputStream(new FileOutputStream(new File(dataDir, name + ".dat")));
+            NBTOutputStream out = new NBTOutputStream(new FileOutputStream(new File(dataDir, uuid.toString() + ".dat")));
             out.writeTag(tag);
             out.close();
         } catch (IOException ex) {
-            iConomy.Server.getLogger().log(Level.WARNING, "[iCo/InvDB] error writing inventory {0}: {1}", new Object[]{name, ex.getMessage()});
+            iConomy.Server.getLogger().log(Level.WARNING, "[iCo/InvDB] error writing inventory {0}: {1}", new Object[]{uuid.toString(), ex.getMessage()});
         }
     }
 

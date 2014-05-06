@@ -2,6 +2,7 @@ package com.iCo6.system;
 
 import com.iCo6.Constants;
 import java.util.List;
+import java.util.UUID;
 
 public class Accounts {
     public Accounts() { }
@@ -10,6 +11,13 @@ public class Accounts {
         return Queried.hasAccount(name);
     }
 
+    public Account get(String name, UUID uuid) {
+        if(!Queried.hasAccount(name))
+            this.create(name);
+
+        return new Account(name, uuid);
+    }
+    
     public Account get(String name) {
         if(!Queried.hasAccount(name))
             this.create(name);
