@@ -59,7 +59,7 @@ public class Payment extends Handler {
         if(amount < 0.1)
             throw new InvalidUsage("Invalid <white>amount<rose>, cannot be less than 0.1");
 
-        if(Common.matches(from.getName(), name)) {
+        if(Common.matches(from.getUniqueId(), name)) {
             template.set(Template.Node.PAYMENT_SELF);
             Messaging.send(sender, template.parse());
             return false;
@@ -73,7 +73,7 @@ public class Payment extends Handler {
             return false;
         }
 
-        Account holder = new Account(from.getName());
+        Account holder = new Account(from.getUniqueId());
         Holdings holdings = holder.getHoldings();
 
         if(holdings.getBalance() < amount) {
@@ -95,7 +95,7 @@ public class Payment extends Handler {
 
         if(to != null) {
             template.set(Template.Node.PAYMENT_FROM);
-            template.add("name", from.getName());
+            template.add("name", from.getUniqueId());
             template.add("amount", iConomy.format(amount));
 
             Messaging.send(to, tag + template.parse());
