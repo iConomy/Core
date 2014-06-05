@@ -14,7 +14,7 @@ public class players implements Listener {
         Player player = event.getPlayer();
 
         if(player != null)
-            if(!accounts.exists(player.getName()))
-                accounts.create(player.getName());
+            if(!accounts.exists(player.getUniqueId()))
+                accounts.create(player.getUniqueId());
     }
 }
