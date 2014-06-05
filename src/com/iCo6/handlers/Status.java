@@ -32,7 +32,7 @@ public class Status extends Handler {
         boolean self = false;
 
         if(!isConsole(sender))
-            if(((Player)sender).getName().equalsIgnoreCase(name))
+            if(((Player)sender).getUniqueId().equalsIgnoreCase(name))
                 self = true;
 
         if(name.equals("0"))
