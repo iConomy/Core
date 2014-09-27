@@ -352,7 +352,7 @@ public class Parser {
             this.value = value;
         }
 
-        public String getName() {
+        public String getUniqueId() {
             return name;
         }
 
