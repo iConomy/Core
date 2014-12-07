@@ -84,9 +84,9 @@ permissions:
     iConomy.holdings.others:
         description: Check other players balance.
         default: op
-        command: "/money <account-name>"
+        command: "/money <username>"
         examples:
-          - "/money Nijikokun"
+          - "/money TWSSYesterday"
     iConomy.top:
         description: View top-most accounts.
         default: op
@@ -94,52 +94,52 @@ permissions:
     iConomy.payment:
         description: Send money to others.
         default: op
-        command: "/money pay <account-name> <amount>"
+        command: "/money pay <username> <amount>"
         examples:
-          - "/money pay Nijikokun 30"
+          - "/money pay TWSSYesterday 30"
     iConomy.accounts.create:
         description: Create an account.
         default: op
-        command: "/money create <account-name> [amount]"
+        command: "/money create <username> <amount>"
         examples:
-          - "/money create Nijikokun"
-          - "/money create Nijikokun 30"
+          - "/money create TWSSYesterday"
+          - "/money create TWSSYesterday 30"
     iConomy.accounts.remove:
         description: Remove an existing account
         default: op
-        command: "/money remove <account-name>"
+        command: "/money remove <username>"
         examples:
-          - "/money remove Nijikokun"
+          - "/money remove TWSSYesterday"
     iConomy.accounts.give:
         description: Give account a certain amount
         default: op
-        command: "/money give <account-name> <amount>"
+        command: "/money give <username> <amount>"
         examples:
-          - "/money give Nijikokun 30"
+          - "/money give TWSSYesterday 30"
     iConomy.accounts.take:
         description: Take a certain amount from an account
         default: op
-        command: "/money take <account-name> <amount>"
+        command: "/money take <username> <amount>"
         examples:
-          - "/money take Nijikokun 30"
+          - "/money take TWSSYesterday 30"
     iConomy.accounts.set:
         description: Set an account's balance to this amount
         default: op
-        command: "/money set <account-name> <amount>"
+        command: "/money set <username> <amount>"
         examples:
-          - "/money set Nijikokun 30"
+          - "/money set TWSSYesterday 30"
     iConomy.accounts.status:
         description: Check to see the status of an account (Visible, Hidden, Etc)
         default: op
-        command: "/money status <account-name>"
+        command: "/money status <username>"
         examples:
-          - "/money status Nijikokun"
+          - "/money status TWSSYesterday"
     iConomy.accounts.status.set:
         description: Set the status of an account (Visible (1), Hidden (0))
         default: op
-        command: "/money status <account-name>"
+        command: "/money status <username>"
         examples:
-          - "/money status Nijikokun"
+          - "/money status TWSSYesterday"
     iConomy.accounts.purge:
         description: Purge all accounts with default creation value.
         default: op
