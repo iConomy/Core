@@ -1,23 +1,21 @@
 # General Data
 name: iConomy
 main: com.iCo6.iConomy
-version: 6.0.10b
+version: 7.0
 
 # Command Data
 commands:
     money:
-      aliases: [iConomy, iCo]
-      description: Distrobute, Check, Use Currency.
+      aliases: [iConomy, iCo, balance, bal]
+      description: Currency stuff.
 
 # Generator Data
 generators: [bukget]
 categories: [ECON]
 description: Simple, easy, and intuitive economy for minecraft.
 maintainer: Nijikokun
-authors: [Nijikokun, SpaceManiac]
-website: http://ico.nexua.org
-thread: http://bit.ly/iConomy
-location: "http://mirror.nexua.org/iConomy/Latest Build/iConomy.jar"
+authors: [Nijikokun, SpaceManiac, TWSSYesterday]
+website: http://granite-servers.com
 conflicts: []
 required: []
 optional: [Permissions]
