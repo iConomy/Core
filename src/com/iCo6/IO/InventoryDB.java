@@ -35,7 +35,7 @@ public class InventoryDB {
     private File dataDir;
 
     public InventoryDB() {
-        dataDir = new File(iConomy.Server.getWorlds().get(0).getName(), "players");
+        dataDir = new File(iConomy.Server.getWorlds().get(0).getUniqueId(), "players");
     }
 
     public List<String> getAllPlayers() {

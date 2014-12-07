@@ -120,7 +120,7 @@ public class iConomy extends JavaPlugin {
 
             // Upgrade Template to 6.0.9b
             LinkedHashMap<String, String> nodes = new LinkedHashMap<String, String>();
-            nodes.put("top.opening", "<green>-----[ <white>Wealthiest Accounts <green>]-----");
+            nodes.put("top.opening", "<green>-----[ <white>Rich List <green>]-----");
             nodes.put("top.item", "<gray>+i. <green>+name <gray>- <white>+amount");
 
             try {

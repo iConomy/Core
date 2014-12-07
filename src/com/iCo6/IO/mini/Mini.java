@@ -90,7 +90,7 @@ public class Mini {
      * @param data
      */
     public Mini(File data) {
-        this.database = data.getName();
+        this.database = data.getUniqueId();
         this.folder = data.getPath();
         this.Database = new Manager(this.folder, this.database, true);
         this.read();
@@ -106,7 +106,7 @@ public class Mini {
      */
     public Mini(File data, boolean caseSensitive) {
         this.caseSensitive = caseSensitive;
-        this.database = data.getName();
+        this.database = data.getUniqueId();
         this.folder = data.getPath();
         this.Database = new Manager(this.folder, this.database, true);
         this.read();
