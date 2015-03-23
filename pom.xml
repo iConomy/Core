@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>src.com.iConomy</groupId>
+    <groupId>com.iCo</groupId>
     <artifactId>iConomy</artifactId>
     <packaging>jar</packaging>
     <version>7.1</version>
@@ -68,7 +68,8 @@
                 <filtering>true</filtering>
                 <directory>${basedir}/src/resources/</directory>
                 <includes>
-                    <include>config.yml</include>
+                    <include>**/*.yml</include>
+                    <include>**/*.sql</include>
                 </includes>
             </resource>
 
