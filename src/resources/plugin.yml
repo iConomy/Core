@@ -1,0 +1,152 @@
+# General Data
+name: iConomy
+main: com.iCo.iConomy
+version: 7.1
+
+# Command Data
+commands:
+    money:
+      aliases: [iConomy, iCo]
+      description: Distrobute, Check, Use Currency.
+
+# Generator Data
+generators: [bukget]
+categories: [ECON]
+description: Simple, easy, and intuitive economy for minecraft.
+maintainer: Nijikokun
+authors: [Nijikokun, SpaceManiac]
+website: http://github.com/iConomy/Core
+thread: http://bit.ly/iConomy
+location: "http://mirror.nexua.org/iConomy/Latest Build/iConomy.jar"
+conflicts: []
+required: []
+optional: [Permissions]
+engine:
+    craftbukkit:
+        min: 0
+        max: 1100
+    glowstone:
+        min: 1
+        max: 100
+
+# SuperPerms data
+permissions:
+    iConomy.*:
+        default: op
+        description: Gives access to all commands
+        children:
+            iConomy.help: true
+            iConomy.holdings: true
+            iConomy.holdings.others: true
+            iConomy.top: true
+            iConomy.payment: true
+            iConomy.accounts.create: true
+            iConomy.accounts.remove: true
+            iConomy.accounts.give: true
+            iConomy.accounts.take: true
+            iConomy.accounts.set: true
+            iConomy.accounts.status: true
+            iConomy.accounts.status.set: true
+            iConomy.accounts.purge: true
+            iConomy.accounts.empty: true
+    iConomy.accounts.*:
+        description: Gives access only to higher level commands
+        children:
+            iConomy.accounts.create: true
+            iConomy.accounts.remove: true
+            iConomy.accounts.give: true
+            iConomy.accounts.take: true
+            iConomy.accounts.set: true
+            iConomy.accounts.status: true
+            iConomy.accounts.status.set: true
+            iConomy.accounts.purge: true
+            iConomy.accounts.empty: true
+    iConomy.plus:
+        description: Gives access to user plus only commands
+        children:
+            iConomy.help: true
+            iConomy.holdings: true
+            iConomy.holdings.others: true
+            iConomy.top: true
+            iConomy.payment: true
+    iConomy.user:
+        description: Gives access to user only commands
+        children:
+            iConomy.help: true
+            iConomy.holdings: true
+            iConomy.payment: true
+    iConomy.help:
+        description: Allows you to request help information.
+        default: op
+        command: "/money help"
+    iConomy.holdings:
+        description: Check your balance.
+        default: op
+        command: "/money"
+    iConomy.holdings.others:
+        description: Check other players balance.
+        default: op
+        command: "/money <account-name>"
+        examples:
+          - "/money Nijikokun"
+    iConomy.top:
+        description: View top-most accounts.
+        default: op
+        command: "/money top"
+    iConomy.payment:
+        description: Send money to others.
+        default: op
+        command: "/money pay <account-name> <amount>"
+        examples:
+          - "/money pay Nijikokun 30"
+    iConomy.accounts.create:
+        description: Create an account.
+        default: op
+        command: "/money create <account-name> [amount]"
+        examples:
+          - "/money create Nijikokun"
+          - "/money create Nijikokun 30"
+    iConomy.accounts.remove:
+        description: Remove an existing account
+        default: op
+        command: "/money remove <account-name>"
+        examples:
+          - "/money remove Nijikokun"
+    iConomy.accounts.give:
+        description: Give account a certain amount
+        default: op
+        command: "/money give <account-name> <amount>"
+        examples:
+          - "/money give Nijikokun 30"
+    iConomy.accounts.take:
+        description: Take a certain amount from an account
+        default: op
+        command: "/money take <account-name> <amount>"
+        examples:
+          - "/money take Nijikokun 30"
+    iConomy.accounts.set:
+        description: Set an account's balance to this amount
+        default: op
+        command: "/money set <account-name> <amount>"
+        examples:
+          - "/money set Nijikokun 30"
+    iConomy.accounts.status:
+        description: Check to see the status of an account (Visible, Hidden, Etc)
+        default: op
+        command: "/money status <account-name>"
+        examples:
+          - "/money status Nijikokun"
+    iConomy.accounts.status.set:
+        description: Set the status of an account (Visible (1), Hidden (0))
+        default: op
+        command: "/money status <account-name>"
+        examples:
+          - "/money status Nijikokun"
+    iConomy.accounts.purge:
+        description: Purge all accounts with default creation value.
+        default: op
+        command: "/money purge"
+    iConomy.accounts.empty:
+        description: Empty / Drop entire database of accounts.
+        default: op
+        command: "/money empty"
