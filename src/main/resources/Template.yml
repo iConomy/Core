@@ -1,0 +1,92 @@
+##
+# Messaging Template
+##
+# Variables
+#   These are denoted by the + signs before them;
+#   Not every line contains the same variables. 
+#   To prevent any errors or issues, we have included every variable for each line.
+##
+# Colors
+#   Previously you would use a utf-8 character to use colors, this has been replaced
+#   to make your lives easier, there are 3 different methods of adding color to your lines
+#   each orchestrated for a different personality type.
+#
+#   Whichever is easiest for you to remember; They all do the same, and you can mix and match.
+#
+#   Methods: &[code] or `[name-code] or the easier alternative InEquality Signed color brackets: <color>
+#
+#   Color Mapping:
+#     &c `c Color     &c `c Color
+#     -- -- -----     -- -- -----
+#     &0 `k black     &f `w white
+#     &1 `B navy      &a `g lime
+#     &2 `G green     &b `a aqua
+#     &3 `A teal      &c `r rose
+#     &4 `R red       &d `p pink
+#     &5 `P purple    &e `y yellow
+#     &6 `Y gold
+#     &7 `s silver
+#     &8 `S gray
+#     &9 `b blue
+#
+#     For black would be: <black> or `k or &0
+#     Example using Inequality: <green>Hi I'm green! <white>Now White!?
+#     Example using &: &2Hi I'm green! &fNow White!?
+#     Example using `: `GHi I'm green! `wNow White!?
+#     Example using all: `GI'm Green, &fWhite, <yellow>and Yellow!
+##
+# Additional Tag for Interest Announcement
+#   +bank,+b = Shows bank name
+##
+
+tag:
+    money: "<green>[<white>Money<green>] "
+
+personal:
+    balance: "<green>Balance: <white>+balance"
+    reset: "<rose>Your account has been reset."
+    set: "<green>Your balance has been changed to <white>+amount"
+    debit: "<rose>Your account had <white>+amount<rose> debited."
+    credit: "<white>+amount<green> was credited into your account."
+    status: "<green>Account status is currently <white>+status<green>."
+
+player:
+    set: "<green>+name's balance has been changed to <white>+amount"
+    balance: "<green>+name's Balance: <white>+balance"
+    reset: "<white>+name's <rose>account has been reset."
+    credit: "<white>+name's <green>account had <white>+amount<green> credited."
+    debit: "<white>+name's <rose>account had <white>+amount<rose> debited."
+    status: "<white>+name's <green>account status is <white>+status<green>."
+
+payment:
+    self: "<rose>Sorry, you cannot send money to yourself."
+    to: "<green>You have sent <white>+amount<green> to <white>+name<green>."
+    from: "<white>+name<green> has sent you <white>+amount<green>."
+
+statistics:
+    opening: "<green>-----[ <white>iConomy Stats <green>]-----"
+    total:  "<gray>Total +currency: <white>+amount"
+    average: "<gray>Average +currency: <white>+amount"
+    accounts: "<gray>Total Accounts: <white>+amount"
+
+interest:
+    announcement: "+amount <green>gained from interest."
+
+accounts:
+    empty: "<rose>Deleted <white>all<rose> accounts."
+    purge: "<rose>All inactive accounts were purged."
+    create: "<green>Created account with the name <white>+name<green>."
+    remove: "<green>Deleted account: <white>+name<green>."
+    status: "<green>Account status is now <white>+status<green>."
+
+top:
+    opening: "<green>-----[ <white>Wealthiest Accounts <green>]-----"
+    item: "<gray>+i. <green>+name <gray>- <white>+amount"
+
+error:
+    online: "<rose>Sorry, nobody else is online."
+    exists: "<rose>Account already exists."
+    create: "<rose>Could not create account with the name <white>+name<rose>."
+    remove: "<rose>Could not remove account with the name <white>+name<rose>."
+    account: "<rose>Account <white>+name<rose> does not exist."
+    funds: "<rose>Sorry, you do not have enough funds to do that."

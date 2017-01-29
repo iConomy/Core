@@ -1,0 +1,189 @@
+# iConomy 6.0.8b
+# @author     Nijikokun <nijikokun@gmail.com>
+# @license    GPLv2
+# @copyright  Copyright AniGaiku LLC (C) 2010-2011
+##
+# Setup Notes
+#   - Seconds
+#         Basic Table:
+#           1 minute = 60 seconds
+#           1 hour = 1 minute * 60 = 3600 seconds
+#           1 day = 1 hour * 24 = 86400 seconds
+#           1 week = 1 day * 7 = 604800 seconds
+#   - Database
+#           Do not use remote databases from free sites, please use either a
+#           remote database from a personal hosted VPS or DEDI or a local
+#           database. This will prevent any 'timeout' or 'invalid settings'
+#           or 'cannot connect to database' issues. Thank you :)!
+##
+
+System:
+  Permissions:
+    Use:
+      # Should a user have the 'iConomy.holdings' to use /money
+      # By default this is false, so that people stop complaining that
+      # iConomy doesn't work. Yes, people actually report that.
+      # If you are one of those people, leave this false.
+      Holdings: false
+
+  Default:
+    Currency:
+      # Major is the first segment [Major].Minor
+
+      # Major ([Major].Minor) 1.00 Dollar (With Seperate 1 Dollar)
+      Major: [ 'Dollar', 'Dollars' ]
+
+      # Minor (Major.[Minor]) 0.23 Coins  (With Seperate 0 Dollars, 23 Coins)
+      Minor: [ 'Coin', 'Coins' ]
+
+    Account:
+      # Default account balance when created
+      Holdings: 30.0
+
+  # Controls how money is formatted through methods
+  Formatting:
+    # Minor allows you to use the Minor amounts for amounts <1
+    # Example (true) 0.23 Coins and 1.23 Dollars (false) 0.23 Dollars and 1.23 Dollars
+    Minor: false
+
+    # Seperate allows your money to be shown in an alternative way,
+    # instead of 1.32 it will show as 1 Dollar 23 Coins
+    # !!! NOTICE: This only works if Minor is set to true !!!
+    Seperate: false                               # Example (true) 1 Dollar, 23 Coins (false) 1.23 Dollars (Only if Minor is true)
+
+    # Single shows your money in another alternative way.
+    # Instead of 1.23 Dollars you will see: 1 Dollar.
+    # If your money is 0.23 you will see 0 Dollars if Minor is false, 23 Coins if Minor is true.
+    # !!! Notice: This overrides seperate !!!
+    Single: false
+
+  # Logs all monetary transactions passed through iConomy
+  Logging:
+    Enabled: false
+
+  # Purges Default Balances at Loading
+  # Good way to keep unused accounts or default accounts wiped out and lower database usage.
+  Purging:
+    Enabled: true
+
+  # Controls amount of money gained at a set interval.
+  Interest:
+    Enabled: false
+
+    # Only give interest to players who are currently online?
+    Online: true
+
+    Announce:
+      # Send a message when the player gains interest?
+      Enabled: false
+
+    Interval:
+      #  Interval is done in seconds, here is a easy reference table for commonly set intervals:
+      #   1 minute = 60 seconds
+      #   1 hour = 1 minute * 60 = 3600 seconds
+      #   1 day = 1 hour * 24 = 86400 seconds
+      #   1 week = 1 day * 7 = 604800 seconds
+      Seconds: 60
+
+    Amount:
+      # The balance to be met where we stop giving interest.
+      # 0.0 for no limit
+      Cutoff: 0.0
+
+      # Percentage of holdings to give / take (Negative to take) (Overrides Min/Max)
+      Percent: 0.0
+
+      # This is range based, to set a "flat" or "constant" rate, set each (Maximum and Minimum) to the same number.
+      # If the two numbers are different, it will be a random amount in-between the two.
+      Maximum: 1
+      Minimum: 2
+
+  Database:
+    # Databases Supported:
+    # Flatfile, FF, mini, minidb
+    #  - These all equate to miniDB
+    ##
+    # item, items, inventory, inventoryDB
+    #  - These all equate to InventoryDB, which uses inventory for storage
+    ##
+    # xp, exp, orb, xpdb, expdb, orbdb
+    #  - These all equate to ExperienceDB, which relies on Experience for balance.
+    ##
+    # mysql, mysqldb
+    #  - These will attempt to connect to MySQL
+    ##
+    # sqlite, sqlite2, sqlite3, sqlitedb
+    #  - These will attempt to create & connect to SQLite
+    ##
+    # postgre, postgreSQL, postgreDB
+    #  - These will attempt to connect to PostgreSQL
+    Type: 'minidb'
+    
+    # These are for InventoryDB only.
+    #
+    # InventoryDB is essentially Physical Money.
+    #   It isn't logged in a database, its based on the users inventory
+    #   and the two items selected below.
+    #
+    # MajorItem is the item or block ID of the major currency
+    # MinorItem is the item or block ID of the minor currency
+    # e.g. MajorItem: 266, MinorItem: 265 for Gold/Iron
+    MajorItem: 266
+    MinorItem: 265
+
+    # This controls the database name, by default it is iConomy
+    Table: 'iConomy'
+
+    # URL is for SQL Databases Only
+    ##
+    # Path to iConomy folder is easy, it's the COMPLETE path.
+    # (Mine) G:\MineCraft\plugins\iConomy\
+    # Won't be the same as yours, but it usually looks like that.
+    ##
+    # [H2DB Default] h2:path/to/iConomy/folder/iConomy;AUTO_RECONNECT=TRUE
+    # [SQLite Default] sqlite:path/to/iConomy/folder/iConomy.db
+    ##
+    # Binary Databases use ip:port style connections.
+    # ip
+    #  - is the connection identifier (internet protocol)
+    #  - for ipv6 usually encased in brackets [::1]
+    # port
+    #  - the port that the database is listening on
+    #  - defaults: 3306 for mysql, postgre is either 5740 or 5432
+    ##
+    # [MySQL Default] mysql://localhost:3306/iConomy
+    # [Postgre Default] postgresql://localhost:5740/iConomy
+    URL: 'mysql://localhost:3306/iConomy'
+
+    # Login details for binary databases
+    Username: 'root'
+    Password: ''
+
+    ##############################################################
+    # !!! Conversion is not your database settings !!!
+    ##############################################################
+    # Conversion allows you to convert your old 5.x to the new 6.x
+    # All is currently unused.
+    ##############################################################
+    # URL is for MySQL only, H2DB doesn't use it.
+    ##############################################################
+    Conversion:
+      # Set to True, After converting, change this back to false!
+      Enabled: false
+
+      # Database Type, H2DB or MySQL
+      Type: 'H2DB'
+
+      # Database Table
+      Table: 'iConomy'
+
+      # Database URL without table at the end.
+      URL: 'mysql://localhost:3306'
+
+      # Username / Password
+      # H2DB does not use this. MySQL Only.
+      Username: 'root'
+      Password: ''
+
+      # Unused ATM.
+      All: true
